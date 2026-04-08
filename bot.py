@@ -42,9 +42,12 @@ class HealthHandler(BaseHTTPRequestHandler):
         pass
 
 def run_health_server(port: int):
-    server = HTTPServer(('0.0.0.0', port), HealthHandler)
-    logger.info(f"🌐 Health-check запущен на порту {port}")
-    server.serve_forever()
+    try:
+        server = HTTPServer(('0.0.0.0', port), HealthHandler)
+        logger.info(f"🌐 Health-check : port {port}")
+        server.serve_forever()
+    except Exception as e:
+        logger.error(f"Health server error: {e}")
 
 # ── Хабарлама обработчиктері ─────────────────────────────────────────────────────
 def unknown_command(update: Update, context: CallbackContext):
@@ -152,8 +155,8 @@ def callback_router(update: Update, context: CallbackContext):
         from handlers.quiz import game_character_start
         game_character_start(update, context)
 
-    # ── Ойын сынып таңдау ─────────────────────────────────────────────────────
-    elif "grade_" in data and data.startswith("game_"):
+    # ── Ойын сынып таңдау (game_{type}_grade_{n}) ─────────────────────────────
+    elif data.startswith("game_") and "_grade_" in data:
         from handlers.quiz import game_grade_selected
         game_grade_selected(update, context)
 
@@ -202,10 +205,18 @@ def callback_router(update: Update, context: CallbackContext):
 def main() -> None:
     logger.info("🚀 Қазақ Әдебиеті Боты іске қосылуда...")
 
-    # Дерекқорды іске қосу
+    # 1. Дерекқор
     init_db()
     logger.info("✅ Дерекқор дайын")
 
+    # 2. Health-check серверін БАРЛЫҚ режимде БІРІНШІ қос
+    #    Koyeb TCP health check PORT-ті тексереді — ол дайын болуы керек
+    health_thread = threading.Thread(
+        target=run_health_server, args=(PORT,), daemon=True
+    )
+    health_thread.start()
+
+    # 3. Updater
     updater = Updater(BOT_TOKEN, use_context=True)
     dp = updater.dispatcher
 
@@ -215,7 +226,7 @@ def main() -> None:
     dp.add_handler(CommandHandler("menu",   start_command))
     dp.add_handler(CommandHandler("help",   start_command))
 
-    # Барлық callback — бір роутер арқылы
+    # Барлық callback
     dp.add_handler(CallbackQueryHandler(callback_router))
 
     # Белгісіз хабарлар
@@ -226,27 +237,32 @@ def main() -> None:
     dp.add_error_handler(error_handler)
 
     if WEBHOOK_URL:
-        # ── WEBHOOK (продакшн: Koyeb / Heroku) ───────────────────────────────
-        health_thread = threading.Thread(
-            target=run_health_server, args=(PORT,), daemon=True
-        )
-        health_thread.start()
-
+        # ── WEBHOOK режимі (Koyeb production) ───────────────────────────────
+        # Bot PORT+1 тыңдайды, health check PORT-та
+        bot_port     = PORT + 1
         webhook_path = f"/webhook/{BOT_TOKEN}"
-        full_url = f"{WEBHOOK_URL.rstrip('/')}{webhook_path}"
+        full_url     = f"{WEBHOOK_URL.rstrip('/')}{webhook_path}"
 
         logger.info(f"✅ WEBHOOK режимі: {full_url}")
+        logger.info(f"   Health: {PORT}  |  Bot: {bot_port}")
         updater.start_webhook(
             listen='0.0.0.0',
-            port=PORT + 1,
+            port=bot_port,
             url_path=webhook_path,
             webhook_url=full_url,
             drop_pending_updates=True,
         )
     else:
-        # ── POLLING (жергілікті) ──────────────────────────────────────────────
-        logger.info("✅ POLLING режимі (жергілікті)")
-        updater.start_polling(drop_pending_updates=True, timeout=20)
+        # ── POLLING режимі (жергілікті / Koyeb без webhook) ─────────────────
+        # Ескі webhook-ті алдын ала өшір → Conflict болмасын
+        try:
+            updater.bot.delete_webhook(drop_pending_updates=True)
+            logger.info("🧹 Webhook тазартылды")
+        except Exception as e:
+            logger.warning(f"Webhook тазарту қатесі: {e}")
+
+        logger.info("✅ POLLING режимі")
+        updater.start_polling(drop_pending_updates=True, timeout=20, poll_interval=1.0)
 
     logger.info("🎓 Бот жұмыс істеп тұр!")
     updater.idle()
