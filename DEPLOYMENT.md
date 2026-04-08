@@ -1,415 +1,380 @@
-# 🚀 ОБЛАҚТА РАЗВЕРТЫВАНИЕ НҰСҚАУЛЫҒЫ
-
-## 📋 ҚАЖЕТТІ НӘРСЕЛЕР
-
-- ✅ GitHub аккаунты
-- ✅ Telegram бот токені (@BotFather-ден)
-- ✅ Облақ платформасының аккаунты (Koyeb, Render, Heroku, т.б.)
-- ✅ Git орнатылған
+# 🚀 DEPLOYMENT ҚҰЖАТЫ
+## Қазақ Әдебиеті Telegram Боты v4.0
 
 ---
 
-## 🔧 ҚАДАМ 1: GitHub-та репозиторий жасау
+## 📋 Мазмұны
+1. [Қалыптастыру](#қалыптастыру)
+2. [Koyeb-ке орнату](#koyeb-ке-орнату)
+3. [Render-ге орнату](#render-ге-орнату)
+4. [Docker-мен орнату](#docker-мен-орнату)
+5. [Локалды тестілеу](#локалды-тестілеу)
+6. [Мониторинг және логирование](#мониторинг-және-логирование)
+7. [Қауіпсіздік](#қауіпсіздік)
 
-### 1.1 GitHub-та жаңа репозиторий жасау
+---
+
+## 🔧 Қалыптастыру
+
+### Өндіктемелер
+- Python 3.9+
+- pip немесе poetry
+- Git
+- Docker (опционалды)
+
+### Орнату қадамдары
+
 ```bash
-1. https://github.com/new қарай барыңыз
-2. Repository name: tg-kazakh-literature-bot
-3. Description: Kazakh Literature Telegram Bot
-4. Public немесе Private таңдаңыз
-5. Create repository басыңыз
+# Репозиторийді клондау
+git clone https://github.com/your-username/kazakh-literature-bot.git
+cd kazakh-literature-bot
+
+# Virtual environment жасау
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# немесе
+venv\Scripts\activate  # Windows
+
+# Зависимостілерді орнату
+pip install -r requirements.txt
+
+# .env файлын жасау
+cp .env.example .env
+# .env файлын өндіктеңіз және BOT_TOKEN-ді қосыңыз
 ```
 
-### 1.2 Локалды репозиторийді GitHub-та сақтау
+### .env файлын конфигурациялау
+
+```env
+# Telegram Bot Token (https://t.me/BotFather)
+BOT_TOKEN=your_bot_token_here
+
+# Орта
+ENVIRONMENT=development  # development | production
+
+# Логирование
+LOG_LEVEL=INFO
+LOG_FILE=bot.log
+
+# Веб-сервер
+PORT=8000
+HOST=0.0.0.0
+```
+
+---
+
+## 🌐 Koyeb-ке орнату
+
+### Қадам 1: GitHub репозиторийін дайындау
+
 ```bash
-cd /home/code
-
-# Git инициализациялау
-git init
-
-# GitHub репозиториясын қосу
-git remote add origin https://github.com/YOUR_USERNAME/tg-kazakh-literature-bot.git
-
-# Барлық файлдарды қосу
-git add .
-
-# Коммит жасау
-git commit -m "Initial commit: Kazakh Literature Bot v4.0"
-
-# GitHub-та сақтау
+# GitHub-та жаңа репозиторий жасаңыз
+git remote add origin https://github.com/your-username/kazakh-literature-bot.git
 git branch -M main
 git push -u origin main
 ```
 
----
+### Қадам 2: Koyeb-те орнату
 
-## 🌐 ҚАДАМ 2: Koyeb-та развертывание (ҰСЫНЫЛАДЫ)
+1. [Koyeb.com](https://www.koyeb.com) сайтына кіріңіз
+2. **Create Service** батонын басыңыз
+3. **GitHub** таңдаңыз
+4. Репозиторийіңізді таңдаңыз
+5. Конфигурациялау:
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Run Command**: `python kazakh_literature_bot.py`
+   - **Port**: `8000`
 
-### 2.1 Koyeb аккаунты жасау
-```
-1. https://www.koyeb.com қарай барыңыз
-2. Sign up басыңыз
-3. Email және пароль енгізіңіз
-4. Аккаунтты растаңыз
-```
+### Қадам 3: Secrets орнату
 
-### 2.2 Koyeb-та приложение жасау
-```
-1. Koyeb дашбордына кіріңіз
-2. Create Service басыңыз
-3. GitHub таңдаңыз
-4. Өзінің репозиториясын таңдаңыз (tg-kazakh-literature-bot)
-5. Branch: main
-6. Builder: Buildpack
-7. Run command: python kazakh_literature_bot.py
-```
+Koyeb Dashboard-та:
+1. **Settings** → **Secrets**
+2. Жаңа secret қосыңыз:
+   - **Name**: `BOT_TOKEN`
+   - **Value**: Ваш Telegram bot token
 
-### 2.3 Орта айнымалыларын орнату
-```
-1. Environment variables бөліміне барыңыз
-2. Жаңа айнымалы қосыңыз:
-   - Name: BOT_TOKEN
-   - Value: YOUR_BOT_TOKEN_HERE
-3. Save басыңыз
-```
+### Қадам 4: Deploy
 
-### 2.4 Развертывание бастау
-```
-1. Deploy басыңыз
-2. Орнату процесін күтіңіз (5-10 минут)
-3. ✅ Deployment successful хабарламасын күтіңіз
-```
-
-**Koyeb URL:** https://your-app-name.koyeb.app
-
----
-
-## 🎨 ҚАДАМ 3: Render-та развертывание (АЛЬТЕРНАТИВА)
-
-### 3.1 Render аккаунты жасау
-```
-1. https://render.com қарай барыңыз
-2. Sign up басыңыз
-3. GitHub аккаунтын байланыстырыңыз
-```
-
-### 3.2 Render-та приложение жасау
-```
-1. Render дашбордына кіріңіз
-2. New + → Web Service
-3. GitHub репозиториясын таңдаңыз
-4. Name: tg-kazakh-literature-bot
-5. Environment: Python 3
-6. Build command: pip install -r requirements.txt
-7. Start command: python kazakh_literature_bot.py
-```
-
-### 3.3 Орта айнымалыларын орнату
-```
-1. Environment бөліміне барыңыз
-2. BOT_TOKEN = YOUR_BOT_TOKEN_HERE
-3. Save and Deploy басыңыз
-```
-
----
-
-## 🟣 ҚАДАМ 4: Heroku-та развертывание
-
-### 4.1 Heroku аккаунты жасау
-```
-1. https://www.heroku.com қарай барыңыз
-2. Sign up басыңыз
-3. Email растаңыз
-```
-
-### 4.2 Heroku CLI орнату
 ```bash
-# macOS
-brew tap heroku/brew && brew install heroku
-
-# Ubuntu/Debian
-curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
-
-# Windows
-# https://devcenter.heroku.com/articles/heroku-cli#download-and-install
+# Автоматты deploy GitHub push-та
+git push origin main
 ```
 
-### 4.3 Heroku-та приложение жасау
+---
+
+## 🎨 Render-ге орнату
+
+### Қадам 1: Render-де сервис жасау
+
+1. [Render.com](https://render.com) сайтына кіріңіз
+2. **New +** → **Web Service**
+3. GitHub репозиторийіңізді таңдаңыз
+4. Конфигурациялау:
+   - **Name**: `kazakh-literature-bot`
+   - **Environment**: `Python 3`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `python kazakh_literature_bot.py`
+
+### Қадам 2: Environment Variables
+
+Render Dashboard-та:
+1. **Environment** табын ашыңыз
+2. Жаңа variable қосыңыз:
+   - **Key**: `BOT_TOKEN`
+   - **Value**: Ваш Telegram bot token
+
+### Қадам 3: Deploy
+
 ```bash
-# Heroku-та кіру
-heroku login
+git push origin main
+```
 
-# Приложение жасау
-heroku create tg-kazakh-literature-bot
+---
 
-# Орта айнымалысын орнату
-heroku config:set BOT_TOKEN=YOUR_BOT_TOKEN_HERE
+## 🐳 Docker-мен орнату
 
-# GitHub-та сақтау
-git push heroku main
+### Локалды Docker-мен
+
+```bash
+# Docker image жасау
+docker build -t kazakh-literature-bot .
+
+# Container іске қосу
+docker run -e BOT_TOKEN=your_token_here \
+           -p 8000:8000 \
+           kazakh-literature-bot
+```
+
+### Docker Compose-мен
+
+```bash
+# .env файлын дайындаңыз
+cp .env.example .env
+# BOT_TOKEN-ді қосыңыз
+
+# Сервистерді іске қосу
+docker-compose up -d
 
 # Логтарды көру
-heroku logs --tail
+docker-compose logs -f bot
+
+# Сервистерді тоқтату
+docker-compose down
 ```
 
----
+### Docker Hub-та публикациялау
 
-## 🚂 ҚАДАМ 5: Railway-та развертывание
-
-### 5.1 Railway аккаунты жасау
-```
-1. https://railway.app қарай барыңыз
-2. Sign up басыңыз
-3. GitHub аккаунтын байланыстырыңыз
-```
-
-### 5.2 Railway-та приложение жасау
-```
-1. Railway дашбордына кіріңіз
-2. New Project → GitHub Repo
-3. Өзінің репозиториясын таңдаңыз
-4. Deploy басыңыз
-```
-
-### 5.3 Орта айнымалыларын орнату
-```
-1. Variables бөліміне барыңыз
-2. BOT_TOKEN = YOUR_BOT_TOKEN_HERE
-3. Save басыңыз
-```
-
----
-
-## 💻 ҚАДАМ 6: Replit-та развертывание
-
-### 6.1 Replit аккаунты жасау
-```
-1. https://replit.com қарай барыңыз
-2. Sign up басыңыз
-3. GitHub аккаунтын байланыстырыңыз
-```
-
-### 6.2 Replit-та приложение жасау
-```
-1. Replit дашбордына кіріңіз
-2. Import from GitHub
-3. Өзінің репозиториясын таңдаңыз
-4. Import басыңыз
-```
-
-### 6.3 Орта айнымалыларын орнату
-```
-1. Secrets (🔒) бөліміне барыңыз
-2. BOT_TOKEN = YOUR_BOT_TOKEN_HERE
-3. Run басыңыз
-```
-
----
-
-## ✅ ҚАДАМ 7: Развертывание тексеру
-
-### 7.1 Бот жұмыс істейтінін тексеру
 ```bash
-# Telegram-да ботыңызға мына командаларды жіберіңіз:
-/start
-/авторлар
-/ойын
-/ұпайлар
-```
+# Docker Hub-та логин
+docker login
 
-### 7.2 Логтарды көру
-```bash
-# Koyeb
-# Koyeb дашбордында Logs бөліміне барыңыз
+# Image-ді tag-тау
+docker tag kazakh-literature-bot:latest your-username/kazakh-literature-bot:latest
 
-# Render
-# Render дашбордында Logs бөліміне барыңыз
-
-# Heroku
-heroku logs --tail
-
-# Railway
-# Railway дашбордында Logs бөліміне барыңыз
-
-# Replit
-# Replit консолында логтарды көріңіз
-```
-
-### 7.3 Қателіктерді түзету
-```bash
-# Қате: ModuleNotFoundError
-# Түзету: requirements.txt файлы болғанын тексеріңіз
-
-# Қате: Invalid token
-# Түзету: BOT_TOKEN дұрыс орнатылғанын тексеріңіз
-
-# Қате: Connection error
-# Түзету: Интернет байланысын тексеріңіз
+# Push
+docker push your-username/kazakh-literature-bot:latest
 ```
 
 ---
 
-## 🔄 ҚАДАМ 8: Автоматты обновление
+## 🧪 Локалды тестілеу
 
-### 8.1 GitHub Actions орнату (Koyeb, Render)
+### Unit тестілер
+
+```bash
+# Барлық тестілерді іске қосу
+pytest tests/ -v
+
+# Белгілі бір тестті іске қосу
+pytest tests/test_bot.py::TestDatabase -v
+
+# Coverage есебін алу
+pytest tests/ --cov=. --cov-report=html
+```
+
+### Интеграция тестілері
+
+```bash
+# Интеграция тестілерін іске қосу
+pytest tests/ -m integration -v
+```
+
+### Өндіріс тестілері
+
+```bash
+# Өндіріс тестілерін іске қосу
+pytest tests/ -m performance -v
+```
+
+### Қауіпсіздік тестілері
+
+```bash
+# Қауіпсіздік тестілерін іске қосу
+pytest tests/ -m security -v
+```
+
+### Локалды бот тестілеу
+
+```bash
+# Бот іске қосу
+python kazakh_literature_bot.py
+
+# Telegram-та @BotFather арқылы жасалған ботыңызға хабарлама жіберіңіз
+# /start командасын пайдаланыңыз
+```
+
+---
+
+## 📊 Мониторинг және логирование
+
+### Логтарды көру
+
+```bash
+# Локалды логтар
+tail -f bot.log
+
+# Docker логтары
+docker logs -f kazakh-literature-bot
+
+# Koyeb логтары
+# Koyeb Dashboard → Logs табы
+
+# Render логтары
+# Render Dashboard → Logs табы
+```
+
+### Health Check
+
+```bash
+# Health check endpoint
+curl http://localhost:8000/health
+
+# Koyeb/Render автоматты health check
+# Әрбір 30 секундта /health endpoint-ін тексереді
+```
+
+### Мониторинг метрикалары
+
+- **Uptime**: Сервис қосылу уақыты
+- **Response Time**: Жауап уақыты
+- **Error Rate**: Қате пайызы
+- **CPU Usage**: CPU пайдалану
+- **Memory Usage**: Жадын пайдалану
+
+---
+
+## 🔒 Қауіпсіздік
+
+### Best Practices
+
+1. **Secrets Management**
+   - `.env` файлын `.gitignore`-та сақтаңыз
+   - Құпиялар платформаның secrets менеджерінде сақталсын
+   - Құпиялар логтарда көрсетілмесін
+
+2. **Token Rotation**
+   - Регулярлы token-ді өзгертіңіз
+   - Ескі token-ді деактивтеңіз
+
+3. **Rate Limiting**
+   - Telegram API rate limits-ін сақтаңыз
+   - Пайдаланушы сұрақтарын лимиттеңіз
+
+4. **Input Validation**
+   - Барлық пайдаланушы мәліметін тексеріңіз
+   - SQL injection-ге қарсы қорғаныңыз
+
+5. **HTTPS**
+   - Webhook үшін HTTPS пайдаланыңыз
+   - SSL сертификатын орнатыңыз
+
+### Қауіпсіздік аудиті
+
+```bash
+# Құпиялар тексеру
+grep -r "BOT_TOKEN" --include="*.py" .
+
+# Зависимостілерді тексеру
+pip audit
+
+# Код сканирлеу
+bandit -r kazakh_literature_bot.py
+```
+
+---
+
+## 🔄 CI/CD Pipeline
+
+### GitHub Actions
+
 ```yaml
-# .github/workflows/deploy.yml файлын жасаңыз
-
-name: Deploy to Koyeb
-
-on:
-  push:
-    branches: [ main ]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Deploy to Koyeb
-      run: |
-        # Koyeb API-ын пайдалану
-        curl -X POST https://api.koyeb.com/v1/deployments \
-          -H "Authorization: Bearer ${{ secrets.KOYEB_TOKEN }}" \
-          -d '{"service": "tg-kazakh-literature-bot"}'
+# .github/workflows/deploy.yml
+# Автоматты тестілеу және deployment
 ```
 
-### 8.2 Webhook орнату
-```
-1. GitHub репозиториясына барыңыз
-2. Settings → Webhooks
-3. Add webhook
-4. Payload URL: https://your-app.koyeb.app/webhook
-5. Content type: application/json
-6. Add webhook
-```
+**Pipeline қадамдары:**
+1. ✅ Unit тестілер
+2. ✅ Интеграция тестілері
+3. ✅ Код сканирлеу
+4. ✅ Docker image жасау
+5. ✅ Koyeb/Render-ге deploy
 
 ---
 
-## 📊 МОНИТОРИНГ
+## 🆘 Troubleshooting
 
-### 7.1 Бот статусын мониторинг қылу
+### Бот іске қосылмайды
+
 ```bash
-# Koyeb
-# Koyeb дашбордында Status бөліміне барыңыз
+# BOT_TOKEN тексеру
+echo $BOT_TOKEN
 
-# Render
-# Render дашбордында Health Check бөліміне барыңыз
+# Зависимостілерді қайта орнату
+pip install -r requirements.txt --force-reinstall
 
-# Heroku
-heroku ps
-
-# Railway
-# Railway дашбордында Deployments бөліміне барыңыз
+# Логтарды көру
+tail -f bot.log
 ```
 
-### 7.2 Қателіктерді мониторинг қылу
+### Telegram-та жауап беріп жатқан жоқ
+
 ```bash
-# Koyeb
-# Logs бөліміне барыңыз және қателіктерді іздеңіз
+# Бот іске қосылғанын тексеру
+ps aux | grep kazakh_literature_bot
 
-# Render
-# Logs бөліміне барыңіз және қателіктерді іздеңіз
+# Портты тексеру
+netstat -an | grep 8000
 
-# Heroku
-heroku logs --tail --source app
-
-# Railway
-# Logs бөліміне барыңыз және қателіктерді іздеңіз
+# Firewall тексеру
+sudo ufw status
 ```
 
----
+### Memory leak
 
-## 🔐 ҚАУІПСІЗДІК
-
-### 8.1 Токенді қорғау
-```
-❌ ҚАТЕ: TOKEN = "1234567890:ABCdefGHIjklMNOpqrSTUvwxYZ"
-✅ ДҰРЫС: Орта айнымалыларын пайдалану
-```
-
-### 8.2 Орта айнымалыларын пайдалану
-```python
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-TOKEN = os.getenv('BOT_TOKEN')
-```
-
-### 8.3 .env файлын .gitignore-та сақтау
 ```bash
-# .gitignore файлын жасаңыз
-echo ".env" >> .gitignore
-git add .gitignore
-git commit -m "Add .env to gitignore"
-git push
+# Memory пайдалануын мониторинг
+watch -n 1 'ps aux | grep kazakh_literature_bot'
+
+# Docker memory лимиті
+docker run -m 512m kazakh-literature-bot
 ```
 
 ---
 
-## 📈 МАСШТАБТАУ
+## 📞 Қолдау
 
-### 9.1 Бот ағымдарын көбейту
-```python
-# kazakh_literature_bot.py файлында
-# Бот ағымдарын көбейтіңіз:
-# - Main polling thread
-# - HTTP health check thread
-# - Database update thread
-```
-
-### 9.2 Деректер базасын масштабтау
-```python
-# Ағымдағы деректер базасынан
-# PostgreSQL немесе MongoDB-ге ауысыңыз
-```
-
-### 9.3 Облақ ресурстарын көбейту
-```
-1. Koyeb: Dyno type-ін өзгертіңіз
-2. Render: Instance type-ін өзгертіңіз
-3. Heroku: Dyno type-ін өзгертіңіз
-4. Railway: CPU/RAM-ды өзгертіңіз
-```
+Сұрақтарыңыз болса:
+- 📧 Email: support@example.com
+- 💬 Telegram: @kazakh_literature_bot
+- 🐛 Issues: GitHub Issues
 
 ---
 
-## 🎯 ФИНАЛДЫ ТЕКСЕРУ
+## 📝 Лицензия
 
-### Чек-лист
-- [ ] GitHub репозиториясы жасалған
-- [ ] Облақ платформасы таңдалған
-- [ ] Приложение жасалған
-- [ ] Орта айнымалылары орнатылған
-- [ ] Развертывание аяқталған
-- [ ] Бот жұмыс істейді
-- [ ] Логтарда қателік жоқ
-- [ ] Командалар жұмыс істейді
-- [ ] Ойындар жұмыс істейді
-- [ ] Іздеу функциясы жұмыс істейді
+MIT License - Толық ақпарат үшін LICENSE файлын қараңыз
 
 ---
 
-## 📞 ҚОЛДАУ
-
-### Қателіктерді түзету
-1. Логтарды оқыңыз
-2. Орта айнымалыларын тексеріңіз
-3. Токенді тексеріңіз
-4. Интернет байланысын тексеріңіз
-
-### Қосымша ресурстар
-- [Telegram Bot API](https://core.telegram.org/bots/api)
-- [python-telegram-bot](https://python-telegram-bot.readthedocs.io/)
-- [Koyeb Docs](https://docs.koyeb.com/)
-- [Render Docs](https://render.com/docs)
-- [Heroku Docs](https://devcenter.heroku.com/)
-
----
-
-**Версия:** 4.0  
-**Дата:** 8 апреля 2026 г.  
-**Язык:** 100% Қазақша  
-**Статус:** ✅ Толық дайын
-
+**Соңғы өндіктеу:** 8 апреля 2026 г.
+**Версия:** 4.0

@@ -1,0 +1,45 @@
+# 🚀 RENDER DEPLOYMENT КОНФИГУРАЦИЯСЫ
+# Қазақ Әдебиеті Telegram Боты v4.0
+
+services:
+  - type: web
+    name: kazakh-literature-bot
+    env: python
+    plan: free
+    
+    buildCommand: pip install -r requirements.txt
+    startCommand: python kazakh_literature_bot.py
+    
+    envVars:
+      - key: BOT_TOKEN
+        scope: build,run
+        sync: false
+      
+      - key: ENVIRONMENT
+        value: production
+      
+      - key: PORT
+        value: 8000
+      
+      - key: PYTHON_VERSION
+        value: 3.11
+    
+    autoDeploy: true
+    
+    healthCheckPath: /health
+    healthCheckInterval: 30
+    
+    scaling:
+      minInstances: 1
+      maxInstances: 2
+
+# GitHub интеграциясы
+github:
+  repo: your-username/kazakh-literature-bot
+  branch: main
+  deployOnPush: true
+
+# Логирование
+logging:
+  enabled: true
+  level: info
