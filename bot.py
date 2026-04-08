@@ -7,7 +7,7 @@
 
 import logging
 import os
-import asyncio
+import threading
 from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
@@ -352,8 +352,12 @@ async def health_check(request):
     """Обработчик health check запросов"""
     return web.Response(text="OK", status=200)
 
-async def start_http_server(app):
+async def start_http_server():
     """Запуск HTTP сервера для health checks"""
+    app = web.Application()
+    app.router.add_get('/', health_check)
+    app.router.add_get('/health', health_check)
+    
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', 8000)
@@ -364,17 +368,9 @@ async def start_http_server(app):
 # ОСНОВНАЯ ФУНКЦИЯ
 # ============================================================================
 
-async def main() -> None:
-    """Запуск бота с HTTP сервером"""
-    # Создание HTTP приложения для health checks
-    http_app = web.Application()
-    http_app.router.add_get('/', health_check)
-    http_app.router.add_get('/health', health_check)
-    
-    # Запуск HTTP сервера в фоне
-    asyncio.create_task(start_http_server(http_app))
-    
-    # Создание Telegram приложения
+def main() -> None:
+    """Запуск бота"""
+    # Создание приложения
     application = Application.builder().token(TOKEN).build()
     
     # Обработчики команд
@@ -388,9 +384,21 @@ async def main() -> None:
     # Обработчик кнопок
     application.add_handler(CallbackQueryHandler(button_callback))
     
+    # Запуск HTTP сервера в отдельном потоке
+    def run_http_server():
+        import asyncio
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(start_http_server())
+        loop.run_forever()
+    
+    http_thread = threading.Thread(target=run_http_server, daemon=True)
+    http_thread.start()
+    logger.info("🚀 HTTP сервер запущен в отдельном потоке")
+    
     # Запуск бота
     logger.info("🚀 Бот запущен и готов к работе!")
-    await application.run_polling(allowed_updates=Update.ALL_TYPES)
+    application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
