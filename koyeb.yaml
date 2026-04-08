@@ -1,46 +1,29 @@
 # 🚀 KOYEB DEPLOYMENT КОНФИГУРАЦИЯСЫ
 # Қазақ Әдебиеті Telegram Боты v4.0
 
-name: kazakh-literature-bot
+name: tg-client
 description: "🎓 Қазақ әдебиетін оқыту Telegram боты"
 
 services:
-  - name: bot
+  - name: tg-client
     github:
-      repo: your-username/kazakh-literature-bot
+      repo: dousheng34/tg-client
       branch: main
     
     build:
-      buildpack: python
+      buildpack: dockerfile
       
     env:
-      - key: BOT_TOKEN
+      - key: TELEGRAM_BOT_TOKEN
         scope: build,run
-        value: ${{ secrets.BOT_TOKEN }}
+        value: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       
       - key: ENVIRONMENT
         value: production
-      
-      - key: PORT
-        value: "8000"
     
     run:
-      command: python kazakh_literature_bot.py
-    
-    routes:
-      - path: /
-        port: 8000
+      command: python bot.py
     
     scaling:
       min_instances: 1
-      max_instances: 3
-      
-    health_check:
-      enabled: true
-      path: /health
-      initial_delay: 30
-      period: 10
-
-# Secrets (Koyeb Dashboard-та орнату)
-secrets:
-  BOT_TOKEN: "your-telegram-bot-token-here"
+      max_instances: 1
