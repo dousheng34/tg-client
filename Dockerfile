@@ -1,10 +1,13 @@
 FROM python:3.11-slim
 
-WORKDIR /app
+WORKDIR /workspace
 
+# Копируем requirements.txt и устанавливаем зависимости
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY kazakh_literature_bot.py .
+# Копируем код бота
+COPY bot.py .
 
-CMD ["python", "kazakh_literature_bot.py"]
+# Запускаем бота
+CMD ["python", "bot.py"]
