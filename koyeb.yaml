@@ -1,32 +1,14 @@
-# 🚀 KOYEB DEPLOYMENT КОНФИГУРАЦИЯСЫ
-# Қазақ Әдебиеті Telegram Боты v4.0
-
-name: tg-client
-description: "🎓 Қазақ әдебиетін оқыту Telegram боты"
-
 services:
-  - name: tg-client
-    github:
-      repo: dousheng34/tg-client
-      branch: main
-    
+  tg-client:
     build:
-      buildpack: dockerfile
-      
+      context: .
+      dockerfile: Dockerfile
     env:
-      - key: TELEGRAM_BOT_TOKEN
-        scope: build,run
-        value: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-      
-      - key: ENVIRONMENT
-        value: production
-    
-    run:
-      command: python bot.py
-    
-    scaling:
-      min_instances: 1
-      max_instances: 1
-    
-    health_check:
+      - name: TELEGRAM_BOT_TOKEN
+        value: $TELEGRAM_BOT_TOKEN
+    health_checks:
       disabled: true
+    instance:
+      type: nano
+      regions:
+        - fra
