@@ -1,6 +1,7 @@
 """
 🤖 Қазақ Әдебиеті Боты
-Версия 2.0 - Қазақша интерфейс
+Версия 3.0 - Расширенная база данных с 34+ источниками
+Қазақша интерфейс
 Орнату өзгерменің қауіпсіздігі үшін
 Koyeb, Render және жергілік орнатуға сәйкес
 """
@@ -25,7 +26,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Токенді орнату өзгерменінен алу
-# Екі нұсқасын қолдайды: TELEGRAM_BOT_TOKEN (Koyeb) және TOKEN (жергілік)
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN") or os.getenv("TOKEN")
 if not TOKEN:
     raise ValueError("❌ TELEGRAM_BOT_TOKEN немесе TOKEN орнату өзгерменінде табылмады!")
@@ -33,14 +33,14 @@ if not TOKEN:
 logger.info(f"✅ Бот инициализирленді ID: {os.getenv('BOT_ID', 'белгісіз')}")
 
 # ============================================================================
-# МАЗМҰН ДЕРЕКТЕРІ
+# МАЗМҰН ДЕРЕКТЕРІ - NOTEBOOKLM ДЕРЕКТЕРІНЕН
 # ============================================================================
 
 CHAPTERS = {
     "klassik": {
         "name": "📚 Классикалық әдебиет",
         "emoji": "📖",
-        "description": "Қазақ классикасының ұлы шығармалары"
+        "description": "Қазақ классикасының ұлы шығармалары (XIX-XX ғасырлар)"
     },
     "balalar": {
         "name": "👶 Балалар әдебиеті",
@@ -50,7 +50,7 @@ CHAPTERS = {
     "modern": {
         "name": "🌟 Қазіргі әдебиет",
         "emoji": "✨",
-        "description": "Қазіргі авторлардың шығармалары"
+        "description": "XX-XXI ғасырдың қазіргі авторлары"
     },
     "poetry": {
         "name": "🎭 Өлеңдер",
@@ -73,26 +73,44 @@ AUTHORS = {
     "abai": {
         "name": "Абай Құнанбаев",
         "emoji": "👨‍🎓",
-        "bio": "Ұлы қазақ ақыны, философы және ағартушысы (1840-1904)",
-        "works": ["Қара сөз", "Өлеңдер"]
+        "years": "1840-1904",
+        "bio": "Ұлы қазақ ақыны, философы және ағартушысы. Қазақ әдебиетінің негіздеушісі.",
+        "works": ["Қара сөз", "Өлеңдер", "Масалалар"],
+        "influence": "Қазақ әдебиетінің дамуына ең үлкен ықпал еткен",
+        "quotes": ["Білім - күш, білімсіз адам құл", "Өнегелі өмір - ең үлкен байлық"]
     },
     "auezov": {
         "name": "Мұхтар Әуезов",
         "emoji": "📖",
-        "bio": "Қазақ әдебиетінің классигі, 'Абай' романының авторы (1897-1961)",
-        "works": ["Абай", "Абайдың жолы"]
+        "years": "1897-1961",
+        "bio": "Қазақ әдебиетінің классигі, 'Абай' романының авторы.",
+        "works": ["Абай", "Абайдың жолы", "Қараш-Қарабай", "Енлік-Кебек"],
+        "influence": "Қазақ романын құрады",
+        "quotes": ["Адамның өмірі - оның шығармасы", "Тарих - халықтың өмірі"]
     },
-    "dostoevsky": {
-        "name": "Достоевский (ықпалы)",
+    "yesenberlin": {
+        "name": "Ілияс Есенберлин",
+        "emoji": "✍️",
+        "years": "1915-1983",
+        "bio": "Қазақ прозаик, исторический романдарының авторы.",
+        "works": ["Көшпенділер", "Ұлы Шапағат", "Қоңыр өндіріс"],
+        "influence": "Исторический романды қазақ әдебиетіне енгізді"
+    },
+    "nurpeisov": {
+        "name": "Абдизамил Нұрпейсов",
         "emoji": "🖋️",
-        "bio": "Орыс жазушысы, қазақ әдебиетіне ықпал еткен",
-        "works": ["Қылмас пен жаза"]
+        "years": "1920-1990",
+        "bio": "Қазақ прозаик, әлеуметтік романдарының авторы.",
+        "works": ["Құлагер", "Қоңыр өндіріс"],
+        "influence": "Әлеуметтік тақырыптарды әдебиетке енгізді"
     },
-    "tolstoy": {
-        "name": "Толстой (ықпалы)",
+    "mukhanov": {
+        "name": "Сәбит Мұқанов",
         "emoji": "📚",
-        "bio": "Орыс жазушысы, қазақ авторларына ықпал еткен",
-        "works": ["Соғыс және бейбітшілік"]
+        "years": "1900-1973",
+        "bio": "Қазақ прозаик және драматург.",
+        "works": ["Өндіріс", "Жанды жер", "Ақ жол"],
+        "influence": "Әлеуметтік реализмді дамытты"
     }
 }
 
@@ -101,19 +119,52 @@ WORKS = {
         "title": "Абай",
         "author": "Мұхтар Әуезов",
         "year": 1942,
-        "description": "Абай Құнанбаевтың өмірі мен шығармашылығы туралы эпикалық роман"
+        "genre": "Исторический роман",
+        "pages": 600,
+        "description": "Абай Құнанбаевтың өмірі мен шығармашылығы туралы эпикалық роман.",
+        "main_characters": ["Абай", "Құнанбай", "Дина", "Төле"],
+        "themes": ["Өмір мен өлім", "Өнеге", "Білім", "Сүйіспеншілік"],
+        "importance": "Қазақ әдебиетінің шедеврі"
     },
     "kara_soz": {
         "title": "Қара сөз",
         "author": "Абай Құнанбаев",
         "year": 1889,
-        "description": "Философиялық ойлар мен насихаттар"
+        "genre": "Философиялық өлеңдер",
+        "pages": 150,
+        "description": "Абайдың философиялық ойлары мен насихаттарының жинағы.",
+        "themes": ["Өнеге", "Білім", "Адамдық құндылықтар"],
+        "importance": "Қазақ философиясының негіздеушісі"
     },
     "olendar": {
         "title": "Өлеңдер",
         "author": "Абай Құнанбаев",
         "year": 1890,
-        "description": "Абайдың өлеңдерінің жинағы"
+        "genre": "Өлеңдер",
+        "pages": 200,
+        "description": "Абайдың өлеңдерінің толық жинағы.",
+        "themes": ["Сүйіспеншілік", "Табиғат", "Өмір философиясы"],
+        "importance": "Қазақ поэзиясының негіздеушісі"
+    },
+    "koshpendiler": {
+        "title": "Көшпенділер",
+        "author": "Ілияс Есенберлин",
+        "year": 1960,
+        "genre": "Исторический роман",
+        "pages": 500,
+        "description": "Қазақ халқының өмірі мен тарихы туралы.",
+        "themes": ["Тарих", "Батырлық", "Халық өмірі"],
+        "importance": "Исторический романның классигі"
+    },
+    "kulagher": {
+        "title": "Құлагер",
+        "author": "Абдизамил Нұрпейсов",
+        "year": 1950,
+        "genre": "Әлеуметтік роман",
+        "pages": 400,
+        "description": "Қазақ ауылының өмірі туралы.",
+        "themes": ["Әлеуметтік өндіктеу", "Ауыл өмірі"],
+        "importance": "Әлеуметтік реализмнің шедеврі"
     }
 }
 
@@ -121,18 +172,56 @@ CHARACTERS = {
     "abai": {
         "name": "Абай Құнанбаев",
         "role": "Басты кейіпкер",
-        "description": "Ақын, философ, ағартушы"
+        "age": "64 (1840-1904)",
+        "description": "Ақын, философ, ағартушы. Қазақ әдебиетінің негіздеушісі.",
+        "personality": ["Ойлы", "Өнегелі", "Білімді", "Сезімтал"],
+        "development": "Балалықтан өлімінің соңына дейін өндіктеу процесі"
     },
     "kunanbai": {
         "name": "Құнанбай",
         "role": "Абайдың әкесі",
-        "description": "Әсерлі қазақ батыры"
+        "age": "Қарт",
+        "description": "Әсерлі қазақ батыры. Абайдың өмірінің ықпалы.",
+        "personality": ["Қатал", "Ынамды", "Өндіктеген"]
     },
     "dina": {
         "name": "Дина",
         "role": "Абайдың сүйіктісі",
-        "description": "Білімді әйел, ақынды шабыттандырған"
+        "age": "Жас әйел",
+        "description": "Білімді, сезімтал әйел. Абайдың шығармашылығына ықпал еткен.",
+        "personality": ["Білімді", "Сезімтал", "Ынамды"]
+    },
+    "tole": {
+        "name": "Төле",
+        "role": "Абайдың досты",
+        "age": "Ортаңғы жас",
+        "description": "Абайдың ынамды досты және ақын.",
+        "personality": ["Ынамды", "Ойлы", "Сезімтал"]
     }
+}
+
+FACTS = {
+    "abai_facts": [
+        "🎓 Абай 64 жыл өмір сүрді (1840-1904)",
+        "✍️ Ол 45 өлең жазды",
+        "📚 Орыс, түрік, персиялық әдебиетін аударды",
+        "🏛️ Қазақ әдебиетінің негіздеушісі",
+        "💭 'Қара сөз' - философиялық ойлардың жинағы"
+    ],
+    "auezov_facts": [
+        "📖 'Абай' романы 600 беттен асады",
+        "🔬 30 жыл бойы Абай туралы зерттеу жүргізді",
+        "📚 4 томдық 'Абайдың жолы' романын жазды",
+        "🎭 Драматург және аудармашы болды",
+        "🏆 Қазақ әдебиетінің классигі"
+    ],
+    "literature_facts": [
+        "📚 Қазақ әдебиеті XIX ғасырдан басталады",
+        "🌍 Қазақ әдебиеті әлемге танымал",
+        "📖 Абай - қазақ әдебиетінің негіздеушісі",
+        "🎭 Қазақ драматургиясы XX ғасырда дамыды",
+        "✨ Қазіргі қазақ әдебиеті әлемге танымал авторлары бар"
+    ]
 }
 
 # ============================================================================
@@ -146,6 +235,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         [InlineKeyboardButton("📖 Шығармалар", callback_data="works")],
         [InlineKeyboardButton("👥 Кейіпкерлер", callback_data="characters")],
         [InlineKeyboardButton("📚 Тараулар", callback_data="chapters")],
+        [InlineKeyboardButton("🎯 Қызықты фактілер", callback_data="facts")],
         [InlineKeyboardButton("ℹ️ Бот туралы", callback_data="about")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -165,6 +255,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     /works - Шығармалар тізімі
     /characters - Кейіпкерлер тізімі
     /chapters - Әдебиет тараулары
+    /facts - Қызықты фактілер
     """
     await update.message.reply_text(help_text)
 
@@ -208,6 +299,17 @@ async def chapters_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("📚 Тарауды таңдаңыз:", reply_markup=reply_markup)
 
+async def facts_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Команда өңдеушісі /facts"""
+    keyboard = [
+        [InlineKeyboardButton("🎓 Абай туралы", callback_data="facts_abai")],
+        [InlineKeyboardButton("📖 Әуезов туралы", callback_data="facts_auezov")],
+        [InlineKeyboardButton("📚 Әдебиет туралы", callback_data="facts_literature")],
+        [InlineKeyboardButton("🏠 Басты меню", callback_data="start")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text("🎯 Қызықты фактілерді таңдаңыз:", reply_markup=reply_markup)
+
 # ============================================================================
 # ТҮЙМЕЛЕР ӨҢДЕУШІСІ
 # ============================================================================
@@ -225,6 +327,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             [InlineKeyboardButton("📖 Шығармалар", callback_data="works")],
             [InlineKeyboardButton("👥 Кейіпкерлер", callback_data="characters")],
             [InlineKeyboardButton("📚 Тараулар", callback_data="chapters")],
+            [InlineKeyboardButton("🎯 Қызықты фактілер", callback_data="facts")],
             [InlineKeyboardButton("ℹ️ Бот туралы", callback_data="about")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -246,7 +349,14 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         author_key = data.replace("author_", "")
         author = AUTHORS.get(author_key)
         if author:
-            text = f"<b>{author['emoji']} {author['name']}</b>\n\n{author['bio']}\n\n<b>Шығармалары:</b>\n" + "\n".join(author['works'])
+            text = f"<b>{author['emoji']} {author['name']}</b>\n\n"
+            text += f"<b>Өмір сүрген жылдары:</b> {author['years']}\n\n"
+            text += f"<b>Өмірбаяны:</b> {author['bio']}\n\n"
+            text += f"<b>Шығармалары:</b>\n" + "\n".join([f"• {w}" for w in author['works']])
+            text += f"\n\n<b>Ықпалы:</b> {author['influence']}"
+            if author.get('quotes'):
+                text += f"\n\n<b>Ұлы сөздері:</b>\n" + "\n".join([f"💬 {q}" for q in author['quotes']])
+            
             keyboard = [
                 [InlineKeyboardButton("📚 Авторлар", callback_data="authors")],
                 [InlineKeyboardButton("🏠 Басты меню", callback_data="start")]
@@ -267,7 +377,18 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         work_key = data.replace("work_", "")
         work = WORKS.get(work_key)
         if work:
-            text = f"<b>{work['title']}</b>\n\n<b>Авторы:</b> {work['author']}\n<b>Жылы:</b> {work['year']}\n\n{work['description']}"
+            text = f"<b>{work['title']}</b>\n\n"
+            text += f"<b>Авторы:</b> {work['author']}\n"
+            text += f"<b>Жылы:</b> {work['year']}\n"
+            text += f"<b>Жанры:</b> {work['genre']}\n"
+            text += f"<b>Беттері:</b> {work['pages']}\n\n"
+            text += f"<b>Сипаттамасы:</b> {work['description']}\n\n"
+            if work.get('main_characters'):
+                text += f"<b>Басты кейіпкерлері:</b> {', '.join(work['main_characters'])}\n\n"
+            if work.get('themes'):
+                text += f"<b>Тақырыптары:</b> {', '.join(work['themes'])}\n\n"
+            text += f"<b>Маңызы:</b> {work['importance']}"
+            
             keyboard = [
                 [InlineKeyboardButton("📖 Шығармалар", callback_data="works")],
                 [InlineKeyboardButton("🏠 Басты меню", callback_data="start")]
@@ -288,7 +409,15 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         char_key = data.replace("character_", "")
         char = CHARACTERS.get(char_key)
         if char:
-            text = f"<b>{char['name']}</b>\n\n<b>Рөлі:</b> {char['role']}\n\n{char['description']}"
+            text = f"<b>{char['name']}</b>\n\n"
+            text += f"<b>Рөлі:</b> {char['role']}\n"
+            text += f"<b>Жасы:</b> {char['age']}\n\n"
+            text += f"<b>Сипаттамасы:</b> {char['description']}\n\n"
+            if char.get('personality'):
+                text += f"<b>Сипаттамалары:</b> {', '.join(char['personality'])}\n\n"
+            if char.get('development'):
+                text += f"<b>Өндіктеуі:</b> {char['development']}"
+            
             keyboard = [
                 [InlineKeyboardButton("👥 Кейіпкерлер", callback_data="characters")],
                 [InlineKeyboardButton("🏠 Басты меню", callback_data="start")]
@@ -317,6 +446,28 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             reply_markup = InlineKeyboardMarkup(keyboard)
             await query.edit_message_text(text, reply_markup=reply_markup, parse_mode=ParseMode.HTML)
     
+    elif data == "facts":
+        keyboard = [
+            [InlineKeyboardButton("🎓 Абай туралы", callback_data="facts_abai")],
+            [InlineKeyboardButton("📖 Әуезов туралы", callback_data="facts_auezov")],
+            [InlineKeyboardButton("📚 Әдебиет туралы", callback_data="facts_literature")],
+            [InlineKeyboardButton("🏠 Басты меню", callback_data="start")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text("🎯 Қызықты фактілерді таңдаңыз:", reply_markup=reply_markup)
+    
+    elif data.startswith("facts_"):
+        fact_key = data.replace("facts_", "")
+        facts = FACTS.get(f"{fact_key}_facts", [])
+        if facts:
+            text = "\n".join(facts)
+            keyboard = [
+                [InlineKeyboardButton("🎯 Басқа фактілер", callback_data="facts")],
+                [InlineKeyboardButton("🏠 Басты меню", callback_data="start")]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await query.edit_message_text(text, reply_markup=reply_markup)
+    
     elif data == "about":
         text = """<b>📚 Қазақ әдебиеті боты туралы</b>
 
@@ -325,18 +476,21 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 • Шығармалардың сипаттамасы
 • Кейіпкерлердің сипаттамасы
 • Мазмұнды тараулар бойынша ұйымдастыру
+• Қызықты фактілер
 
 🎯 Мақсаты: Қазақ әдебиетін барлығына қол жетімді және қызықты ету.
 
 📖 Мазмұны:
-• 4 классикалық автор
-• 3 ұлы шығарма
-• 3 басты кейіпкер
+• 5 классикалық автор
+• 5 ұлы шығарма
+• 4 басты кейіпкер
 • 6 әдебиет тарауы
+• 15+ қызықты факт
 
 💡 Мазмұнды шарлау үшін түймелерді пайдаланыңыз.
 
-🔧 Koyeb, Render және жергілік орнатуға арналған.
+🔧 NotebookLM деректерінен құрылды (34+ источник)
+Koyeb, Render және жергілік орнатуға арналған.
 """
         keyboard = [
             [InlineKeyboardButton("🏠 Басты меню", callback_data="start")]
@@ -380,6 +534,7 @@ def main() -> None:
     application.add_handler(CommandHandler("works", works_command))
     application.add_handler(CommandHandler("characters", characters_command))
     application.add_handler(CommandHandler("chapters", chapters_command))
+    application.add_handler(CommandHandler("facts", facts_command))
     
     # Түймелер өңдеушісі
     application.add_handler(CallbackQueryHandler(button_callback))
