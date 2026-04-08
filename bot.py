@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
 # Настройка логирования
 logging.basicConfig(
@@ -21,7 +21,7 @@ if not BOT_TOKEN:
 logger.info(f"🚀 Бот басталуда... TOKEN: {BOT_TOKEN[:20]}...")
 
 # Обработчики команд
-def start(update: Update, context):
+def start(update: Update, context: CallbackContext):
     """Обработчик команды /start"""
     update.message.reply_text(
         "Қазақ әдебиеті ботына қош келдіңіз! 📚\n\n"
@@ -30,14 +30,14 @@ def start(update: Update, context):
         "/about - Туралы"
     )
 
-def help_command(update: Update, context):
+def help_command(update: Update, context: CallbackContext):
     """Обработчик команды /help"""
     update.message.reply_text(
         "Бот қазақ әдебиеті туралы ақпарат беріп тұрады.\n"
         "Сұрақ қойыңыз немесе автордың атын жазыңыз."
     )
 
-def about(update: Update, context):
+def about(update: Update, context: CallbackContext):
     """Обработчик команды /about"""
     update.message.reply_text(
         "Қазақ әдебиеті ботының v4.0\n"
@@ -45,7 +45,7 @@ def about(update: Update, context):
         "2026"
     )
 
-def handle_message(update: Update, context):
+def handle_message(update: Update, context: CallbackContext):
     """Обработчик обычных сообщений"""
     user_message = update.message.text
     logger.info(f"Сообщение от {update.effective_user.id}: {user_message}")
@@ -55,7 +55,7 @@ def handle_message(update: Update, context):
         "Бот разрабатывается..."
     )
 
-def error_handler(update, context):
+def error_handler(update: Update, context: CallbackContext):
     """Обработчик ошибок"""
     error = context.error
     logger.error(f"Update {update} caused error {error}")
