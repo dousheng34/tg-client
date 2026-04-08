@@ -1,41 +1,93 @@
-# Kazakh Literature Bot v4.0
+# 📚 Қазақ Әдебиеті Боты v2.0
 
-Telegram bot for Kazakh literature information and discussions.
+Telegram бот — 1-11 класс оқушыларына арналған қазақ әдебиеті бойынша интерактивті оқу платформасы.
 
-## Features
+## 🎯 Мүмкіндіктер
 
-- `/start` - Start the bot
-- `/help` - Get help
-- `/about` - About the bot
-- Message handling for user queries
+### 📖 Оқу материалдары (1-11 класс)
+- Әр сынып бойынша тақырыптар
+- Ертегілер, батырлар жыры, эпостар
+- Авторлар мен шығармалары
+- ЕНТ дайындығы (11-сынып)
 
-## Requirements
+### 🎮 6 Ойын Түрі
+- 🎯 **Викторина** — 4 нұсқалы сұрақтар (200+)
+- ✍️ **Кім жазды?** — шығармадан авторды тап
+- 📚 **Шығарманы тап!** — авторынан шығармасын тап
+- 💬 **Цитата жарысы** — цитатаны авторға сай
+- ⚡ **Блиц-тур** — жылдам жауап режимі
+- 👥 **Кейіпкерлер** — кейіпкерді тап
 
-- Python 3.11+
-- python-telegram-bot==12.8
-- requests==2.28.1
+### 👤 20+ Автор Биографиясы
+- Толық өмірбаяны
+- Текстік инфографика
+- Шығармалар тізімі
+- Цитаталары мен қызықты деректері
 
-## Setup
+### 📈 Прогресс Жүйесі
+- ⭐ Ұпай жүйесі
+- 🎓 11 деңгей (Оқушы → Қазақ Әдебиеті Ұстасы)
+- 🔥 Күнделікті стрик
+- 🏅 16+ жетістік
+- 🏆 Рейтинг кестесі
 
-1. Set environment variable:
-```bash
-export TELEGRAM_BOT_TOKEN="your_token_here"
+## 🛠 Орнату
+
+### Environment Variables
+```
+TELEGRAM_BOT_TOKEN=your_token_here
+WEBHOOK_URL=https://your-app.koyeb.app  # (optional, for production)
+PORT=8000
 ```
 
-2. Install dependencies:
+### Жергілікті іске қосу
 ```bash
 pip install -r requirements.txt
-```
-
-3. Run the bot:
-```bash
 python bot.py
 ```
 
-## Deployment
+## 📁 Жоба Структурасы
 
-Deployed on Koyeb with Docker.
+```
+├── bot.py                  # Бас файл
+├── database.py             # SQLite дерекқоры
+├── content/
+│   ├── authors.py          # 20+ автор биографиясы
+│   ├── grades.py           # 1-11 класс материалдары
+│   └── quizzes.py          # 200+ сұрақтар
+├── handlers/
+│   ├── menu.py             # Бас мәзір
+│   ├── grades.py           # Сыныптар
+│   ├── authors.py          # Авторлар
+│   ├── quiz.py             # Ойындар
+│   └── profile.py          # Профиль
+└── utils/
+    └── keyboards.py        # Клавиатуралар
+```
 
-## Author
+## 🚀 Деплой (Koyeb)
 
-Aseke - 2026
+1. GitHub-қа push жасаңыз
+2. Koyeb-те жаңа app жасаңыз
+3. Environment variable-ді қосыңыз
+4. `WEBHOOK_URL` мен `TELEGRAM_BOT_TOKEN` орнатыңыз
+
+## 📊 Ұпай Жүйесі
+
+| Іс-әрекет | Ұпай |
+|-----------|------|
+| Дұрыс жауап | +10 |
+| Тақырып аяқтау | +15 |
+| Автор оқу | +5 |
+| Мінсіз викторина | +50 бонус |
+
+## 🎓 Деңгейлер
+
+| Деңгей | Атау | Ұпай |
+|--------|------|------|
+| 1 | ⭐ Оқушы | 0 |
+| 2 | ⭐⭐ Ынталы оқушы | 100 |
+| 3 | 🌟 Білімді | 300 |
+| 5 | 💫 Дана | 1000 |
+| 9 | 👑 Әдебиет шебері | 4000 |
+| 11 | 🏆 Қазақ Әдебиеті Ұстасы | 7500 |
