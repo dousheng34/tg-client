@@ -2,712 +2,1639 @@
 <html lang="kk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Қазақ Әдебиеті — Ойын</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Қазақ Әдебиеті — Ойын Кітапханасы</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --primary: #1a1a2e;
-    --accent: #e94560;
-    --gold: #f5a623;
-    --green: #2ecc71;
-    --card: #16213e;
-    --text: #eaeaea;
-    --sub: #a0a9b4;
-    --radius: 16px;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    background: var(--primary);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+/* ══════════════════ DESIGN TOKENS ════════════════════════════════════════ */
+:root {
+  --bg:        #10141a;
+  --bg-low:    #181c22;
+  --bg-mid:    #1c2026;
+  --bg-high:   #262a31;
+  --bg-top:    #31353c;
+  --bright:    #353940;
+  --gold:      #e5c27f;
+  --gold-dim:  #c0a060;
+  --silver:    #bcc7db;
+  --blue:      #a9c7fe;
+  --text:      #dfe2eb;
+  --subtext:   #d0c5b5;
+  --outline:   rgba(78, 68, 55, 0.3);
+  --r4:        4px;
+  --r8:        8px;
+  --r12:       12px;
+  --r16:       16px;
+  --r24:       24px;
+  --r-pill:    999px;
+  --shadow:    0 24px 48px rgba(0,0,0,0.4);
+  --shadow-sm: 0 8px 20px rgba(0,0,0,0.3);
+}
 
-  /* HEADER */
-  .header {
-    background: linear-gradient(135deg, #0f3460, #16213e);
-    padding: 20px 16px 16px;
-    text-align: center;
-    border-bottom: 2px solid var(--accent);
-  }
-  .header h1 { font-size: 1.3rem; font-weight: 700; color: var(--gold); }
-  .header p { font-size: 0.8rem; color: var(--sub); margin-top: 4px; }
+/* ══════════════════ RESET + BASE ══════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { height: 100%; }
+body {
+  font-family: 'Manrope', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100%;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+h1, h2, h3 { font-family: 'Noto Serif', serif; }
 
-  /* SCORE BAR */
-  .score-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 20px;
-    background: var(--card);
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-  }
-  .score-item { text-align: center; }
-  .score-item .val { font-size: 1.4rem; font-weight: 800; color: var(--gold); }
-  .score-item .lbl { font-size: 0.65rem; color: var(--sub); text-transform: uppercase; letter-spacing: 0.05em; }
+/* ══════════════════ SCREENS ═══════════════════════════════════════════════ */
+.screen { display: none; min-height: 100vh; padding-bottom: 80px; }
+.screen.active { display: block; }
+.page-enter { animation: pageIn 0.3s cubic-bezier(0.22,1,0.36,1); }
+@keyframes pageIn { from { opacity:0; transform: translateY(18px); } to { opacity:1; transform: none; } }
 
-  /* TIMER */
-  .timer-bar {
-    height: 5px;
-    background: rgba(255,255,255,0.1);
-    position: relative;
-    overflow: hidden;
-  }
-  .timer-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--green), var(--gold), var(--accent));
-    transition: width 0.2s linear;
-  }
+/* ══════════════════ HEADER ════════════════════════════════════════════════ */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(16,20,26,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 14px 20px 12px;
+  border-bottom: 1px solid var(--outline);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-left { display: flex; align-items: center; gap: 10px; }
+.header-logo { font-family: 'Noto Serif', serif; font-size: 1.1rem; font-weight: 700; color: var(--gold); }
+.header-sub { font-size: 0.7rem; color: var(--subtext); }
+.back-btn {
+  width: 36px; height: 36px;
+  background: var(--bg-mid);
+  border: none;
+  border-radius: var(--r8);
+  color: var(--text);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.back-btn:active { background: var(--bright); }
 
-  /* SCREENS */
-  .screen { display: none; padding: 20px 16px; min-height: calc(100vh - 120px); }
-  .screen.active { display: block; }
+/* ══════════════════ STATS BAR ═════════════════════════════════════════════ */
+.stats-bar {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.stats-bar::-webkit-scrollbar { display: none; }
+.stat-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-mid);
+  border-radius: var(--r-pill);
+  padding: 6px 14px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.stat-pill .sp-icon { font-size: 1rem; }
+.stat-pill .sp-val { font-size: 0.85rem; font-weight: 700; color: var(--gold); }
+.stat-pill .sp-lbl { font-size: 0.7rem; color: var(--subtext); }
 
-  /* HOME SCREEN */
-  .home-title {
-    font-size: 1.8rem;
-    font-weight: 900;
-    text-align: center;
-    margin: 20px 0 8px;
-    background: linear-gradient(135deg, var(--gold), var(--accent));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .home-sub { text-align: center; color: var(--sub); font-size: 0.9rem; margin-bottom: 24px; }
+/* ══════════════════ SECTION TITLE ═════════════════════════════════════════ */
+.section-hdr {
+  padding: 16px 20px 10px;
+  font-family: 'Noto Serif', serif;
+  font-size: 1.1rem;
+  color: var(--gold);
+  letter-spacing: 0.01em;
+}
 
-  .game-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 24px;
-  }
-  .game-card {
-    background: var(--card);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: var(--radius);
-    padding: 18px 12px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
-  }
-  .game-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-  }
-  .game-card.c1::before { background: var(--accent); }
-  .game-card.c2::before { background: var(--gold); }
-  .game-card.c3::before { background: var(--green); }
-  .game-card.c4::before { background: #9b59b6; }
-  .game-card:active { transform: scale(0.96); }
-  .game-card .emoji { font-size: 2rem; display: block; margin-bottom: 8px; }
-  .game-card .name { font-size: 0.85rem; font-weight: 600; }
-  .game-card .desc { font-size: 0.7rem; color: var(--sub); margin-top: 4px; }
+/* ══════════════════ GAME CARDS GRID ═══════════════════════════════════════ */
+.games-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 0 20px 8px;
+}
+.game-card {
+  position: relative;
+  background: var(--bg-low);
+  border-radius: var(--r16);
+  padding: 20px 14px;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.game-card::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  opacity: 0.12;
+  filter: blur(20px);
+}
+.game-card.glow-blue::before   { background: #3b82f6; }
+.game-card.glow-purple::before { background: #8b5cf6; }
+.game-card.glow-orange::before { background: #f97316; }
+.game-card.glow-green::before  { background: #10b981; }
+.game-card.glow-pink::before   { background: #ec4899; }
+.game-card.glow-teal::before   { background: #06b6d4; }
+.game-card:active { transform: scale(0.96); box-shadow: var(--shadow); }
+.game-card .gc-emoji { font-size: 1.8rem; display: block; margin-bottom: 8px; }
+.game-card .gc-title { font-weight: 700; font-size: 0.9rem; color: var(--text); }
+.game-card .gc-desc { font-size: 0.68rem; color: var(--subtext); margin-top: 3px; }
+.game-card .gc-badge {
+  position: absolute;
+  top: 10px; right: 10px;
+  background: var(--gold-dim);
+  color: #261900;
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: var(--r-pill);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
 
-  /* GRADE SELECTOR */
-  .grade-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-    margin: 16px 0;
-  }
-  .grade-btn {
-    background: var(--card);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
-    padding: 14px 8px;
-    cursor: pointer;
-    text-align: center;
-    font-size: 0.85rem;
-    font-weight: 600;
-    transition: all 0.2s;
-  }
-  .grade-btn:active { transform: scale(0.95); }
-  .grade-btn.selected {
-    background: var(--accent);
-    border-color: var(--accent);
-  }
-  .grade-btn .g-num { font-size: 1.2rem; font-weight: 800; }
-  .grade-btn .g-lbl { font-size: 0.6rem; color: var(--sub); }
-  .grade-btn.selected .g-lbl { color: rgba(255,255,255,0.7); }
+/* ══════════════════ DIFFICULTY CHIPS ══════════════════════════════════════ */
+.diff-chips {
+  display: flex;
+  gap: 8px;
+  padding: 8px 20px 16px;
+}
+.diff-chip {
+  padding: 6px 14px;
+  border-radius: var(--r-pill);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--bg-mid);
+  color: var(--subtext);
+  border: 1px solid transparent;
+}
+.diff-chip.active {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+  color: #261900;
+  border-color: transparent;
+}
 
-  /* QUESTION SCREEN */
-  .q-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-  }
-  .q-num { font-size: 0.8rem; color: var(--sub); }
-  .q-timer {
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: var(--gold);
-    min-width: 36px;
-    text-align: center;
-  }
-  .q-timer.urgent { color: var(--accent); animation: pulse 0.5s infinite; }
+/* ══════════════════ BOTTOM NAV ════════════════════════════════════════════ */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 64px;
+  background: rgba(28,32,38,0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--outline);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 200;
+}
+.nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: var(--r8);
+  transition: background 0.15s;
+  background: none;
+  border: none;
+  color: var(--subtext);
+}
+.nav-btn .nb-icon { font-size: 1.2rem; }
+.nav-btn .nb-lbl { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.nav-btn.active { color: var(--gold); }
+.nav-btn:active { background: var(--bg-mid); }
 
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+/* ══════════════════ GOLDEN BUTTON ═════════════════════════════════════════ */
+.btn-gold {
+  width: calc(100% - 40px);
+  margin: 0 20px;
+  padding: 16px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+  color: #261900;
+  font-family: 'Manrope', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  box-shadow: 0 8px 24px rgba(193,158,86,0.35);
+  transition: all 0.15s;
+}
+.btn-gold:active { transform: scale(0.97); box-shadow: 0 4px 12px rgba(193,158,86,0.2); }
+.btn-outline {
+  width: calc(100% - 40px);
+  margin: 0 20px;
+  padding: 14px;
+  border: 1.5px solid rgba(229,194,127,0.3);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--gold);
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-outline:active { background: rgba(229,194,127,0.06); }
 
-  .question-card {
-    background: linear-gradient(135deg, #0f3460, var(--card));
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: var(--radius);
-    padding: 24px 18px;
-    margin-bottom: 20px;
-    min-height: 100px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .question-card .q-text {
-    font-size: 1.05rem;
-    font-weight: 600;
-    text-align: center;
-    line-height: 1.5;
-  }
+/* ══════════════════ GAME SCREENS — COMMON ═════════════════════════════════ */
+.game-header {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.progress-track {
+  height: 4px;
+  background: var(--bg-mid);
+  border-radius: 2px;
+  margin: 0 20px 16px;
+  position: relative;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--blue));
+  transition: width 0.4s cubic-bezier(0.22,1,0.36,1);
+}
+.score-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px 16px;
+  align-items: center;
+}
+.score-row .sr-score { font-size: 1rem; font-weight: 800; color: var(--gold); }
+.score-row .sr-timer {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 1rem; font-weight: 700;
+  color: var(--text);
+  background: var(--bg-mid);
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+}
+.sr-timer.urgent { color: #ff6b6b; animation: pulse 0.6s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
-  .options { display: flex; flex-direction: column; gap: 10px; }
-  .option-btn {
-    background: var(--card);
-    border: 1.5px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
-    padding: 16px 18px;
-    font-size: 0.9rem;
-    color: var(--text);
-    cursor: pointer;
-    text-align: left;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    transition: all 0.15s;
-    position: relative;
-  }
-  .option-btn:active { transform: scale(0.98); }
-  .option-btn.correct { background: rgba(46,204,113,0.2); border-color: var(--green); }
-  .option-btn.wrong { background: rgba(233,69,96,0.2); border-color: var(--accent); }
-  .option-btn .opt-letter {
-    width: 28px; height: 28px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700;
-    font-size: 0.8rem;
-    flex-shrink: 0;
-  }
-  .option-btn.correct .opt-letter { background: var(--green); }
-  .option-btn.wrong .opt-letter { background: var(--accent); }
+/* QUESTION CARD */
+.q-card {
+  margin: 0 20px 20px;
+  background: linear-gradient(135deg, var(--bg-low), var(--bg-mid));
+  border-radius: var(--r16);
+  padding: 24px 20px;
+  min-height: 90px;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--outline);
+}
+.q-card .q-hint { font-size: 0.7rem; color: var(--subtext); margin-bottom: 8px; }
+.q-card .q-text { font-family: 'Noto Serif', serif; font-size: 1.05rem; line-height: 1.6; }
 
-  /* RESULT SCREEN */
-  .result-circle {
-    width: 120px; height: 120px;
-    margin: 24px auto;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--gold), var(--accent));
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    font-weight: 900;
-    box-shadow: 0 0 40px rgba(245,166,35,0.4);
-  }
-  .result-score { font-size: 1.5rem; font-weight: 900; }
-  .result-total { font-size: 0.7rem; opacity: 0.8; }
-  .result-msg {
-    text-align: center;
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
-  .result-sub { text-align: center; color: var(--sub); font-size: 0.85rem; margin-bottom: 24px; }
-  .result-stars { font-size: 2rem; text-align: center; margin-bottom: 16px; }
+/* OPTIONS */
+.options { padding: 0 20px; display: flex; flex-direction: column; gap: 10px; }
+.opt-btn {
+  background: var(--bg-mid);
+  border: 1.5px solid rgba(255,255,255,0.05);
+  border-radius: var(--r12);
+  padding: 14px 18px;
+  color: var(--text);
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  display: flex; align-items: center; gap: 12px;
+  transition: all 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+.opt-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: var(--gold);
+  transform: scaleY(0);
+  transition: transform 0.15s;
+  border-radius: 0 2px 2px 0;
+}
+.opt-btn:active { background: var(--bg-high); }
+.opt-btn:active::before { transform: scaleY(1); }
+.opt-btn .opt-ltr {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--bg-high);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.8rem;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.opt-btn.correct { background: rgba(16,185,129,0.15); border-color: #10b981; }
+.opt-btn.correct .opt-ltr { background: #10b981; color: #fff; }
+.opt-btn.wrong { background: rgba(239,68,68,0.15); border-color: #ef4444; }
+.opt-btn.wrong .opt-ltr { background: #ef4444; color: #fff; }
+.opt-btn.disabled { pointer-events: none; }
 
-  .stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  .stat-card {
-    background: var(--card);
-    border-radius: 12px;
-    padding: 14px;
-    text-align: center;
-  }
-  .stat-card .sv { font-size: 1.4rem; font-weight: 800; color: var(--gold); }
-  .stat-card .sl { font-size: 0.7rem; color: var(--sub); margin-top: 2px; }
+/* ══════════════════ CARD GAME (Карточкалар) ═══════════════════════════════ */
+.cards-info { padding: 0 20px 16px; display: flex; justify-content: space-between; font-size:0.8rem; color:var(--subtext); }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 0 16px 20px;
+}
+.mem-card {
+  aspect-ratio: 1;
+  border-radius: var(--r8);
+  cursor: pointer;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.22,1,0.36,1);
+}
+.mem-card.flipped { transform: rotateY(180deg); }
+.mem-card.matched { transform: rotateY(180deg); opacity:0.5; pointer-events:none; }
+.mem-card .mc-front,
+.mem-card .mc-back {
+  position: absolute; inset: 0;
+  border-radius: var(--r8);
+  display: flex; align-items: center; justify-content: center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.mem-card .mc-front {
+  background: var(--bg-mid);
+  border: 1px solid var(--outline);
+  font-size: 1.4rem;
+}
+.mem-card .mc-back {
+  background: linear-gradient(135deg, var(--bg-low), var(--bg-mid));
+  border: 1.5px solid var(--gold-dim);
+  transform: rotateY(180deg);
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 4px;
+  color: var(--gold);
+  line-height: 1.3;
+}
 
-  /* BUTTONS */
-  .btn {
-    width: 100%;
-    padding: 16px;
-    border: none;
-    border-radius: var(--radius);
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-bottom: 10px;
-  }
-  .btn-primary { background: linear-gradient(135deg, var(--accent), #c0392b); color: white; }
-  .btn-secondary { background: var(--card); color: var(--text); border: 1px solid rgba(255,255,255,0.1); }
-  .btn:active { transform: scale(0.97); }
+/* ══════════════════ TIMELINE GAME ═════════════════════════════════════════ */
+.timeline-list {
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tl-item {
+  background: var(--bg-mid);
+  border-radius: var(--r12);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: grab;
+  transition: background 0.15s, box-shadow 0.15s;
+  border: 1.5px solid transparent;
+  user-select: none;
+}
+.tl-item.dragging {
+  background: var(--bg-high);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  border-color: var(--gold-dim);
+  cursor: grabbing;
+}
+.tl-item.drag-over { border-color: var(--blue); }
+.tl-item .tl-handle { color: var(--subtext); font-size:1rem; }
+.tl-item .tl-content { flex:1; }
+.tl-item .tl-name { font-weight: 600; font-size: 0.9rem; }
+.tl-item .tl-hint { font-size: 0.7rem; color: var(--subtext); margin-top: 2px; }
+.tl-item .tl-year {
+  font-family: 'Noto Serif', serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gold);
+  background: rgba(229,194,127,0.1);
+  padding: 3px 8px;
+  border-radius: var(--r-pill);
+}
+.tl-item.correct-pos { border-color: #10b981; background: rgba(16,185,129,0.1); }
+.tl-item.wrong-pos   { border-color: #ef4444; background: rgba(239,68,68,0.1); }
 
-  .section-title {
-    font-size: 1rem;
-    font-weight: 700;
-    margin-bottom: 12px;
-    color: var(--gold);
-  }
+/* ══════════════════ RESULT SCREEN ═════════════════════════════════════════ */
+.result-hero {
+  text-align: center;
+  padding: 30px 20px 20px;
+}
+.result-ring {
+  width: 130px; height: 130px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+}
+.result-ring svg.ring-svg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  transform: rotate(-90deg);
+}
+.ring-track { fill: none; stroke: var(--bg-high); stroke-width: 8; }
+.ring-fill  { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1.2s cubic-bezier(0.22,1,0.36,1); }
+.result-ring .r-score { font-family:'Noto Serif',serif; font-size:2.5rem; font-weight:700; color:var(--gold); z-index:1; line-height:1; }
+.result-ring .r-of    { font-size:0.75rem; color:var(--subtext); z-index:1; }
+.res-title { font-family:'Noto Serif',serif; font-size:1.4rem; font-weight:700; margin-bottom:6px; }
+.res-sub   { color:var(--subtext); font-size:0.875rem; margin-bottom:24px; }
+.res-stars { font-size:2rem; letter-spacing:4px; margin-bottom:20px; }
+.res-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 0 20px 20px;
+}
+.res-stat {
+  background: var(--bg-mid);
+  border-radius: var(--r12);
+  padding: 14px;
+  text-align: center;
+}
+.res-stat .rs-val { font-size:1.5rem; font-weight:800; color:var(--gold); }
+.res-stat .rs-lbl { font-size:0.7rem; color:var(--subtext); margin-top:2px; }
+.btn-row { display:flex; flex-direction:column; gap:10px; padding:0 20px 20px; }
 
-  /* CONFETTI */
-  .confetti-container {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 999;
-  }
-  .confetti-piece {
-    position: absolute;
-    width: 8px; height: 8px;
-    border-radius: 2px;
-    animation: fall 3s ease-in forwards;
-  }
-  @keyframes fall {
-    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-  }
+/* ══════════════════ PROFILE SCREEN ════════════════════════════════════════ */
+.profile-hero {
+  padding: 24px 20px 16px;
+  display: flex; align-items: center; gap: 16px;
+}
+.avatar {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+.profile-name { font-family:'Noto Serif',serif; font-size:1.2rem; font-weight:700; }
+.profile-lvl  { font-size:0.8rem; color:var(--gold); margin-top:2px; }
+.profile-pts  { font-size:0.75rem; color:var(--subtext); margin-top:1px; }
+.level-bar {
+  margin: 0 20px 20px;
+  background: var(--bg-mid);
+  border-radius: var(--r8);
+  padding: 14px;
+}
+.lb-top { display:flex; justify-content:space-between; margin-bottom:8px; font-size:0.8rem; }
+.lb-top span:first-child { color:var(--subtext); }
+.lb-top span:last-child  { color:var(--gold); font-weight:700; }
+.lb-track { height:6px; background: var(--bg-high); border-radius:3px; }
+.lb-fill  { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--gold),var(--blue)); }
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 0 20px 16px;
+}
+.badge-cell {
+  background: var(--bg-mid);
+  border-radius: var(--r8);
+  padding: 12px 8px;
+  text-align: center;
+  border: 1px solid var(--outline);
+}
+.badge-cell .bc-icon { font-size:1.5rem; }
+.badge-cell .bc-name { font-size:0.55rem; color:var(--subtext); margin-top:4px; line-height:1.2; }
+.badge-cell.earned { border-color: rgba(229,194,127,0.3); background: rgba(229,194,127,0.06); }
+.badge-cell.locked { opacity:0.4; }
+
+/* ══════════════════ LEADERBOARD ════════════════════════════════════════════ */
+.leader-list {
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.leader-item {
+  background: var(--bg-mid);
+  border-radius: var(--r12);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--outline);
+}
+.leader-item.top1 { border-color: rgba(229,194,127,0.4); background: rgba(229,194,127,0.06); }
+.leader-item.top2 { border-color: rgba(188,199,219,0.3); }
+.leader-item.top3 { border-color: rgba(180,120,80,0.3); }
+.li-rank { font-size:1.2rem; width:30px; text-align:center; font-weight:800; }
+.li-ava {
+  width:38px; height:38px;
+  border-radius:50%;
+  background:var(--bg-high);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.2rem;
+  flex-shrink:0;
+}
+.li-name { font-weight:600; font-size:0.9rem; }
+.li-sub  { font-size:0.7rem; color:var(--subtext); }
+.li-pts  { margin-left:auto; font-weight:800; color:var(--gold); font-size:0.9rem; }
+
+/* ══════════════════ MICRO-ANIMATIONS ══════════════════════════════════════ */
+.pop { animation: pop 0.25s cubic-bezier(0.22,1,0.36,1); }
+@keyframes pop { 0%{transform:scale(0.8);opacity:0} 60%{transform:scale(1.05)} 100%{transform:scale(1);opacity:1} }
+.shake { animation: shake 0.3s; }
+@keyframes shake { 0%,100%{transform:none} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+.bounce-in { animation: bounceIn 0.5s cubic-bezier(0.22,1,0.36,1); }
+@keyframes bounceIn { 0%{transform:scale(0)} 60%{transform:scale(1.1)} 100%{transform:scale(1)} }
+
+/* Confetti */
+.confetti-wrap { position:fixed; inset:0; pointer-events:none; z-index:9999; overflow:hidden; }
+.cf { position:absolute; width:8px; height:8px; border-radius:2px; animation:cf-fall linear forwards; }
+@keyframes cf-fall {
+  0%  { transform: translateY(-20px) rotate(0deg); opacity:1; }
+  100%{ transform: translateY(105vh) rotate(720deg); opacity:0; }
+}
+
+/* Misc */
+.divider { height:1px; background:var(--outline); margin:0 20px 16px; }
+.gap { height: 12px; }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>📚 Қазақ Әдебиеті</h1>
-  <p>Интерактивті тест ойыны</p>
-</div>
+<!-- ═══════════ HOME SCREEN ════════════════════════════════════════════════ -->
+<div class="screen active page-enter" id="homeScreen">
+  <div class="app-header">
+    <div class="header-left">
+      <div>
+        <div class="header-logo">📚 Қазақ Әдебиеті</div>
+        <div class="header-sub">Ойын Кітапханасы</div>
+      </div>
+    </div>
+    <button class="back-btn" onclick="showLeaderboard()">🏆</button>
+  </div>
 
-<!-- HOME SCREEN -->
-<div class="screen active" id="homeScreen">
-  <div class="home-title">Ойын Таңда</div>
-  <div class="home-sub">Біліміңді сынап көр!</div>
-
-  <div class="section-title">🎮 Ойын Түрі</div>
-  <div class="game-grid">
-    <div class="game-card c1" onclick="selectGame('quiz')">
-      <span class="emoji">🎯</span>
-      <div class="name">Викторина</div>
-      <div class="desc">4 нұсқалы сұрақтар</div>
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-pill">
+      <span class="sp-icon">⭐</span>
+      <span class="sp-val" id="homeLevel">Оқушы</span>
+      <span class="sp-lbl">деңгей</span>
     </div>
-    <div class="game-card c2" onclick="selectGame('whowrote')">
-      <span class="emoji">✍️</span>
-      <div class="name">Кім жазды?</div>
-      <div class="desc">Авторды тап</div>
+    <div class="stat-pill">
+      <span class="sp-icon">🪙</span>
+      <span class="sp-val" id="homePoints">0</span>
+      <span class="sp-lbl">ұпай</span>
     </div>
-    <div class="game-card c3" onclick="selectGame('quote')">
-      <span class="emoji">💬</span>
-      <div class="name">Цитата</div>
-      <div class="desc">Кімнің сөзі?</div>
+    <div class="stat-pill">
+      <span class="sp-icon">🔥</span>
+      <span class="sp-val" id="homeStreak">0</span>
+      <span class="sp-lbl">күн стрик</span>
     </div>
-    <div class="game-card c4" onclick="selectGame('blitz')">
-      <span class="emoji">⚡</span>
-      <div class="name">Блиц-тур</div>
-      <div class="desc">Жылдам жауап</div>
+    <div class="stat-pill">
+      <span class="sp-icon">🎮</span>
+      <span class="sp-val" id="homeGames">0</span>
+      <span class="sp-lbl">ойын</span>
     </div>
   </div>
 
-  <div class="section-title">📚 Сынып таңда</div>
-  <div class="grade-grid" id="gradeGrid"></div>
+  <!-- Difficulty -->
+  <div class="section-hdr">🎯 Қиындық деңгейі</div>
+  <div class="diff-chips">
+    <div class="diff-chip active" data-diff="all"    onclick="setDiff('all',this)">Барлығы</div>
+    <div class="diff-chip"        data-diff="easy"   onclick="setDiff('easy',this)">Оңай</div>
+    <div class="diff-chip"        data-diff="medium" onclick="setDiff('medium',this)">Орташа</div>
+    <div class="diff-chip"        data-diff="hard"   onclick="setDiff('hard',this)">Қиын</div>
+  </div>
 
-  <button class="btn btn-primary" onclick="startGame()">🚀 Ойынды бастау</button>
+  <!-- Games -->
+  <div class="section-hdr">🎮 Ойын таңда</div>
+  <div class="games-grid">
+    <div class="game-card glow-blue"   onclick="startGame('quiz')">
+      <div class="gc-badge">ТОП</div>
+      <span class="gc-emoji">🎯</span>
+      <div class="gc-title">Викторина</div>
+      <div class="gc-desc">4 нұсқалы сұрақтар</div>
+    </div>
+    <div class="game-card glow-purple" onclick="startGame('whowrote')">
+      <span class="gc-emoji">✍️</span>
+      <div class="gc-title">Кім жазды?</div>
+      <div class="gc-desc">Авторды тап</div>
+    </div>
+    <div class="game-card glow-orange" onclick="startGame('blitz')">
+      <div class="gc-badge">⚡</div>
+      <span class="gc-emoji">⚡</span>
+      <div class="gc-title">Блиц-тур</div>
+      <div class="gc-desc">10 сек жауап</div>
+    </div>
+    <div class="game-card glow-green"  onclick="startGame('quote')">
+      <span class="gc-emoji">💬</span>
+      <div class="gc-title">Цитата</div>
+      <div class="gc-desc">Кімнің сөзі?</div>
+    </div>
+    <div class="game-card glow-pink"   onclick="startGame('memory')">
+      <div class="gc-badge">ЖАЛ</div>
+      <span class="gc-emoji">🎴</span>
+      <div class="gc-title">Жад Карточкасы</div>
+      <div class="gc-desc">Жұп тап!</div>
+    </div>
+    <div class="game-card glow-teal"   onclick="startGame('timeline')">
+      <span class="gc-emoji">📅</span>
+      <div class="gc-title">Хронология</div>
+      <div class="gc-desc">Ретімен сыра</div>
+    </div>
+  </div>
+  <div class="gap"></div>
 </div>
 
-<!-- QUESTION SCREEN -->
-<div class="screen" id="questionScreen">
-  <div class="score-bar" id="scoreBar">
-    <div class="score-item">
-      <div class="val" id="scoreVal">0</div>
-      <div class="lbl">Ұпай</div>
+<!-- ═══════════ QUIZ SCREEN (Викторина / Кім жазды? / Цитата) ════════════ -->
+<div class="screen" id="quizScreen">
+  <div class="app-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="header-left">
+      <div>
+        <div class="header-logo" id="quizTitle">Викторина</div>
+        <div class="header-sub" id="quizSubtitle">Білімді сынаймыз!</div>
+      </div>
     </div>
-    <div class="score-item">
-      <div class="val" id="qNumVal">1/10</div>
-      <div class="lbl">Сұрақ</div>
-    </div>
-    <div class="score-item">
-      <div class="val" id="correctVal">0</div>
-      <div class="lbl">Дұрыс</div>
+    <div style="width:36px"></div>
+  </div>
+
+  <div class="progress-track">
+    <div class="progress-fill" id="qProgress" style="width:0%"></div>
+  </div>
+
+  <div class="score-row">
+    <div class="sr-score">⭐ <span id="qScore">0</span></div>
+    <div class="sr-timer" id="qTimer">⏱ 30</div>
+    <div style="font-size:0.85rem;color:var(--subtext)"><span id="qNum">1</span>/<span id="qTotal">10</span></div>
+  </div>
+
+  <div class="q-card">
+    <div>
+      <div class="q-hint" id="qHint"></div>
+      <div class="q-text" id="qText">Сұрақ жүктелуде...</div>
     </div>
   </div>
 
-  <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
-
-  <div style="padding: 20px 16px;">
-    <div class="q-meta">
-      <div class="q-num" id="qMeta">Сұрақ 1</div>
-      <div class="q-timer" id="timerDisplay">30</div>
-    </div>
-
-    <div class="question-card">
-      <div class="q-text" id="questionText">Сұрақ жүктелуде...</div>
-    </div>
-
-    <div class="options" id="optionsContainer"></div>
-  </div>
+  <div class="options" id="qOptions"></div>
 </div>
 
-<!-- RESULT SCREEN -->
+<!-- ═══════════ BLITZ SCREEN ═════════════════════════════════════════════ -->
+<div class="screen" id="blitzScreen">
+  <div class="app-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="header-left">
+      <div>
+        <div class="header-logo">⚡ Блиц-тур</div>
+        <div class="header-sub">10 секунд жауап бер!</div>
+      </div>
+    </div>
+    <div style="width:36px"></div>
+  </div>
+
+  <div class="progress-track">
+    <div class="progress-fill" id="bProgress" style="width:0%"></div>
+  </div>
+
+  <div class="score-row">
+    <div class="sr-score">⭐ <span id="bScore">0</span></div>
+    <div class="sr-timer" id="bTimer">⚡ 10</div>
+    <div style="font-size:0.85rem;color:var(--subtext)"><span id="bNum">1</span>/15</div>
+  </div>
+
+  <div class="q-card" style="min-height:110px">
+    <div class="q-text" id="bText"></div>
+  </div>
+
+  <div class="options" id="bOptions"></div>
+</div>
+
+<!-- ═══════════ MEMORY CARD SCREEN ═══════════════════════════════════════ -->
+<div class="screen" id="memoryScreen">
+  <div class="app-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="header-left">
+      <div>
+        <div class="header-logo">🎴 Жад Карточкасы</div>
+        <div class="header-sub">Жұп тап — автор+шығарма</div>
+      </div>
+    </div>
+    <div style="width:36px"></div>
+  </div>
+
+  <div class="cards-info">
+    <span>Табылды: <b id="memMatched" style="color:var(--gold)">0</b>/8</span>
+    <span>Сынақ: <b id="memMoves" style="color:var(--gold)">0</b></span>
+    <span id="memTimer" style="color:var(--subtext)">⏱ 00:00</span>
+  </div>
+
+  <div class="card-grid" id="memGrid"></div>
+</div>
+
+<!-- ═══════════ TIMELINE SCREEN ══════════════════════════════════════════ -->
+<div class="screen" id="timelineScreen">
+  <div class="app-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="header-left">
+      <div>
+        <div class="header-logo">📅 Хронология</div>
+        <div class="header-sub">Ескіден жаңаға реттеңіз</div>
+      </div>
+    </div>
+    <div style="width:36px"></div>
+  </div>
+  <div style="padding:12px 20px 4px; color:var(--subtext); font-size:0.8rem;">
+    💡 Карточкаларды сүйреп жылжытыңыз (ескіден жаңаға!)
+  </div>
+  <div class="timeline-list" id="tlList"></div>
+  <div class="gap"></div>
+  <button class="btn-gold" onclick="checkTimeline()" style="margin-top:16px">Тексеру ✓</button>
+  <div class="gap"></div>
+</div>
+
+<!-- ═══════════ RESULT SCREEN ═════════════════════════════════════════════ -->
 <div class="screen" id="resultScreen">
-  <div style="padding: 20px 16px;">
-    <div class="result-circle">
-      <div class="result-score" id="resultScore">0</div>
-      <div class="result-total" id="resultTotal">/10</div>
+  <div class="result-hero">
+    <div class="result-ring">
+      <svg class="ring-svg" viewBox="0 0 130 130">
+        <circle class="ring-track" cx="65" cy="65" r="55"/>
+        <circle class="ring-fill" id="ringCircle" cx="65" cy="65" r="55"
+          stroke="url(#rg)"
+          stroke-dasharray="345.6"
+          stroke-dashoffset="345.6"/>
+        <defs>
+          <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#e5c27f"/>
+            <stop offset="100%" stop-color="#a9c7fe"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="r-score" id="resScore">0</div>
+      <div class="r-of"   id="resOf">/10</div>
     </div>
-    <div class="result-stars" id="resultStars">⭐⭐⭐</div>
-    <div class="result-msg" id="resultMsg">Нәтиже</div>
-    <div class="result-sub" id="resultSub">Жалғастырыңыз!</div>
+    <div class="res-stars" id="resStars">⭐⭐⭐</div>
+    <div class="res-title" id="resTitle">Нәтиже</div>
+    <div class="res-sub"   id="resSub">Жалғастырыңыз!</div>
+  </div>
 
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="sv" id="resCorrect">0</div>
-        <div class="sl">Дұрыс жауап</div>
-      </div>
-      <div class="stat-card">
-        <div class="sv" id="resAccuracy">0%</div>
-        <div class="sl">Дәлдік</div>
-      </div>
-      <div class="stat-card">
-        <div class="sv" id="resPoints">0</div>
-        <div class="sl">Ұпай жинады</div>
-      </div>
-      <div class="stat-card">
-        <div class="sv" id="resTime">0с</div>
-        <div class="sl">Орт. уақыт</div>
-      </div>
+  <div class="res-stats">
+    <div class="res-stat">
+      <div class="rs-val" id="resCorrect">0</div>
+      <div class="rs-lbl">Дұрыс жауап</div>
     </div>
+    <div class="res-stat">
+      <div class="rs-val" id="resAcc">0%</div>
+      <div class="rs-lbl">Дәлдік</div>
+    </div>
+    <div class="res-stat">
+      <div class="rs-val" id="resPts">+0</div>
+      <div class="rs-lbl">Ұпай жинады</div>
+    </div>
+    <div class="res-stat">
+      <div class="rs-val" id="resTime">0с</div>
+      <div class="rs-lbl">Орт. уақыт</div>
+    </div>
+  </div>
 
-    <button class="btn btn-primary" onclick="restartGame()">🔄 Қайталау</button>
-    <button class="btn btn-secondary" onclick="goHome()">🏠 Басты бет</button>
+  <div class="btn-row">
+    <button class="btn-gold"    onclick="restartGame()">🔄 Қайталау</button>
+    <button class="btn-outline" onclick="goHome()">🏠 Басты бетке</button>
   </div>
 </div>
 
-<div class="confetti-container" id="confettiContainer"></div>
+<!-- ═══════════ PROFILE SCREEN ════════════════════════════════════════════ -->
+<div class="screen" id="profileScreen">
+  <div class="app-header">
+    <button class="back-btn" onclick="showHome()">←</button>
+    <div class="header-left">
+      <div>
+        <div class="header-logo">👤 Профиль</div>
+        <div class="header-sub">Менің жетістіктерім</div>
+      </div>
+    </div>
+    <div style="width:36px"></div>
+  </div>
 
+  <div class="profile-hero">
+    <div class="avatar">📚</div>
+    <div>
+      <div class="profile-name" id="profName">Оқушы</div>
+      <div class="profile-lvl"  id="profLvl">⭐ Оқушы деңгейі</div>
+      <div class="profile-pts"  id="profPts">0 ұпай жиналды</div>
+    </div>
+  </div>
+
+  <div class="level-bar">
+    <div class="lb-top">
+      <span>Келесі деңгейге дейін</span>
+      <span id="profNext">100 ұпай</span>
+    </div>
+    <div class="lb-track">
+      <div class="lb-fill" id="profBar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="section-hdr">🏅 Жетістіктер</div>
+  <div class="badges-grid" id="badgesGrid"></div>
+
+  <div class="section-hdr">📊 Статистика</div>
+  <div class="res-stats" id="profStats" style="margin:0 0 16px"></div>
+</div>
+
+<!-- ═══════════ LEADERBOARD SCREEN ════════════════════════════════════════ -->
+<div class="screen" id="leaderScreen">
+  <div class="app-header">
+    <button class="back-btn" onclick="showHome()">←</button>
+    <div class="header-left">
+      <div>
+        <div class="header-logo">🏆 Рейтинг</div>
+        <div class="header-sub">Үздік оқушылар</div>
+      </div>
+    </div>
+    <div style="width:36px"></div>
+  </div>
+  <div class="leader-list" id="leaderList"></div>
+  <div class="gap"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-home"   onclick="showHome();setNav('nav-home')">
+    <span class="nb-icon">🏠</span><span class="nb-lbl">Басты</span>
+  </button>
+  <button class="nav-btn" id="nav-rating" onclick="showLeaderboard();setNav('nav-rating')">
+    <span class="nb-icon">🏆</span><span class="nb-lbl">Рейтинг</span>
+  </button>
+  <button class="nav-btn" id="nav-profile" onclick="showProfile();setNav('nav-profile')">
+    <span class="nb-icon">👤</span><span class="nb-lbl">Профиль</span>
+  </button>
+</nav>
+
+<!-- CONFETTI -->
+<div class="confetti-wrap" id="confettiWrap"></div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!-- JAVASCRIPT ENGINE                                                     -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
 <script>
-// ─── Telegram Mini App инициализациясы ─────────────────────────────────────────
+// ─── Telegram Init ────────────────────────────────────────────────────────────
 const tg = window.Telegram?.WebApp;
 if (tg) {
-  tg.ready();
-  tg.expand();
-  tg.setHeaderColor('#1a1a2e');
-  tg.setBackgroundColor('#1a1a2e');
+  tg.ready(); tg.expand();
+  tg.setHeaderColor && tg.setHeaderColor('#10141a');
+  tg.setBackgroundColor && tg.setBackgroundColor('#10141a');
 }
 
-// ─── Деректер базасы ────────────────────────────────────────────────────────────
-const QUESTIONS = {
-  quiz: [
-    {q:"Абайдың туған жылы?", a:"1845", opts:["1845","1840","1850","1835"]},
-    {q:"«Абай жолы» романы неше томнан тұрады?", a:"4", opts:["4","2","3","5"]},
-    {q:"Ыбырай Алтынсариннің атақты өлеңі?", a:"Кел, балалар, оқылық", opts:["Кел, балалар, оқылық","Ғылым таппай","Жаз","Желсіз түнде"]},
-    {q:"Жамбыл Жабаев неше жыл өмір сүрді?", a:"99", opts:["99","85","100","90"]},
-    {q:"«Алпамыс батыр» эпосындағы батырдың аты (жануар)?", a:"Байшұбар", opts:["Байшұбар","Тайбурыл","Жирен","Боз ат"]},
-    {q:"Абай неше «Қара сөз» жазды?", a:"56", opts:["56","45","30","70"]},
-    {q:"«Абай жолы» Лениндік сыйлықты қай жылы алды?", a:"1959", opts:["1959","1955","1962","1965"]},
-    {q:"Мұхтар Әуезовтің туған жылы?", a:"1897", opts:["1897","1900","1890","1905"]},
-    {q:"Ахмет Байтұрсынов қалай аталады?", a:"Ұлт ұстазы", opts:["Ұлт ұстазы","Халық батыры","Ел ақыны","Ұлы жырау"]},
-    {q:"Сәкен Сейфуллиннің атақты романы?", a:"Тар жол, тайғақ кешу", opts:["Тар жол, тайғақ кешу","Абай жолы","Ақбілек","Оянған өлке"]},
-    {q:"Мағжан Жұмабаевтың атақты поэмасы?", a:"Батыр Баян", opts:["Батыр Баян","Шолпан","Күй","Дала"]},
-    {q:"Міржақып Дулатовтың атақты жинағы?", a:"Оян, қазақ!", opts:["Оян, қазақ!","Маса","Таң нұры","Алқа"]},
-    {q:"«Қобыланды батыр» эпосындағы Қобыландының аты?", a:"Тайбурыл", opts:["Тайбурыл","Байшұбар","Жирен","Боз"]},
-    {q:"Бауыржан Момышұлы қандай атақ алды?", a:"Кеңес Одағының Батыры", opts:["Кеңес Одағының Батыры","СССР Халық ақыны","Еңбек Батыры","Жазушы"]},
-    {q:"Шәкәрім Құдайбердіұлының атақты поэмасы?", a:"Еңлік-Кебек", opts:["Еңлік-Кебек","Батыр Баян","Күй","Дала"]},
-  ],
-  whowrote: [
-    {q:"«Абай жолы» романын кім жазды?", a:"Мұхтар Әуезов", opts:["Мұхтар Әуезов","Абай","Сейфуллин","Жамбыл"]},
-    {q:"«Тар жол, тайғақ кешу» кімнің романы?", a:"Сәкен Сейфуллин", opts:["Сәкен Сейфуллин","Беймбет Майлин","Ғабит Мүсірепов","Мағжан"]},
-    {q:"«Маса» жинағының авторы кім?", a:"Ахмет Байтұрсынов", opts:["Ахмет Байтұрсынов","Дулатов","Абай","Мағжан"]},
-    {q:"«Оян, қазақ!» жинағын кім жазды?", a:"Міржақып Дулатов", opts:["Міржақып Дулатов","Байтұрсынов","Мағжан","Абай"]},
-    {q:"«Батыр Баян» поэмасының авторы?", a:"Мағжан Жұмабаев", opts:["Мағжан Жұмабаев","Жансүгіров","Сейфуллин","Жамбыл"]},
-    {q:"«Шұғаның белгісі» кімнің туындысы?", a:"Беймбет Майлин", opts:["Беймбет Майлин","Сейфуллин","Мүсірепов","Аймауытов"]},
-    {q:"«Күй» поэмасын кім жазды?", a:"Ілияс Жансүгіров", opts:["Ілияс Жансүгіров","Мағжан","Сейфуллин","Жамбыл"]},
-    {q:"«Ақбілек» романының авторы?", a:"Жүсіпбек Аймауытов", opts:["Жүсіпбек Аймауытов","Майлин","Мүсірепов","Сейфуллин"]},
-    {q:"«Еңлік-Кебек» поэмасын кім жазды?", a:"Шәкәрім Құдайбердіұлы", opts:["Шәкәрім Құдайбердіұлы","Мұхтар Әуезов","Мағжан","Дулатов"]},
-    {q:"«Көшпенділер» трилогиясын кім жазды?", a:"Іле Есенберлин", opts:["Іле Есенберлин","Мүсірепов","Мұхтар Әуезов","Момышұлы"]},
-  ],
-  quote: [
-    {q:"«Адамзаттың бәрін сүй, бауырым деп...» — кімнің сөзі?", a:"Абай", opts:["Абай","Жамбыл","Мағжан","Ыбырай"]},
-    {q:"«Ғылым таппай мақтанба...» — кімнің өлеңі?", a:"Абай", opts:["Абай","Байтұрсынов","Дулатов","Мағжан"]},
-    {q:"«Кел, балалар, оқылық!» — кімнің шақыруы?", a:"Ыбырай Алтынсарин", opts:["Ыбырай Алтынсарин","Абай","Жамбыл","Мағжан"]},
-    {q:"«Оян, қазақ, көзіңді аш!» — кімнің жыры?", a:"Міржақып Дулатов", opts:["Міржақып Дулатов","Байтұрсынов","Мағжан","Абай"]},
-    {q:"«Тіл — халықтың жаны» деген кімнің сөзі?", a:"Ахмет Байтұрсынов", opts:["Ахмет Байтұрсынов","Абай","Дулатов","Жамбыл"]},
-    {q:"«Батыр өледі — аты өлмейді» — кімнің сөзі?", a:"Бауыржан Момышұлы", opts:["Бауыржан Момышұлы","Абай","Жамбыл","Мағжан"]},
-    {q:"«Туған жер — алтын бесік» — бұл не?", a:"Халық мақалы", opts:["Халық мақалы","Абай өлеңі","Жамбыл жыры","Мағжан сөзі"]},
-    {q:"«Жастықта алған білім — тасқа басылған із» — кімнің сөзі?", a:"Абай", opts:["Абай","Ыбырай","Мағжан","Дулатов"]},
-  ],
+// ─── DATA: Questions ──────────────────────────────────────────────────────────
+const DATA = {
+  quiz: {
+    easy: [
+      {q:"Абайдың туған жылы?", a:"1845", o:["1845","1840","1830","1850"]},
+      {q:"Ыбырайдың атақты өлеңі?", a:"Кел, балалар, оқылық", o:["Кел, балалар, оқылық","Жаз","Ғылым таппай","Желсіз түнде"]},
+      {q:"«Абай жолы» неше томнан тұрады?", a:"4", o:["4","2","3","5"]},
+      {q:"Жамбыл Жабаев неше жыл өмір сүрді?", a:"99", o:["99","85","120","75"]},
+      {q:"«Алпамыс батыр» эпосындағы батырдың аты?", a:"Байшұбар", o:["Байшұбар","Тайбурыл","Жирен","Боз"]},
+    ],
+    medium: [
+      {q:"Абай неше «Қара сөз» жазды?", a:"56", o:["56","45","30","70"]},
+      {q:"«Абай жолы» Лениндік сыйлықты қай жылы алды?", a:"1959", o:["1959","1955","1962","1948"]},
+      {q:"Ахмет Байтұрсынов қалай аталады?", a:"Ұлт ұстазы", o:["Ұлт ұстазы","Халық батыры","Ел данасы","Жыр алыбы"]},
+      {q:"Сәкен Сейфуллиннің атақты шығармасы?", a:"Тар жол, тайғақ кешу", o:["Тар жол, тайғақ кешу","Абай жолы","Ақбілек","Оянған өлке"]},
+      {q:"«Батыр Баян» поэмасының авторы?", a:"Мағжан Жұмабаев", o:["Мағжан Жұмабаев","Жансүгіров","Сейфуллин","Жамбыл"]},
+    ],
+    hard: [
+      {q:"Шәкәрімнің атақты поэмасы қайда болған оқиғаны суреттейді?", a:"Семей маңы", o:["Семей маңы","Алматы","Астана","Шымкент"]},
+      {q:"«Ер Едіге» жырының аты кімнен шықты?", a:"Ноғайлы батырынан", o:["Ноғайлы батырынан","Қыпшақ байынан","Орта жүздің биінен","Моңғол ханынан"]},
+      {q:"Жүсіпбек Аймауытовтың психологиялық романы?", a:"Ақбілек", o:["Ақбілек","Ер Тарғын","Шұғаның белгісі","Тар жол"]},
+      {q:"«Маса» жинағы қай жылы шықты?", a:"1911", o:["1911","1905","1917","1920"]},
+      {q:"Мұқағали Мақатаев неше өлең жазды?", a:"4000-нан аса", o:["4000-нан аса","500","1000","2000"]},
+    ]
+  },
+  whowrote: {
+    easy: [
+      {q:"«Абай жолы» романын кім жазды?", a:"Мұхтар Әуезов", o:["Мұхтар Әуезов","Абай","Сейфуллин","Жамбыл"]},
+      {q:"«Тар жол, тайғақ кешу» кімнің романы?", a:"Сәкен Сейфуллин", o:["Сәкен Сейфуллин","Беймбет Майлин","Мүсірепов","Мағжан"]},
+      {q:"«Маса» жинағының авторы кім?", a:"Ахмет Байтұрсынов", o:["Ахмет Байтұрсынов","Дулатов","Абай","Мағжан"]},
+      {q:"«Оян, қазақ!» жинағын кім жазды?", a:"Міржақып Дулатов", o:["Міржақып Дулатов","Байтұрсынов","Мағжан","Абай"]},
+      {q:"«Еңлік-Кебек» поэмасын кім жазды?", a:"Шәкәрім Құдайбердіұлы", o:["Шәкәрім Құдайбердіұлы","Мұхтар Әуезов","Мағжан","Дулатов"]},
+    ],
+    medium: [
+      {q:"«Шұғаның белгісі» кімнің туындысы?", a:"Беймбет Майлин", o:["Беймбет Майлин","Сейфуллин","Мүсірепов","Аймауытов"]},
+      {q:"«Күй» поэмасын кім жазды?", a:"Ілияс Жансүгіров", o:["Ілияс Жансүгіров","Мағжан","Сейфуллин","Жамбыл"]},
+      {q:"«Ақбілек» романының авторы?", a:"Жүсіпбек Аймауытов", o:["Жүсіпбек Аймауытов","Майлин","Мүсірепов","Сейфуллин"]},
+      {q:"«Көшпенділер» трилогиясын кім жазды?", a:"Іле Есенберлин", o:["Іле Есенберлин","Мүсірепов","Мұхтар Әуезов","Момышұлы"]},
+      {q:"«Батыр Баян» поэмасын кім жазды?", a:"Мағжан Жұмабаев", o:["Мағжан Жұмабаев","Сейфуллин","Жансүгіров","Дулатов"]},
+    ],
+    hard: [
+      {q:"«Мұзтау» романын кім жазды?", a:"Оралхан Бөкей", o:["Оралхан Бөкей","Мақатаев","Мүсірепов","Есенберлин"]},
+      {q:"«Алдар Көсе туралы ертегіні» жинаған кім?", a:"Халық шығармасы", o:["Халық шығармасы","Абай","Жамбыл","Мүсірепов"]},
+      {q:"«Қазақ айнасы» тарихи еңбегін кім жазды?", a:"Шәкәрім", o:["Шәкәрім","Байтұрсынов","Дулатов","Аймауытов"]},
+      {q:"«Ленинградтық өренімді» поэмасын кім жазды?", a:"Жамбыл Жабаев", o:["Жамбыл Жабаев","Мүсірепов","Момышұлы","Мақатаев"]},
+      {q:"«Бақытсыз Жамал» романын кім жазды?", a:"Міржақып Дулатов", o:["Міржақып Дулатов","Аймауытов","Майлин","Сейфуллин"]},
+    ]
+  },
+  quote: {
+    easy: [
+      {q:"«Кел, балалар, оқылық!» — кімнің сөзі?", a:"Ыбырай Алтынсарин", o:["Ыбырай Алтынсарин","Абай","Жамбыл","Мағжан"]},
+      {q:"«Ғылым таппай мақтанба...» — кімнің өлеңі?", a:"Абай", o:["Абай","Байтұрсынов","Дулатов","Мағжан"]},
+      {q:"«Оян, қазақ, көзіңді аш!» — кімнің жыры?", a:"Міржақып Дулатов", o:["Міржақып Дулатов","Байтұрсынов","Мағжан","Абай"]},
+      {q:"«Туған жер — алтын бесік» — бұл не?", a:"Халық мақалы", o:["Халық мақалы","Абай өлеңі","Жамбыл жыры","Мағжан сөзі"]},
+      {q:"«Адамзаттың бәрін сүй, бауырым деп» — кімнен?", a:"Абай", o:["Абай","Жамбыл","Мағжан","Ыбырай"]},
+    ],
+    medium: [
+      {q:"«Тіл — халықтың жаны» деген кімнің сөзі?", a:"Ахмет Байтұрсынов", o:["Ахмет Байтұрсынов","Абай","Дулатов","Жамбыл"]},
+      {q:"«Батыр өледі — аты өлмейді» — кімнен?", a:"Бауыржан Момышұлы", o:["Бауыржан Момышұлы","Абай","Жамбыл","Мағжан"]},
+      {q:"«Жастықта алған білім — тасқа басылған із» — кімнінен?", a:"Абай «Қара сөзі»", o:["Абай «Қара сөзі»","Ыбырай","Мағжан","Дулатов"]},
+      {q:"«Мен жастарға сенемін» — кімнің өлеңі?", a:"Мұқағали Мақатаев", o:["Мұқағали Мақатаев","Жамбыл","Сейфуллин","Бөкей"]},
+      {q:"«Дүниеде тіршілік ең тамаша...» — қай «Қара сөзден»?", a:"1-ші Қара сөз", o:["1-ші Қара сөз","7-ші","15-ші","45-ші"]},
+    ],
+    hard: [
+      {q:"«Ер жігіт өз ісін тындыра алмаса — ұят» — кімнен?", a:"Абай 45-ші Қара сөз", o:["Абай 45-ші Қара сөз","Дулатов","Байтұрсынов","Шәкәрім"]},
+      {q:"«Ел болам десең — бесігіңді түзе» — кімнен?", a:"Ахмет Байтұрсынов", o:["Ахмет Байтұрсынов","Абай","Мағжан","Дулатов"]},
+    ]
+  },
   blitz: [
-    {q:"Абай дүниеден өткен жылы?", a:"1904", opts:["1904","1900","1910","1895"]},
-    {q:"«Абай жолы» авторы?", a:"Әуезов", opts:["Әуезов","Абай","Майлин","Жамбыл"]},
-    {q:"Ыбырайдың туған облысы?", a:"Қостанай", opts:["Қостанай","Семей","Алматы","Павлодар"]},
-    {q:"«Оян, қазақ!» авторы?", a:"Дулатов", opts:["Дулатов","Абай","Мағжан","Байтұрсынов"]},
-    {q:"Абайдың шын есімі?", a:"Ибраһим", opts:["Ибраһим","Абай","Мұса","Иса"]},
-    {q:"«Батыр Баян» авторы?", a:"Мағжан", opts:["Мағжан","Жансүгіров","Сейфуллин","Жамбыл"]},
-    {q:"«Тар жол, тайғақ кешу» авторы?", a:"Сейфуллин", opts:["Сейфуллин","Майлин","Мүсірепов","Мағжан"]},
-    {q:"«Күй» поэмасының авторы?", a:"Жансүгіров", opts:["Жансүгіров","Мағжан","Сейфуллин","Жамбыл"]},
-    {q:"Алаш партиясы қашан құрылды?", a:"1917", opts:["1917","1905","1920","1930"]},
-    {q:"«Ақбілек» авторы?", a:"Аймауытов", opts:["Аймауытов","Майлин","Мүсірепов","Мағжан"]},
+    {q:"Абай дүниеден өткен жылы?", a:"1904", o:["1904","1900","1910","1895"]},
+    {q:"«Абай жолы» авторы?", a:"Әуезов", o:["Әуезов","Абай","Майлин","Жамбыл"]},
+    {q:"Ыбырайдың туған облысы?", a:"Қостанай", o:["Қостанай","Семей","Алматы","Павлодар"]},
+    {q:"«Оян, қазақ!» авторы?", a:"Дулатов", o:["Дулатов","Абай","Мағжан","Байтұрсынов"]},
+    {q:"Абайдың шын есімі?", a:"Ибраһим", o:["Ибраһим","Абай","Мұса","Иса"]},
+    {q:"«Батыр Баян» авторы?", a:"Мағжан", o:["Мағжан","Жансүгіров","Сейфуллин","Жамбыл"]},
+    {q:"«Тар жол...» авторы?", a:"Сейфуллин", o:["Сейфуллин","Майлин","Мүсірепов","Мағжан"]},
+    {q:"«Күй» поэмасының авторы?", a:"Жансүгіров", o:["Жансүгіров","Мағжан","Сейфуллин","Жамбыл"]},
+    {q:"Алаш партиясы ашылды?", a:"1917", o:["1917","1905","1920","1930"]},
+    {q:"«Ақбілек» авторы?", a:"Аймауытов", o:["Аймауытов","Майлин","Мүсірепов","Мағжан"]},
+    {q:"«Маса» жинағы ашылды?", a:"1911", o:["1911","1905","1917","1925"]},
+    {q:"Жамбыл туған жылы?", a:"1846", o:["1846","1855","1840","1860"]},
+    {q:"«Еңлік-Кебек» авторы?", a:"Шәкәрім", o:["Шәкәрім","Мұхтар Әуезов","Дулатов","Мағжан"]},
+    {q:"«Мұзтау» авторы?", a:"Оралхан Бөкей", o:["Оралхан Бөкей","Мақатаев","Мүсірепов","Сейфуллин"]},
+    {q:"«Қара сөздер» саны?", a:"56", o:["56","40","30","70"]},
   ]
 };
 
-const GRADE_EMOJIS = {1:"🌱",2:"🌿",3:"📗",4:"🌺",5:"🌟",6:"⚔️",7:"💎",8:"🦅",9:"✍️",10:"🔥",11:"🏆"};
+// Memory game pairs
+const MEMORY_PAIRS = [
+  ["📚 Абай",       "«Абай жолы»"],
+  ["🖊 Ыбырай",     "«Кел, балалар»"],
+  ["🎵 Жамбыл",     "«Ленинград»"],
+  ["✒️ Дулатов",    "«Оян, қазақ!»"],
+  ["📜 Байтұрсынов","«Маса»"],
+  ["🌙 Мағжан",     "«Батыр Баян»"],
+  ["🕊 Шәкәрім",    "«Еңлік-Кебек»"],
+  ["🎭 Аймауытов",  "«Ақбілек»"],
+];
 
-// ─── Ойын күйі ──────────────────────────────────────────────────────────────────
-let state = {
-  gameType: 'quiz',
-  grade: 0,
-  questions: [],
-  current: 0,
-  score: 0,
-  correct: 0,
-  answered: false,
-  timer: null,
+// Timeline data
+const TIMELINE_DATA = [
+  {name:"Ыбырай Алтынсарин",  year:1841, hint:"Қазақтың ұлы педагогы", id:0},
+  {name:"Абай Құнанбайұлы",   year:1845, hint:"Ұлы ақын, пайымшыл",    id:1},
+  {name:"Жамбыл Жабаев",      year:1846, hint:"Халық жырауы",           id:2},
+  {name:"Шәкәрім Құдайбердіұлы",year:1858,hint:"Ойшыл ақын",           id:3},
+  {name:"Ахмет Байтұрсынов",  year:1872, hint:"Ұлт ұстазы",             id:4},
+  {name:"Мағжан Жұмабаев",    year:1893, hint:"Символист ақын",          id:5},
+  {name:"Мұхтар Әуезов",      year:1897, hint:"«Абай жолы» авторы",     id:6},
+  {name:"Мұқағали Мақатаев",  year:1931, hint:"Жастар ақыны",            id:7},
+];
+
+const LEVEL_THRESHOLDS = [0,100,300,600,1000,1500,2200,3000,4000,5500,7500];
+const LEVEL_NAMES = ["Оқушы","Ынталы","Білімді","Зерделі","Дана","Оқырман","Сүйер","Ұлы","Шебер","Дана","Ұстаз"];
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let S = {
+  points: +localStorage.getItem('kl_pts') || 0,
+  games:  +localStorage.getItem('kl_games') || 0,
+  streak: +localStorage.getItem('kl_streak') || 1,
+  badges: JSON.parse(localStorage.getItem('kl_badges') || '[]'),
+  diff:   'all',
+  // game state
+  mode:   null,
+  pool:   [],
+  qi:     0,
+  score:  0,
+  correct:0,
+  timer:  null,
   timeLeft: 30,
-  maxTime: 30,
-  startTime: Date.now(),
   totalTime: 0,
+  startT: 0,
+  answered: false,
+  lastGame: null,
+  // memory
+  memFlipped: [],
+  memMatched: 0,
+  memMoves:   0,
+  memTimerSec:0,
+  memTimerInt:null,
+  // timeline
+  tlData: [],
 };
 
-// ─── Инициализация ──────────────────────────────────────────────────────────────
-function init() {
-  const grid = document.getElementById('gradeGrid');
-  grid.innerHTML = '';
-  // "Барлығы" батырмасы
-  const allBtn = document.createElement('div');
-  allBtn.className = 'grade-btn selected';
-  allBtn.dataset.grade = '0';
-  allBtn.innerHTML = '<div class="g-num">🎲</div><div class="g-lbl">Барлығы</div>';
-  allBtn.onclick = () => selectGrade(0, allBtn);
-  grid.appendChild(allBtn);
-
-  for (let g = 1; g <= 11; g++) {
-    const btn = document.createElement('div');
-    btn.className = 'grade-btn';
-    btn.dataset.grade = String(g);
-    btn.innerHTML = `<div class="g-num">${GRADE_EMOJIS[g]}</div><div class="g-lbl">${g}-сынып</div>`;
-    btn.onclick = () => selectGrade(g, btn);
-    grid.appendChild(btn);
-  }
+function saveState() {
+  localStorage.setItem('kl_pts',    S.points);
+  localStorage.setItem('kl_games',  S.games);
+  localStorage.setItem('kl_streak', S.streak);
+  localStorage.setItem('kl_badges', JSON.stringify(S.badges));
 }
 
-function selectGrade(g, el) {
-  document.querySelectorAll('.grade-btn').forEach(b => b.classList.remove('selected'));
-  el.classList.add('selected');
-  state.grade = g;
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function shuffle(a) {
+  const b = [...a];
+  for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}
+  return b;
+}
+function clamp(v,mn,mx){return Math.min(Math.max(v,mn),mx);}
+function levelOf(pts) { return LEVEL_THRESHOLDS.filter(t=>pts>=t).length; }
+function levelName(pts) { return LEVEL_NAMES[Math.min(levelOf(pts)-1,10)] || "Ұстаз"; }
+function levelProgress(pts) {
+  const lv = levelOf(pts);
+  if (lv >= LEVEL_THRESHOLDS.length) return 1;
+  const lo = LEVEL_THRESHOLDS[lv-1], hi = LEVEL_THRESHOLDS[lv] || lo+500;
+  return clamp((pts-lo)/(hi-lo),0,1);
+}
+function nextLevelPts(pts) {
+  const lv = levelOf(pts);
+  const hi = LEVEL_THRESHOLDS[lv];
+  return hi ? (hi - pts) : 0;
+}
+function fmt00(n) { return String(n).padStart(2,'0'); }
+
+// ─── SCREEN ROUTING ───────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active','page-enter'); });
+  const el = document.getElementById(id);
+  el.classList.add('active','page-enter');
+  window.scrollTo(0, 0);
+}
+function showHome()        { refreshHomeStats(); showScreen('homeScreen'); }
+function showLeaderboard() { buildLeaderboard(); showScreen('leaderScreen'); }
+function showProfile()     { buildProfile();    showScreen('profileScreen'); }
+function goHome()          { stopTimers(); showHome(); }
+
+function setNav(id) {
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
 }
 
-function selectGame(type) {
-  state.gameType = type;
-  document.querySelectorAll('.game-card').forEach(c => {
-    c.style.borderColor = 'rgba(255,255,255,0.08)';
-    c.style.background = 'var(--card)';
-  });
-  event.currentTarget.style.borderColor = 'var(--accent)';
-  event.currentTarget.style.background = 'rgba(233,69,96,0.15)';
+// ─── HOME STATS ───────────────────────────────────────────────────────────────
+function refreshHomeStats() {
+  document.getElementById('homePoints').textContent = S.points;
+  document.getElementById('homeLevel').textContent  = levelName(S.points);
+  document.getElementById('homeStreak').textContent = S.streak;
+  document.getElementById('homeGames').textContent  = S.games;
+  setNav('nav-home');
 }
 
-// ─── Ойынды бастау ──────────────────────────────────────────────────────────────
-function startGame() {
-  let pool = [...(QUESTIONS[state.gameType] || QUESTIONS.quiz)];
-  shuffle(pool);
-  state.questions = pool.slice(0, 10);
-  state.current = 0;
-  state.score = 0;
-  state.correct = 0;
-  state.totalTime = 0;
-  showScreen('questionScreen');
-  showQuestion();
+function setDiff(val, el) {
+  S.diff = val;
+  document.querySelectorAll('.diff-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
 }
 
-function showQuestion() {
-  if (state.current >= state.questions.length) {
-    showResult();
-    return;
-  }
-  const q = state.questions[state.current];
-  const opts = [...q.opts];
-  shuffle(opts);
-  state.currentOpts = opts;
-  state.answered = false;
-  state.timeLeft = 30;
-  state.startTime = Date.now();
+// ─── GAME STARTERS ────────────────────────────────────────────────────────────
+function startGame(mode) {
+  S.mode = mode;
+  stopTimers();
+  if (mode === 'memory')   { startMemory();   return; }
+  if (mode === 'timeline') { startTimeline(); return; }
+  if (mode === 'blitz')    { startBlitz();    return; }
 
-  document.getElementById('questionText').textContent = q.q;
-  document.getElementById('qNumVal').textContent = `${state.current + 1}/${state.questions.length}`;
-  document.getElementById('scoreVal').textContent = state.score;
-  document.getElementById('correctVal').textContent = state.correct;
-  document.getElementById('qMeta').textContent = `Сұрақ ${state.current + 1}`;
+  const src = DATA[mode];
+  let pool = S.diff === 'all'
+    ? [...src.easy, ...src.medium, ...src.hard]
+    : [...(src[S.diff] || src.easy)];
+  pool = shuffle(pool).slice(0, 10);
+  S.pool = pool; S.qi = 0; S.score = 0; S.correct = 0; S.totalTime = 0;
+  S.answered = false;
+  S.lastGame = mode;
 
-  renderOptions(opts, q.a);
-  startTimer();
+  const titles = { quiz:'🎯 Викторина', whowrote:'✍️ Кім жазды?', quote:'💬 Цитата' };
+  document.getElementById('quizTitle').textContent    = titles[mode] || '🎯 Викторина';
+  document.getElementById('quizSubtitle').textContent = 'Білімді сынаймыз!';
+
+  showScreen('quizScreen');
+  renderQuestion();
 }
 
-function renderOptions(opts, correct) {
-  const letters = ['A', 'B', 'C', 'D'];
-  const container = document.getElementById('optionsContainer');
+// ─── QUIZ ENGINE ──────────────────────────────────────────────────────────────
+function renderQuestion() {
+  if (S.qi >= S.pool.length) { showResult(); return; }
+  const q = S.pool[S.qi];
+  const opts = shuffle(q.o);
+  S.answered = false;
+  S.timeLeft = 30; S.startT = Date.now();
+
+  document.getElementById('qProgress').style.width = (S.qi/S.pool.length*100)+'%';
+  document.getElementById('qNum').textContent   = S.qi+1;
+  document.getElementById('qTotal').textContent = S.pool.length;
+  document.getElementById('qScore').textContent = S.score;
+  document.getElementById('qText').textContent  = q.q;
+  document.getElementById('qHint').textContent  = '';
+
+  const letters = ['A','B','C','D'];
+  const container = document.getElementById('qOptions');
   container.innerHTML = '';
-  opts.forEach((opt, i) => {
+  opts.forEach((opt,i) => {
     const btn = document.createElement('button');
-    btn.className = 'option-btn';
-    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span>${opt}</span>`;
-    btn.onclick = () => answer(opt, correct, btn);
+    btn.className = 'opt-btn';
+    btn.innerHTML = `<span class="opt-ltr">${letters[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => answerQuiz(opt, q.a, btn);
     container.appendChild(btn);
   });
+
+  startTimer('q', 30, () => autoMiss(q.a));
 }
 
-function answer(selected, correct, btn) {
-  if (state.answered) return;
-  state.answered = true;
-  clearInterval(state.timer);
-  const elapsed = (Date.now() - state.startTime) / 1000;
-  state.totalTime += elapsed;
+function answerQuiz(selected, correct, btn) {
+  if (S.answered) return;
+  S.answered = true;
+  clearInterval(S.timer);
+  const elapsed = (Date.now()-S.startT)/1000;
+  S.totalTime += elapsed;
 
-  const isCorrect = selected === correct;
-  const allBtns = document.querySelectorAll('.option-btn');
-  allBtns.forEach(b => {
+  const isRight = selected === correct;
+  document.querySelectorAll('#qOptions .opt-btn').forEach(b => {
     const txt = b.querySelector('span:last-child').textContent;
-    if (txt === correct) b.classList.add('correct');
-    else if (b === btn && !isCorrect) b.classList.add('wrong');
-    b.onclick = null;
+    b.classList.add('disabled');
+    if (txt === correct)   b.classList.add('correct');
+    else if (b === btn)    b.classList.add('wrong');
   });
 
-  if (isCorrect) {
-    state.correct++;
-    const bonus = Math.floor(state.timeLeft / 3);
-    state.score += 10 + bonus;
-    document.getElementById('scoreVal').textContent = state.score;
-    document.getElementById('correctVal').textContent = state.correct;
+  if (isRight) {
+    S.correct++;
+    const bonus = Math.floor(S.timeLeft/3);
+    S.score += 10 + bonus;
+    document.getElementById('qScore').textContent = S.score;
+    btn.classList.add('pop');
+  } else {
+    btn.classList.add('shake');
   }
 
-  setTimeout(() => {
-    state.current++;
-    showQuestion();
-  }, 1200);
+  setTimeout(() => { S.qi++; renderQuestion(); }, 1100);
 }
 
-// ─── Таймер ─────────────────────────────────────────────────────────────────────
-function startTimer() {
-  clearInterval(state.timer);
-  updateTimerUI(30, 30);
-  state.timer = setInterval(() => {
-    state.timeLeft--;
-    updateTimerUI(state.timeLeft, 30);
-    if (state.timeLeft <= 0) {
-      clearInterval(state.timer);
-      autoFail();
+function autoMiss(correct) {
+  if(S.answered) return;
+  S.answered = true;
+  S.totalTime += 30;
+  document.querySelectorAll('#qOptions .opt-btn').forEach(b => {
+    const txt = b.querySelector('span:last-child').textContent;
+    b.classList.add('disabled');
+    if (txt === correct) b.classList.add('correct');
+  });
+  setTimeout(() => { S.qi++; renderQuestion(); }, 1100);
+}
+
+// ─── BLITZ ENGINE ─────────────────────────────────────────────────────────────
+function startBlitz() {
+  S.pool = shuffle([...DATA.blitz]).slice(0, 15);
+  S.qi = 0; S.score = 0; S.correct = 0; S.totalTime = 0;
+  S.lastGame = 'blitz';
+  showScreen('blitzScreen');
+  renderBlitz();
+}
+
+function renderBlitz() {
+  if (S.qi >= S.pool.length) { showResult(); return; }
+  const q = S.pool[S.qi];
+  const opts = shuffle(q.o);
+  S.answered = false; S.startT = Date.now(); S.timeLeft = 10;
+
+  document.getElementById('bProgress').style.width = (S.qi/S.pool.length*100)+'%';
+  document.getElementById('bNum').textContent   = S.qi+1;
+  document.getElementById('bScore').textContent = S.score;
+  document.getElementById('bText').textContent  = q.q;
+
+  const letters = ['A','B','C','D'];
+  const container = document.getElementById('bOptions');
+  container.innerHTML = '';
+  opts.forEach((opt,i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.innerHTML = `<span class="opt-ltr">${letters[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => answerBlitz(opt, q.a, btn);
+    container.appendChild(btn);
+  });
+
+  startTimer('b', 10, () => {
+    if (!S.answered) {
+      S.answered = true; S.totalTime += 10;
+      document.querySelectorAll('#bOptions .opt-btn').forEach(b => {
+        b.classList.add('disabled');
+        if (b.querySelector('span:last-child').textContent===q.a) b.classList.add('correct');
+      });
+      setTimeout(() => { S.qi++; renderBlitz(); }, 800);
     }
+  });
+}
+
+function answerBlitz(selected, correct, btn) {
+  if (S.answered) return;
+  S.answered = true;
+  clearInterval(S.timer);
+  const elapsed = (Date.now()-S.startT)/1000;
+  S.totalTime += elapsed;
+
+  const isRight = selected === correct;
+  document.querySelectorAll('#bOptions .opt-btn').forEach(b => {
+    const txt = b.querySelector('span:last-child').textContent;
+    b.classList.add('disabled');
+    if (txt === correct)  b.classList.add('correct');
+    else if (b === btn)   b.classList.add('wrong');
+  });
+
+  if (isRight) { S.correct++; S.score += 8 + Math.floor(S.timeLeft); }
+  setTimeout(() => { S.qi++; renderBlitz(); }, 800);
+}
+
+// ─── TIMER UTIL ───────────────────────────────────────────────────────────────
+function startTimer(prefix, secs, onDone) {
+  clearInterval(S.timer);
+  S.timeLeft = secs;
+  updateTimerUI(prefix, secs, secs);
+  S.timer = setInterval(() => {
+    S.timeLeft--;
+    updateTimerUI(prefix, S.timeLeft, secs);
+    if (S.timeLeft <= 0) { clearInterval(S.timer); onDone(); }
   }, 1000);
 }
 
-function updateTimerUI(left, max) {
-  const pct = (left / max) * 100;
-  document.getElementById('timerFill').style.width = pct + '%';
-  const disp = document.getElementById('timerDisplay');
-  disp.textContent = left;
-  disp.className = 'q-timer' + (left <= 7 ? ' urgent' : '');
-}
-
-function autoFail() {
-  if (state.answered) return;
-  state.answered = true;
-  state.totalTime += 30;
-  const allBtns = document.querySelectorAll('.option-btn');
-  const correct = state.questions[state.current].a;
-  allBtns.forEach(b => {
-    if (b.querySelector('span:last-child').textContent === correct) b.classList.add('correct');
-  });
-  setTimeout(() => { state.current++; showQuestion(); }, 1200);
-}
-
-// ─── Нәтиже ─────────────────────────────────────────────────────────────────────
-function showResult() {
-  const total = state.questions.length;
-  const pct = Math.round((state.correct / total) * 100);
-  const avgTime = total > 0 ? Math.round(state.totalTime / total) : 0;
-
-  document.getElementById('resultScore').textContent = state.correct;
-  document.getElementById('resultTotal').textContent = `/${total}`;
-  document.getElementById('resCorrect').textContent = state.correct;
-  document.getElementById('resAccuracy').textContent = pct + '%';
-  document.getElementById('resPoints').textContent = state.score;
-  document.getElementById('resTime').textContent = avgTime + 'с';
-
-  let stars, msg, sub;
-  if (pct >= 90) {
-    stars = '⭐⭐⭐'; msg = '🏆 Тамаша нәтиже!'; sub = 'Сіз — нағыз Қазақ Әдебиеті шебері!';
-    spawnConfetti();
-  } else if (pct >= 70) {
-    stars = '⭐⭐'; msg = '🌟 Жақсы нәтиже!'; sub = 'Тағы да оқып, жетілдіріңіз!';
-  } else if (pct >= 50) {
-    stars = '⭐'; msg = '👍 Орташа нәтиже'; sub = 'Материалды тағы бір рет қайталаңыз.';
-  } else {
-    stars = '📚'; msg = '📖 Оқуды жалғастыр!'; sub = 'Ботта материалдарды оқып, қайталаңыз.';
+function updateTimerUI(prefix, left, max) {
+  const el = document.getElementById(prefix === 'q' ? 'qTimer' : 'bTimer');
+  if (!el) return;
+  const icon = prefix === 'b' ? '⚡' : '⏱';
+  el.textContent = `${icon} ${left}`;
+  el.className = 'sr-timer' + (left <= (prefix==='b'?4:7) ? ' urgent' : '');
+  const pct = (left/max)*100;
+  const pBar = document.getElementById(prefix+'Progress');
+  if(pBar) {
+    pBar.style.width = ((S.qi/S.pool.length) * 100 + (1/S.pool.length)*(100-pct))+'%';
   }
-  document.getElementById('resultStars').textContent = stars;
-  document.getElementById('resultMsg').textContent = msg;
-  document.getElementById('resultSub').textContent = sub;
+}
+
+function stopTimers() {
+  clearInterval(S.timer);
+  clearInterval(S.memTimerInt);
+}
+
+// ─── MEMORY GAME ──────────────────────────────────────────────────────────────
+function startMemory() {
+  S.memFlipped = []; S.memMatched = 0; S.memMoves = 0; S.memTimerSec = 0;
+  S.lastGame = 'memory';
+  showScreen('memoryScreen');
+  buildMemoryGrid();
+  clearInterval(S.memTimerInt);
+  S.memTimerInt = setInterval(() => {
+    S.memTimerSec++;
+    const m = Math.floor(S.memTimerSec/60), sc = S.memTimerSec%60;
+    const el = document.getElementById('memTimer');
+    if(el) el.textContent = `⏱ ${fmt00(m)}:${fmt00(sc)}`;
+  }, 1000);
+}
+
+function buildMemoryGrid() {
+  const pairs = shuffle(MEMORY_PAIRS).slice(0,8);
+  const cards = [];
+  pairs.forEach((p,i) => {
+    cards.push({id:i, type:'A', text:p[0], pairId:i});
+    cards.push({id:i+100, type:'B', text:p[1], pairId:i});
+  });
+  const shuffled = shuffle(cards);
+  const grid = document.getElementById('memGrid');
+  grid.innerHTML = '';
+  document.getElementById('memMatched').textContent = '0';
+  document.getElementById('memMoves').textContent   = '0';
+
+  shuffled.forEach((card, idx) => {
+    const div = document.createElement('div');
+    div.className = 'mem-card';
+    div.dataset.idx = idx;
+    div.dataset.pairId = card.pairId;
+    div.dataset.text = card.text;
+    div.innerHTML = `
+      <div class="mc-front">📖</div>
+      <div class="mc-back">${card.text.replace(' ','\n')}</div>`;
+    div.onclick = () => flipCard(div, idx, card.pairId);
+    grid.appendChild(div);
+    grid._cards = grid._cards || [];
+    grid._cards.push({el:div, card});
+  });
+}
+
+function flipCard(el, idx, pairId) {
+  if (el.classList.contains('flipped') || el.classList.contains('matched')) return;
+  if (S.memFlipped.length >= 2) return;
+
+  el.classList.add('flipped');
+  S.memFlipped.push({el, pairId});
+
+  if (S.memFlipped.length === 2) {
+    S.memMoves++;
+    document.getElementById('memMoves').textContent = S.memMoves;
+    const [a, b] = S.memFlipped;
+    if (a.pairId === b.pairId) {
+      // Match!
+      setTimeout(() => {
+        a.el.classList.add('matched'); b.el.classList.add('matched');
+        a.el.classList.remove('flipped'); b.el.classList.remove('flipped');
+        S.memFlipped = [];
+        S.memMatched++;
+        document.getElementById('memMatched').textContent = S.memMatched;
+        if (S.memMatched === 8) {
+          clearInterval(S.memTimerInt);
+          const bonus = Math.max(0, 200 - S.memTimerSec*2 - S.memMoves*5);
+          S.score = 80 + bonus;
+          S.correct = S.memMatched;
+          S.pool = {length:8};
+          setTimeout(() => showResult(), 800);
+        }
+      }, 500);
+    } else {
+      a.el.classList.add('shake'); b.el.classList.add('shake');
+      setTimeout(() => {
+        a.el.classList.remove('flipped','shake');
+        b.el.classList.remove('flipped','shake');
+        S.memFlipped = [];
+      }, 900);
+    }
+  }
+}
+
+// ─── TIMELINE GAME ────────────────────────────────────────────────────────────
+function startTimeline() {
+  S.tlData = shuffle([...TIMELINE_DATA]);
+  S.lastGame = 'timeline';
+  buildTimelineUI();
+  showScreen('timelineScreen');
+}
+
+function buildTimelineUI() {
+  const list = document.getElementById('tlList');
+  list.innerHTML = '';
+  S.tlData.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'tl-item';
+    div.draggable = true;
+    div.dataset.idx = idx;
+    div.innerHTML = `
+      <span class="tl-handle">⠿</span>
+      <div class="tl-content">
+        <div class="tl-name">${item.name}</div>
+        <div class="tl-hint">${item.hint}</div>
+      </div>
+      <span class="tl-year">${item.year}</span>`;
+
+    // Drag events
+    div.addEventListener('dragstart', e => {
+      div.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', idx);
+    });
+    div.addEventListener('dragend', () => div.classList.remove('dragging','drag-over'));
+    div.addEventListener('dragover', e => {
+      e.preventDefault();
+      div.classList.add('drag-over');
+    });
+    div.addEventListener('dragleave', () => div.classList.remove('drag-over'));
+    div.addEventListener('drop', e => {
+      e.preventDefault();
+      const fromIdx = +e.dataTransfer.getData('text/plain');
+      const toIdx   = +div.dataset.idx;
+      if (fromIdx === toIdx) return;
+      const tmp = S.tlData[fromIdx];
+      S.tlData[fromIdx] = S.tlData[toIdx];
+      S.tlData[toIdx]   = tmp;
+      buildTimelineUI();
+    });
+
+    // Touch drag (mobile)
+    let touchY = 0, touchFrom = -1;
+    div.addEventListener('touchstart', e => { touchY = e.touches[0].clientY; touchFrom = idx; });
+    div.addEventListener('touchmove', e => {
+      e.preventDefault();
+      const dy = e.touches[0].clientY - touchY;
+      div.style.transform = `translateY(${dy}px)`;
+      div.style.zIndex = '10';
+    }, {passive:false});
+    div.addEventListener('touchend', e => {
+      div.style.transform = '';
+      div.style.zIndex = '';
+      const touchTarget = document.elementFromPoint(
+        e.changedTouches[0].clientX, e.changedTouches[0].clientY
+      );
+      const targetItem = touchTarget?.closest('.tl-item');
+      if (targetItem && targetItem !== div) {
+        const toIdx = +targetItem.dataset.idx;
+        const tmp = S.tlData[touchFrom]; S.tlData[touchFrom]=S.tlData[toIdx]; S.tlData[toIdx]=tmp;
+        buildTimelineUI();
+      }
+    });
+
+    list.appendChild(div);
+  });
+}
+
+function checkTimeline() {
+  let correct = 0;
+  const sorted = [...S.tlData].sort((a,b)=>a.year-b.year);
+  const items = document.querySelectorAll('#tlList .tl-item');
+  S.tlData.forEach((item, i) => {
+    const el = items[i];
+    if (item.id === sorted[i].id) {
+      el.classList.add('correct-pos');
+      el.classList.remove('wrong-pos');
+      correct++;
+    } else {
+      el.classList.add('wrong-pos');
+      el.classList.remove('correct-pos');
+    }
+  });
+  S.correct = correct;
+  S.score = correct * 15;
+  S.pool = {length: TIMELINE_DATA.length};
+  setTimeout(() => showResult(), 1200);
+}
+
+// ─── RESULT ───────────────────────────────────────────────────────────────────
+function showResult() {
+  stopTimers();
+
+  const total = S.pool.length || 10;
+  const pct   = Math.round((S.correct / total) * 100);
+  const avgT  = S.totalTime > 0 ? Math.round(S.totalTime / total) : 0;
+  const pts   = S.score;
+
+  // Award points
+  S.points += pts;
+  S.games++;
+  checkBadges();
+  saveState();
+
+  document.getElementById('resScore').textContent   = S.correct;
+  document.getElementById('resOf').textContent      = '/'+total;
+  document.getElementById('resCorrect').textContent = S.correct;
+  document.getElementById('resAcc').textContent     = pct+'%';
+  document.getElementById('resPts').textContent     = '+'+pts;
+  document.getElementById('resTime').textContent    = avgT+'с';
+
+  // Animated ring
+  const circumference = 2 * Math.PI * 55; // ~345.6
+  const offset = circumference * (1 - pct/100);
+  const ring = document.getElementById('ringCircle');
+  ring.style.strokeDashoffset = circumference;
+  setTimeout(() => { ring.style.strokeDashoffset = offset; }, 100);
+  const sc = pct >= 90 ? '#e5c27f' : pct >= 60 ? '#a9c7fe' : '#ef4444';
+  ring.style.stroke = sc;
+
+  let stars, title, sub;
+  if (pct >= 90) {
+    stars='⭐⭐⭐'; title='🏆 Тамаша нәтиже!'; sub='Сіз — Қазақ Әдебиеті шебері!';
+    launchConfetti();
+  } else if (pct >= 70) {
+    stars='⭐⭐'; title='🌟 Жақсы нәтиже!'; sub='Тағы да жаттықсаңыз — тамаша болады!';
+  } else if (pct >= 50) {
+    stars='⭐'; title='📖 Орташа нәтиже'; sub='Материалдарды қайта оқыңыз.';
+  } else {
+    stars='📚'; title='💪 Жаттыққа жалғастыр!'; sub='Оқу бөлімін пайдаланыңыз!';
+  }
+  document.getElementById('resStars').textContent = stars;
+  document.getElementById('resTitle').textContent = title;
+  document.getElementById('resSub').textContent   = sub;
 
   showScreen('resultScreen');
 
-  // Telegram-ға нәтижені жіберу
-  if (tg) {
-    tg.sendData(JSON.stringify({
-      action: 'game_result',
-      score: state.score,
-      correct: state.correct,
-      total: total,
-      gameType: state.gameType
+  // Telegram data send
+  try {
+    tg?.sendData(JSON.stringify({
+      action:'game_result', score:pts, correct:S.correct,
+      total, gameType:S.mode, accuracy:pct
     }));
+  } catch(e){}
+}
+
+function restartGame() { startGame(S.lastGame || 'quiz'); }
+
+// ─── BADGES ──────────────────────────────────────────────────────────────────
+const BADGES = [
+  {id:'first_game',  icon:'🎮', name:'Алғашқы ойын', cond:()=>S.games>=1},
+  {id:'10_games',    icon:'🎯', name:'10 ойын',      cond:()=>S.games>=10},
+  {id:'pts_100',     icon:'⭐', name:'100 ұпай',      cond:()=>S.points>=100},
+  {id:'pts_500',     icon:'🌟', name:'500 ұпай',      cond:()=>S.points>=500},
+  {id:'pts_1000',    icon:'💫', name:'1000 ұпай',     cond:()=>S.points>=1000},
+  {id:'pts_3000',    icon:'👑', name:'3000 ұпай',     cond:()=>S.points>=3000},
+  {id:'perfect',     icon:'💎', name:'Мінсіз',        cond:()=>false /* set manually */},
+  {id:'streak7',     icon:'🔥', name:'Апталық стрик', cond:()=>S.streak>=7},
+];
+
+function checkBadges() {
+  BADGES.forEach(b => {
+    if (!S.badges.includes(b.id) && b.cond()) S.badges.push(b.id);
+  });
+  if (S.correct === (S.pool.length||10) && !S.badges.includes('perfect')) S.badges.push('perfect');
+}
+
+// ─── PROFILE ──────────────────────────────────────────────────────────────────
+function buildProfile() {
+  document.getElementById('profName').textContent = '📚 Оқушы';
+  document.getElementById('profLvl').textContent  = '⭐ '+levelName(S.points)+' деңгейі';
+  document.getElementById('profPts').textContent  = S.points+' ұпай жиналды';
+  document.getElementById('profNext').textContent = nextLevelPts(S.points)+' ұпай қалды';
+  document.getElementById('profBar').style.width  = (levelProgress(S.points)*100)+'%';
+
+  // Badges
+  const grid = document.getElementById('badgesGrid');
+  grid.innerHTML = '';
+  BADGES.forEach(b => {
+    const d = document.createElement('div');
+    const earned = S.badges.includes(b.id);
+    d.className = 'badge-cell '+(earned?'earned':'locked');
+    d.innerHTML = `<div class="bc-icon">${b.icon}</div><div class="bc-name">${b.name}</div>`;
+    grid.appendChild(d);
+  });
+
+  // Stats
+  const st = document.getElementById('profStats');
+  st.innerHTML = `
+    <div class="res-stat"><div class="rs-val">${S.points}</div><div class="rs-lbl">Ұпай</div></div>
+    <div class="res-stat"><div class="rs-val">${S.games}</div><div class="rs-lbl">Ойын</div></div>
+    <div class="res-stat"><div class="rs-val">${S.badges.length}</div><div class="rs-lbl">Жетістік</div></div>
+    <div class="res-stat"><div class="rs-val">${S.streak}</div><div class="rs-lbl">Стрик</div></div>
+  `;
+}
+
+// ─── LEADERBOARD (local demo) ────────────────────────────────────────────────
+function buildLeaderboard() {
+  const DEMO = [
+    {name:'🏆 Сіздің нәтижеңіз', pts:S.points, icon:'📚'},
+    {name:'Айгерім Б.',  pts:4850, icon:'👑'},
+    {name:'Нұрлан М.',   pts:3920, icon:'🔥'},
+    {name:'Жансая Қ.',   pts:3100, icon:'⭐'},
+    {name:'Дарина С.',   pts:2670, icon:'📖'},
+    {name:'Асхат Т.',    pts:2300, icon:'🎯'},
+    {name:'Камила Ж.',   pts:1980, icon:'💫'},
+    {name:'Серік А.',    pts:1450, icon:'✨'},
+  ];
+  // insert real user score
+  DEMO[0].pts = S.points;
+  DEMO.sort((a,b)=>b.pts-a.pts);
+
+  const medals = ['🥇','🥈','🥉'];
+  const list = document.getElementById('leaderList');
+  list.innerHTML = '';
+  DEMO.forEach((u,i) => {
+    const cls = i===0?'top1':i===1?'top2':i===2?'top3':'';
+    const div = document.createElement('div');
+    div.className = 'leader-item '+cls;
+    div.innerHTML = `
+      <div class="li-rank">${medals[i]||'#'+(i+1)}</div>
+      <div class="li-ava">${u.icon}</div>
+      <div>
+        <div class="li-name">${u.name}</div>
+        <div class="li-sub">${levelName(u.pts)} деңгей</div>
+      </div>
+      <div class="li-pts">${u.pts} ⭐</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+// ─── CONFETTI ─────────────────────────────────────────────────────────────────
+function launchConfetti() {
+  const wrap = document.getElementById('confettiWrap');
+  const colors = ['#e5c27f','#c0a060','#a9c7fe','#10b981','#f472b6','#fb923c'];
+  for (let i=0; i<60; i++) {
+    const c = document.createElement('div');
+    c.className = 'cf';
+    c.style.cssText = `
+      left:${Math.random()*100}vw;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      animation: cf-fall ${1.5+Math.random()*2.5}s linear ${Math.random()*1.2}s forwards;
+      width:${5+Math.random()*8}px; height:${5+Math.random()*8}px;
+      border-radius:${Math.random()>0.5?'50%':'2px'};
+    `;
+    wrap.appendChild(c);
   }
+  setTimeout(() => wrap.innerHTML='', 5000);
 }
 
-function spawnConfetti() {
-  const container = document.getElementById('confettiContainer');
-  const colors = ['#f5a623','#e94560','#2ecc71','#3498db','#9b59b6'];
-  for (let i = 0; i < 50; i++) {
-    const piece = document.createElement('div');
-    piece.className = 'confetti-piece';
-    piece.style.left = Math.random() * 100 + 'vw';
-    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
-    piece.style.animationDelay = Math.random() * 1.5 + 's';
-    piece.style.animationDuration = (2 + Math.random() * 2) + 's';
-    container.appendChild(piece);
-  }
-  setTimeout(() => container.innerHTML = '', 5000);
-}
-
-function restartGame() { startGame(); }
-
-function goHome() { showScreen('homeScreen'); }
-
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo(0, 0);
-}
-
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-}
-
-init();
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+refreshHomeStats();
 </script>
 </body>
 </html>
