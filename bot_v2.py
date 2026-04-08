@@ -1,18 +1,12 @@
 """
 🤖 Telegram Bot для Казахской Литературы
 Версия 2.0 - С улучшенными кнопками и функциональностью
-Использует переменные окружения для безопасности
 """
 
 import logging
-import os
-from dotenv import load_dotenv
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes, MessageHandler, filters
 from telegram.constants import ParseMode
-
-# Загрузка переменных окружения
-load_dotenv()
 
 # Настройка логирования
 logging.basicConfig(
@@ -21,12 +15,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Получение токена из переменной окружения
-TOKEN = os.getenv("TOKEN")
-if not TOKEN:
-    raise ValueError("❌ TOKEN не найден в переменных окружения!")
-
-logger.info(f"✅ Бот инициализирован с ID: {os.getenv('BOT_ID', 'unknown')}")
+# ⚠️ ЗАМЕНИТЕ НА ВАШЕ ЗНАЧЕНИЕ
+TOKEN = "8167312154:AAFNFQqJ7_dwbbqFjlO4tTbpGSkD9lQP4rM"
 
 # ═══════════════════════════════════════════════════════════════
 # 📚 БАЗА ДАННЫХ КОНТЕНТА
@@ -172,7 +162,6 @@ CHARACTERS = {
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Команда /start - главное меню"""
     user = update.effective_user
-    logger.info(f"👤 Пользователь {user.first_name} ({user.id}) запустил бота")
     
     welcome_text = f"""
 🎓 *Қазақ Әдебиеті Боты*
@@ -526,7 +515,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обработчик ошибок"""
-    logger.error(f"❌ Update {update} caused error {context.error}")
+    logger.error(f"Update {update} caused error {context.error}")
 
 # ═══════════════════════════════════════════════════════════════
 # 🚀 ЗАПУСК БОТА
@@ -546,7 +535,6 @@ def main():
     application.add_error_handler(error_handler)
     
     # Запуск бота
-    logger.info("🚀 Бот запущен! Нажмите Ctrl+C для остановки.")
     print("🤖 Бот запущен! Нажмите Ctrl+C для остановки.")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
