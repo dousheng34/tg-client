@@ -4,24 +4,28 @@ utils/keyboards.py — барлық клавиатуралар
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
 
 # ─── ГЛАВНОЕ МЕНЮ ──────────────────────────────────────────────────────────────
+
 MAIN_MENU_TEXT = (
-    "📚 <b>ҚАЗАҚ ӘДЕБИЕТІ БОТЫ</b>\n\n"
-    "Сәлем! Мен қазақ әдебиетін оқуға көмектесемін.\n"
-    "1-11 класс материалдары, ойындар, авторлар туралы мәліметтер!\n\n"
-    "👇 Бөлімді таңдаңыз:"
+    "📚 <b>ҚАЗАҚ ӘДЕБИЕТІ — БІЛІМ КІТАПХАНАСЫ</b>\n\n"
+    "Сәлем, ардақты оқушы! 👋\n"
+    "Мен — қазақ әдебиетін оқуға арналған ақылды серігің.\n"
+    "1-11 сынып материалдары, ойындар, авторлар — бәрі осында!\n\n"
+    "👇 <b>Бөлімді таңдаңыз:</b>"
 )
 
 def main_menu_keyboard():
     keyboard = [
-        [InlineKeyboardButton("📖 Сабақтар (1-11 класс)", callback_data="menu_grades")],
+        [InlineKeyboardButton("📖 Сабақтар (1–11 сынып)", callback_data="menu_grades")],
         [InlineKeyboardButton("🎮 Ойындар", callback_data="menu_games"),
          InlineKeyboardButton("👤 Авторлар", callback_data="menu_authors")],
         [InlineKeyboardButton("📊 Менің прогресім", callback_data="menu_profile"),
          InlineKeyboardButton("🏆 Рейтинг", callback_data="menu_rating")],
-        [InlineKeyboardButton("📅 Күнделікті факт", callback_data="menu_daily"),
+        [InlineKeyboardButton("🎲 Mini App Ойын", callback_data="menu_app")],
+        [InlineKeyboardButton("📅 Күнделікті дерек", callback_data="menu_daily"),
          InlineKeyboardButton("ℹ️ Анықтама", callback_data="menu_help")],
     ]
     return InlineKeyboardMarkup(keyboard)
+
 
 # ─── Сыныптар меню ─────────────────────────────────────────────────────────────
 def grades_keyboard():

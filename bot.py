@@ -1,6 +1,6 @@
 """
 bot.py — Қазақ Әдебиеті Telegram Боты — Бас файл
-1-11 класс, ойындар, авторлар, прогресс жүйесі
+1-11 класс, ойындар, авторлар, прогресс жүйесі, Mini App
 """
 import logging
 import os
@@ -8,7 +8,7 @@ import sys
 import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
-from telegram import Update
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import (
     Updater, CommandHandler, CallbackQueryHandler,
     MessageHandler, Filters, CallbackContext
@@ -27,27 +27,53 @@ logger = logging.getLogger(__name__)
 BOT_TOKEN   = os.getenv('TELEGRAM_BOT_TOKEN')
 WEBHOOK_URL = os.getenv('WEBHOOK_URL', '')
 PORT        = int(os.getenv('PORT', 8000))
+WEBAPP_URL  = os.getenv('WEBAPP_URL', '')   # Mini App URL (автоматты анықталады)
 
 if not BOT_TOKEN:
     logger.error("❌ TELEGRAM_BOT_TOKEN жоқ!")
     sys.exit(1)
 
-# ── Health-check HTTP сервері ─────────────────────────────────────────────────────
-class HealthHandler(BaseHTTPRequestHandler):
+# ── Health-check + Mini App HTTP сервері ──────────────────────────────────────────
+WEBAPP_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'webapp')
+
+class AppHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(b'OK - Kazakh Literature Bot')
+        if self.path == '/health' or self.path == '/':
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/plain; charset=utf-8')
+            self.end_headers()
+            self.wfile.write('OK - Kazakh Literature Bot'.encode())
+        elif self.path == '/app' or self.path == '/app/':
+            self._serve_file(os.path.join(WEBAPP_DIR, 'index.html'), 'text/html; charset=utf-8')
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    def _serve_file(self, path, content_type):
+        try:
+            with open(path, 'rb') as f:
+                data = f.read()
+            self.send_response(200)
+            self.send_header('Content-Type', content_type)
+            self.send_header('Content-Length', len(data))
+            self.end_headers()
+            self.wfile.write(data)
+        except FileNotFoundError:
+            self.send_response(404)
+            self.end_headers()
+
     def log_message(self, format, *args):
         pass
 
+
 def run_health_server(port: int):
     try:
-        server = HTTPServer(('0.0.0.0', port), HealthHandler)
-        logger.info(f"🌐 Health-check : port {port}")
+        server = HTTPServer(('0.0.0.0', port), AppHandler)
+        logger.info(f"🌐 Health+WebApp сервері: port {port}")
         server.serve_forever()
     except Exception as e:
-        logger.error(f"Health server error: {e}")
+        logger.error(f"Сервер қатесі: {e}")
+
 
 # ── Хабарлама обработчиктері ─────────────────────────────────────────────────────
 def unknown_command(update: Update, context: CallbackContext):
@@ -75,10 +101,42 @@ def error_handler(update: Update, context: CallbackContext):
         return
     logger.error(msg="Exception:", exc_info=error)
 
+
+# ── /app команда — Mini App сілтемесі ───────────────────────────────────────────
+def app_command(update: Update, context: CallbackContext):
+    """Mini App ойын беті"""
+    webapp_url = WEBAPP_URL or (
+        WEBHOOK_URL.rstrip('/') + '/app' if WEBHOOK_URL else None
+    )
+    if not webapp_url:
+        update.message.reply_text(
+            "⚠️ Mini App тек деплой (Koyeb) серверінде жұмыс істейді.\n"
+            "Бот арқылы ойнау үшін: /start → 🎮 Ойындар"
+        )
+        return
+
+    from telegram import WebAppInfo
+    keyboard = InlineKeyboardMarkup([[
+        InlineKeyboardButton(
+            text="🎮 Ойынды ашу",
+            web_app=WebAppInfo(url=webapp_url)
+        )
+    ]])
+    update.message.reply_text(
+        "🎮 <b>ҚАЗАҚ ӘДЕБИЕТІ — ИНТЕРАКТИВТІ ОЙЫН</b>\n\n"
+        "📱 Ойынды ашу үшін төмендегі батырманы басыңыз!\n\n"
+        "🎯 Визорина, Цитата, Блиц — барлығы осында!\n"
+        "⏱️ Таймер + Ұпай жүйесі + Нәтиже!",
+        parse_mode='HTML',
+        reply_markup=keyboard
+    )
+
+
 # ── CALLBACK DISPATCHER ───────────────────────────────────────────────────────────
 def callback_router(update: Update, context: CallbackContext):
     """Барлық inline callback сұрауларын бағыттайды"""
     query = update.callback_query
+    query.answer()   # ← БІРІНШІ қатарда: жылдам жауап (<0.5с)
     data = query.data
 
     # ── Бас мәзір ────────────────────────────────────────────────────────────
@@ -106,6 +164,8 @@ def callback_router(update: Update, context: CallbackContext):
     elif data == "menu_help":
         from handlers.menu import help_callback
         help_callback(update, context)
+    elif data == "menu_app":
+        _send_miniapp(update, context)
 
     # ── Сыныптар ─────────────────────────────────────────────────────────────
     elif data.startswith("grade_"):
@@ -155,7 +215,7 @@ def callback_router(update: Update, context: CallbackContext):
         from handlers.quiz import game_character_start
         game_character_start(update, context)
 
-    # ── Ойын сынып таңдау (game_{type}_grade_{n}) ─────────────────────────────
+    # ── Ойын сынып таңдау ─────────────────────────────────────────────────────
     elif data.startswith("game_") and "_grade_" in data:
         from handlers.quiz import game_grade_selected
         game_grade_selected(update, context)
@@ -197,8 +257,35 @@ def callback_router(update: Update, context: CallbackContext):
         set_grade_callback(update, context)
 
     else:
-        query.answer("❓ Белгісіз команда")
         logger.warning(f"Unknown callback: {data}")
+
+
+def _send_miniapp(update: Update, context: CallbackContext):
+    """Mini App батырмасын жіберу"""
+    webapp_url = WEBAPP_URL or (
+        WEBHOOK_URL.rstrip('/') + '/app' if WEBHOOK_URL else None
+    )
+    query = update.callback_query
+    if not webapp_url:
+        query.edit_message_text(
+            "⚠️ Mini App тек деплой серверінде жұмыс істейді.\n"
+            "Бот ішіндегі ойынды қараңыз: 🎮 Ойындар"
+        )
+        return
+    from telegram import WebAppInfo
+    keyboard = InlineKeyboardMarkup([[
+        InlineKeyboardButton("🎮 Ойынды ашу (Mini App)", web_app=WebAppInfo(url=webapp_url))
+    ], [
+        InlineKeyboardButton("◀️ Артқа", callback_data="menu_main")
+    ]])
+    query.edit_message_text(
+        "🎮 <b>ОЙЫН — MINI APP</b>\n\n"
+        "💡 Батырманы басыңыз — ойын ашылады!\n"
+        "🎯 4 ойын түрі: Викторина, Кім жазды?, Цитата, Блиц\n"
+        "⏱️ Таймер, ұпай жүйесі, нәтиже экраны",
+        parse_mode='HTML',
+        reply_markup=keyboard
+    )
 
 
 # ── MAIN ─────────────────────────────────────────────────────────────────────────
@@ -209,8 +296,7 @@ def main() -> None:
     init_db()
     logger.info("✅ Дерекқор дайын")
 
-    # 2. Health-check серверін БАРЛЫҚ режимде БІРІНШІ қос
-    #    Koyeb TCP health check PORT-ті тексереді — ол дайын болуы керек
+    # 2. Health+WebApp серверін БІРІНШІ қос (Koyeb TCP health check талабы)
     health_thread = threading.Thread(
         target=run_health_server, args=(PORT,), daemon=True
     )
@@ -225,6 +311,7 @@ def main() -> None:
     dp.add_handler(CommandHandler("start",  start_command))
     dp.add_handler(CommandHandler("menu",   start_command))
     dp.add_handler(CommandHandler("help",   start_command))
+    dp.add_handler(CommandHandler("app",    app_command))
 
     # Барлық callback
     dp.add_handler(CallbackQueryHandler(callback_router))
@@ -238,13 +325,12 @@ def main() -> None:
 
     if WEBHOOK_URL:
         # ── WEBHOOK режимі (Koyeb production) ───────────────────────────────
-        # Bot PORT+1 тыңдайды, health check PORT-та
         bot_port     = PORT + 1
         webhook_path = f"/webhook/{BOT_TOKEN}"
         full_url     = f"{WEBHOOK_URL.rstrip('/')}{webhook_path}"
 
         logger.info(f"✅ WEBHOOK режимі: {full_url}")
-        logger.info(f"   Health: {PORT}  |  Bot: {bot_port}")
+        logger.info(f"   Health+WebApp: :{PORT}  |  Bot: :{bot_port}")
         updater.start_webhook(
             listen='0.0.0.0',
             port=bot_port,
@@ -253,8 +339,7 @@ def main() -> None:
             drop_pending_updates=True,
         )
     else:
-        # ── POLLING режимі (жергілікті / Koyeb без webhook) ─────────────────
-        # Ескі webhook-ті алдын ала өшір → Conflict болмасын
+        # ── POLLING режимі (жергілікті) ──────────────────────────────────────
         try:
             updater.bot.delete_webhook(drop_pending_updates=True)
             logger.info("🧹 Webhook тазартылды")
