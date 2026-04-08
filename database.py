@@ -201,3 +201,8 @@ LEVEL_NAMES = {
     9:  ("👑", "Әдебиет шебері"),  10: ("👑💎", "Ұлт данасы"),
     11: ("🏆", "Қазақ Әдебиеті Ұстасы"),
 }
+
+
+def get_level_info(level: int) -> tuple:
+    """Деңгей emoji мен атауын қайтарады: (emoji, name)"""
+    return LEVEL_NAMES.get(level, ("⭐", "Оқушы"))
