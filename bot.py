@@ -1,7 +1,7 @@
 import logging
 import os
 import sys
-from telegram import Update
+from telegram import Update, Bot
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 # Настройка логирования
@@ -55,9 +55,17 @@ def handle_message(update: Update, context):
         "Бот разрабатывается..."
     )
 
-def error_handler(update: object, context):
+def error_handler(bot, update, error):
     """Обработчик ошибок"""
-    logger.error(msg="Exception while handling an update:", exc_info=context.error)
+    logger.error(f"Update {update} caused error {error}")
+    
+    # Игнорируем ошибку конфликта (другой экземпляр бота)
+    if "Conflict" in str(error):
+        logger.warning("Conflict detected - another bot instance is running")
+        return
+    
+    # Логируем другие ошибки
+    logger.error(msg="Exception while handling an update:", exc_info=error)
 
 def main() -> None:
     """Запуск бота"""
