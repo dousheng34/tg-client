@@ -1,7 +1,8 @@
 import logging
 import os
+import sys
 from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 # Настройка логирования
 logging.basicConfig(
@@ -15,68 +16,74 @@ BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 
 if not BOT_TOKEN:
     logger.error("❌ TELEGRAM_BOT_TOKEN не установлен!")
-    exit(1)
+    sys.exit(1)
 
 logger.info(f"🚀 Бот басталуда... TOKEN: {BOT_TOKEN[:20]}...")
 
 # Обработчики команд
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+def start(update: Update, context):
     """Обработчик команды /start"""
-    await update.message.reply_text(
+    update.message.reply_text(
         "Қазақ әдебиеті ботына қош келдіңіз! 📚\n\n"
         "Команды:\n"
         "/help - Көмек\n"
         "/about - Туралы"
     )
 
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+def help_command(update: Update, context):
     """Обработчик команды /help"""
-    await update.message.reply_text(
+    update.message.reply_text(
         "Бот қазақ әдебиеті туралы ақпарат беріп тұрады.\n"
         "Сұрақ қойыңыз немесе автордың атын жазыңыз."
     )
 
-async def about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+def about(update: Update, context):
     """Обработчик команды /about"""
-    await update.message.reply_text(
+    update.message.reply_text(
         "Қазақ әдебиеті ботының v4.0\n"
         "Автор: Aseke\n"
         "2026"
     )
 
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+def handle_message(update: Update, context):
     """Обработчик обычных сообщений"""
     user_message = update.message.text
     logger.info(f"Сообщение от {update.effective_user.id}: {user_message}")
     
-    await update.message.reply_text(
+    update.message.reply_text(
         f"Спасибо за сообщение: {user_message}\n"
         "Бот разрабатывается..."
     )
 
-async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+def error_handler(update: object, context):
     """Обработчик ошибок"""
     logger.error(msg="Exception while handling an update:", exc_info=context.error)
 
 def main() -> None:
     """Запуск бота"""
-    # Создание приложения
-    application = Application.builder().token(BOT_TOKEN).build()
+    try:
+        # Создание updater
+        updater = Updater(BOT_TOKEN)
+        dispatcher = updater.dispatcher
 
-    # Добавление обработчиков команд
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("help", help_command))
-    application.add_handler(CommandHandler("about", about))
+        # Добавление обработчиков команд
+        dispatcher.add_handler(CommandHandler("start", start))
+        dispatcher.add_handler(CommandHandler("help", help_command))
+        dispatcher.add_handler(CommandHandler("about", about))
 
-    # Добавление обработчика сообщений
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+        # Добавление обработчика сообщений
+        dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
 
-    # Добавление обработчика ошибок
-    application.add_error_handler(error_handler)
+        # Добавление обработчика ошибок
+        dispatcher.add_error_handler(error_handler)
 
-    # Запуск бота
-    logger.info("✅ Бот успешно запущен!")
-    application.run_polling()
+        # Запуск бота
+        logger.info("✅ Бот успешно запущен!")
+        updater.start_polling()
+        updater.idle()
+    except Exception as e:
+        logger.error(f"❌ Ошибка при запуске бота: {e}")
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()
