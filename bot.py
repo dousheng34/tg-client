@@ -1,98 +1,139 @@
 import logging
 import os
 import sys
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
+
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
-# Настройка логирования
+# -- Logging ------------------------------------------------------------------
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
-# Получение токена из переменной окружения
-BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+# -- Config -------------------------------------------------------------------
+BOT_TOKEN   = os.getenv('TELEGRAM_BOT_TOKEN')
+WEBHOOK_URL = os.getenv('WEBHOOK_URL')           # https://your-app.koyeb.app
+PORT        = int(os.getenv('PORT', 8000))       # port for health-check / webhook
 
 if not BOT_TOKEN:
-    logger.error("❌ TELEGRAM_BOT_TOKEN не установлен!")
+    logger.error("Error: TELEGRAM_BOT_TOKEN not set!")
     sys.exit(1)
 
-logger.info(f"🚀 Бот басталуда... TOKEN: {BOT_TOKEN[:20]}...")
+logger.info(f"Bot starting... TOKEN: {BOT_TOKEN[:20]}...")
 
-# Обработчики команд
+# -- Health-check server (TCP-check) ------------------------------------------
+class HealthHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b'OK')
+
+    def log_message(self, format, *args):
+        pass
+
+
+def run_health_server(port: int):
+    server = HTTPServer(('0.0.0.0', port), HealthHandler)
+    logger.info(f"Health-check server started on port {port}")
+    server.serve_forever()
+
+
+# -- Command Handlers ---------------------------------------------------------
 def start(update: Update, context: CallbackContext):
-    """Обработчик команды /start"""
+    """Handler for /start"""
     update.message.reply_text(
-        "Қазақ әдебиеті ботына қош келдіңіз! 📚\n\n"
-        "Команды:\n"
-        "/help - Көмек\n"
-        "/about - Туралы"
+        "Welcome to the Kazakh Literature Bot! \n\n"
+        "Commands:\n"
+        "/help - Help\n"
+        "/about - About"
     )
+
 
 def help_command(update: Update, context: CallbackContext):
-    """Обработчик команды /help"""
+    """Handler for /help"""
     update.message.reply_text(
-        "Бот қазақ әдебиеті туралы ақпарат беріп тұрады.\n"
-        "Сұрақ қойыңыз немесе автордың атын жазыңыз."
+        "Bot provides information about Kazakh literature.\n"
+        "Ask a question or write the author's name."
     )
 
+
 def about(update: Update, context: CallbackContext):
-    """Обработчик команды /about"""
+    """Handler for /about"""
     update.message.reply_text(
-        "Қазақ әдебиеті ботының v4.0\n"
-        "Автор: Aseke\n"
+        "Kazakh Literature Bot v4.0\n"
+        "Author: Aseke\n"
         "2026"
     )
 
+
 def handle_message(update: Update, context: CallbackContext):
-    """Обработчик обычных сообщений"""
+    """Handler for text messages"""
     user_message = update.message.text
-    logger.info(f"Сообщение от {update.effective_user.id}: {user_message}")
-    
+    logger.info(f"Message from {update.effective_user.id}: {user_message}")
     update.message.reply_text(
-        f"Спасибо за сообщение: {user_message}\n"
-        "Бот разрабатывается..."
+        f"Thank you for the message: {user_message}\n"
+        "Bot is under development..."
     )
 
+
 def error_handler(update: Update, context: CallbackContext):
-    """Обработчик ошибок"""
+    """Error handler - correct signature for use_context=True"""
     error = context.error
     logger.error(f"Update {update} caused error {error}")
-    
-    # Игнорируем ошибку конфликта (другой экземпляр бота)
-    if "Conflict" in str(error):
-        logger.warning("Conflict detected - another bot instance is running")
-        return
-    
-    # Логируем другие ошибки
-    logger.error(msg="Exception while handling an update:", exc_info=error)
 
+    if 'Conflict' in str(error):
+        logger.warning('Conflict: another bot instance is running. Ignoring.')
+        return
+
+    logger.error(msg='Exception while handling an update:', exc_info=error)
+
+
+# -- Main function ------------------------------------------------------------
 def main() -> None:
-    """Запуск бота"""
     try:
-        # Создание updater
-        updater = Updater(BOT_TOKEN)
+        # use_context=True - REQUIRED for new API
+        updater = Updater(BOT_TOKEN, use_context=True)
         dispatcher = updater.dispatcher
 
-        # Добавление обработчиков команд
         dispatcher.add_handler(CommandHandler("start", start))
         dispatcher.add_handler(CommandHandler("help", help_command))
         dispatcher.add_handler(CommandHandler("about", about))
-
-        # Добавление обработчика сообщений
         dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
-
-        # Добавление обработчика ошибок
         dispatcher.add_error_handler(error_handler)
 
-        # Запуск бота
-        logger.info("✅ Бот успешно запущен!")
-        updater.start_polling()
+        if WEBHOOK_URL:
+            # -- WEBHOOK mode --
+            health_thread = threading.Thread(
+                target=run_health_server, args=(PORT,), daemon=True
+            )
+            health_thread.start()
+
+            webhook_path = `/webhook/${BOT_TOKEN}`;
+            full_url     = `${WEBHOOK_URL.replace(/\/$/, '')}${webhook_path}`;
+
+            logger.info(`Bot started in WEBHOOK mode: ${full_url}`);
+            updater.start_webhook(
+                listen='0.0.0.0',
+                port=PORT + 1,
+                url_path=webhook_path,
+                webhook_url=full_url,
+                drop_pending_updates=True,
+            )
+        else:
+            # -- POLLING mode --
+            logger.info("Bot started in POLLING mode")
+            updater.start_polling(drop_pending_updates=True, timeout=20)
+
         updater.idle()
+
     except Exception as e:
-        logger.error(f"❌ Ошибка при запуске бота: {e}")
+        logger.error(`Error starting bot: ${e}`)
         sys.exit(1)
+
 
 if __name__ == '__main__':
     main()
