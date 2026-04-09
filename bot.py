@@ -182,6 +182,49 @@ def callback_router(update: Update, context: CallbackContext):
     elif data.startswith("topic_done_"):
         from handlers.grades import topic_done_callback
         topic_done_callback(update, context)
+
+    # ── Тақырыптар (topics.py) ────────────────────────────────────────────────
+    elif data.startswith("topics_list_"):
+        # topics_list_{grade}
+        grade = int(data.split("_")[-1])
+        from handlers.topics import show_topics_list
+        show_topics_list(update, context, grade)
+    elif data.startswith("topic_read_"):
+        # topic_read_{grade}_{topic_id}
+        parts = data.split("_", 3)
+        grade = int(parts[2]); topic_id = parts[3]
+        from handlers.topics import show_topic_content
+        show_topic_content(update, context, grade, topic_id)
+    elif data.startswith("topic_quiz_"):
+        # topic_quiz_{grade}_{topic_id}_{q_index}
+        parts = data.split("_"); grade = int(parts[2])
+        q_index = int(parts[-1]); topic_id = "_".join(parts[3:-1])
+        from handlers.topics import show_topic_quiz
+        show_topic_quiz(update, context, grade, topic_id, q_index)
+    elif data.startswith("topic_answer_"):
+        # topic_answer_{grade}_{topic_id}_{q_index}_{chosen}
+        parts = data.split("_")
+        grade = int(parts[2]); chosen = int(parts[-1]); q_index = int(parts[-2])
+        topic_id = "_".join(parts[3:-2])
+        from handlers.topics import check_topic_answer
+        check_topic_answer(update, context, grade, topic_id, q_index, chosen)
+    elif data.startswith("topic_general_quiz_"):
+        # topic_general_quiz_{grade}
+        grade = int(data.split("_")[-1])
+        from handlers.topics import show_general_quiz
+        show_general_quiz(update, context, grade)
+    elif data.startswith("general_answer_"):
+        # general_answer_{grade}_{q_index}_{chosen or 'show'}
+        parts = data.split("_")
+        grade = int(parts[2]); q_index = int(parts[3])
+        if parts[4] == "show":
+            from handlers.topics import show_next_general_question
+            show_next_general_question(update, context, grade, q_index)
+        else:
+            chosen = int(parts[4])
+            from handlers.topics import check_general_answer
+            check_general_answer(update, context, grade, q_index, chosen)
+
     elif data.startswith("topic_"):
         from handlers.grades import topic_callback
         topic_callback(update, context)

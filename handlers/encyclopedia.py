@@ -121,11 +121,15 @@ def show_grade_menu(update: Update, context: CallbackContext, grade_num: int):
     tr_count = len(_terms(grade_num))
     q_count = len(_quiz(grade_num))
 
+    from content.topics import count_topics
+    tc_count = count_topics(grade_num)
+
     keyboard = [
         [InlineKeyboardButton(f"👨‍🏫 Авторлар ({a_count})", callback_data=f"enc_authors_{grade_num}")],
         [InlineKeyboardButton(f"📖 Шығармалар ({w_count})", callback_data=f"enc_works_{grade_num}")],
         [InlineKeyboardButton(f"🎭 Кейіпкерлер ({c_count})", callback_data=f"enc_chars_{grade_num}")],
         [InlineKeyboardButton(f"🌟 Тақырыптар ({th_count})", callback_data=f"enc_themes_{grade_num}")],
+        [InlineKeyboardButton(f"📚 Тақырыпты оқу ({tc_count})", callback_data=f"topics_list_{grade_num}")],
         [InlineKeyboardButton(f"💡 Қызықты деректер ({f_count})", callback_data=f"enc_facts_{grade_num}")],
         [InlineKeyboardButton(f"📑 Терминдер ({tr_count})", callback_data=f"enc_terms_{grade_num}")],
         [InlineKeyboardButton(f"🧩 Сұрақ-жауап ({q_count})", callback_data=f"enc_quiz_{grade_num}_0")],
