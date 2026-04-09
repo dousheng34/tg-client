@@ -6,11 +6,6 @@ services:
     env:
       - name: TELEGRAM_BOT_TOKEN
         value: $TELEGRAM_BOT_TOKEN
-      - name: PORT
-        value: "8000"
-    ports:
-      - port: 8000
-        protocol: http
     health_checks:
       disabled: true
     instance:
