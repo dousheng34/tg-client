@@ -5,7 +5,10 @@ handlers/menu.py — Бас мәзір обработчиктері
 import os
 import random
 import datetime
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import (
+    Update, InlineKeyboardButton, InlineKeyboardMarkup,
+    ReplyKeyboardMarkup, KeyboardButton
+)
 try:
     from telegram import WebAppInfo
     HAS_WEBAPP = True
@@ -57,69 +60,65 @@ MAIN_MENU_TEXT = (
 )
 
 
-def _build_webapp_keyboard():
-    """Mini App батырмасы бар клавиатура"""
-    from utils.keyboards import main_menu_keyboard
-    webapp_url = get_webapp_url()
-
-    if webapp_url and HAS_WEBAPP:
-        # WebApp батырмасы — Telegram ішінде тікелей ашылады
-        keyboard = [
-            [InlineKeyboardButton(
-                "🎮 Ойын Кітапханасы — Ашу",
+def _open_app_reply_kb(webapp_url: str):
+    """
+    Чат төменгі жағындағы «Open App» батырмасы.
+    Суреттегі сияқты — input жолының үстінде тұрады.
+    """
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(
+                text="🎮  Open App",
                 web_app=WebAppInfo(url=webapp_url)
-            )],
-            [
-                InlineKeyboardButton("📖 Сабақтар", callback_data="menu_grades"),
-                InlineKeyboardButton("👤 Авторлар",  callback_data="menu_authors"),
-            ],
-            [
-                InlineKeyboardButton("🏆 Рейтинг",   callback_data="menu_rating"),
-                InlineKeyboardButton("📊 Прогресс",  callback_data="menu_profile"),
-            ],
-            [
-                InlineKeyboardButton("📅 Дерек",     callback_data="menu_daily"),
-                InlineKeyboardButton("ℹ️ Анықтама",  callback_data="menu_help"),
-            ],
-        ]
-        return InlineKeyboardMarkup(keyboard)
-    else:
-        # WebApp жоқ болса — кәдімгі мәзір
-        return main_menu_keyboard()
+            )]
+        ],
+        resize_keyboard=True,          # кішірек, ықшам
+        input_field_placeholder="Бөлімді таңдаңыз..."
+    )
+
+
+def _build_inline_menu():
+    """Inline мәзір батырмалары (хабарлама ішінде)"""
+    from utils.keyboards import main_menu_keyboard
+    return main_menu_keyboard()
 
 
 def start_command(update: Update, context: CallbackContext):
     """Бот іске қосылғанда немесе /start командасы"""
-    user = update.effective_user
+    user    = update.effective_user
     db_user = get_or_create_user(user.id, user.username, user.full_name)
-    level  = db_user.get('level', 1)
+    level   = db_user.get('level', 1)
     emoji, name = get_level_info(level)
-    points = db_user.get('points', 0)
-    streak = db_user.get('streak', 0)
-
-    streak_txt = f"🔥 {streak} күндік серпіліс!" if streak > 1 else ""
-
+    points  = db_user.get('points', 0)
+    streak  = db_user.get('streak', 0)
     webapp_url = get_webapp_url()
-    app_hint = (
-        "\n\n🎮 <b>«Ойын Кітапханасы»</b> батырмасын басыңыз —\n"
-        "   ол Telegram ішінде сайт сияқты ашылады!"
-    ) if webapp_url and HAS_WEBAPP else ""
+
+    streak_txt = f"🔥 {streak} күндік серпіліс!\n" if streak > 1 else ""
 
     welcome = (
         f"🎓 <b>Қош келдіңіз, {user.first_name}!</b>\n\n"
         f"{emoji} Деңгей: <b>{name}</b>\n"
         f"⭐ Жинаған ұпай: <b>{points}</b>\n"
-        f"{streak_txt}"
-        f"{app_hint}\n\n"
+        f"{streak_txt}\n"
         f"📚 <b>ҚАЗАҚ ӘДЕБИЕТІ — БІЛІМ КІТАПХАНАСЫ</b>\n\n"
-        f"1–11 сынып материалдары, ойындар, авторлар — бәрі осында!\n"
+        f"1–11 сынып материалдары, ойындар, авторлар — бәрі осында!\n\n"
         f"👇 <b>Бөлімді таңдаңыз:</b>"
     )
-    update.message.reply_text(
-        welcome.strip(),
-        parse_mode='HTML',
-        reply_markup=_build_webapp_keyboard()
-    )
+
+    # 1-қадам: «Open App» батырмасын төменгі жолаққа шығар
+    if webapp_url and HAS_WEBAPP:
+        update.message.reply_text(
+            welcome.strip(),
+            parse_mode='HTML',
+            reply_markup=_open_app_reply_kb(webapp_url)
+        )
+    else:
+        # Mini App жоқ болса — кәдімгі inline мәзір
+        update.message.reply_text(
+            welcome.strip(),
+            parse_mode='HTML',
+            reply_markup=_build_inline_menu()
+        )
 
 
 def main_menu_callback(update: Update, context: CallbackContext):
@@ -139,8 +138,9 @@ def main_menu_callback(update: Update, context: CallbackContext):
     )
     query.edit_message_text(
         text.strip(), parse_mode='HTML',
-        reply_markup=_build_webapp_keyboard()
+        reply_markup=_build_inline_menu()
     )
+
 
 
 
