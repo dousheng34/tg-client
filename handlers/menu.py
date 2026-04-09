@@ -110,20 +110,12 @@ def start_command(update: Update, context: CallbackContext):
         f"👇 <b>Бөлімді таңдаңыз:</b>"
     )
 
-    # 1-қадам: «Open App» батырмасын төменгі жолаққа шығар
-    if webapp_url and HAS_WEBAPP:
-        update.message.reply_text(
-            welcome.strip(),
-            parse_mode='HTML',
-            reply_markup=_open_app_reply_kb(webapp_url)
-        )
-    else:
-        # Mini App жоқ болса — кәдімгі inline мәзір
-        update.message.reply_text(
-            welcome.strip(),
-            parse_mode='HTML',
-            reply_markup=_build_inline_menu()
-        )
+    # Inline мәзір әрдайым шығады
+    update.message.reply_text(
+        welcome.strip(),
+        parse_mode='HTML',
+        reply_markup=_build_inline_menu()
+    )
 
 
 def main_menu_callback(update: Update, context: CallbackContext):
