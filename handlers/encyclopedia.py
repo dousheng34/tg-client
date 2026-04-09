@@ -18,6 +18,11 @@ try:
 except ImportError:
     QUIZ_BANK = {}
 
+try:
+    from content.themes_extended import EXTENDED_THEMES
+except ImportError:
+    EXTENDED_THEMES = {}
+
 
 # ─── Деректерге оңай қолжетімділік ─────────────────────────────────────────
 
@@ -34,6 +39,11 @@ def _characters(g):
     return _grade(g).get("characters", {})
 
 def _themes(g):
+    # Алдымен кеңейтілген тізімді пайдалан (100 тақырып)
+    extended = EXTENDED_THEMES.get(g, [])
+    if extended:
+        return extended
+    # Запасной нұсқа — encyclopedia.py-дағы деректер
     return _grade(g).get("themes", [])
 
 def _facts(g):
