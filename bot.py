@@ -104,32 +104,37 @@ def error_handler(update: Update, context: CallbackContext):
 
 # ── /app команда — Mini App сілтемесі ───────────────────────────────────────────
 def app_command(update: Update, context: CallbackContext):
-    """Mini App ойын беті"""
+    """Mini App ойын беті — /app командасы"""
     webapp_url = WEBAPP_URL or (
         WEBHOOK_URL.rstrip('/') + '/app' if WEBHOOK_URL else None
     )
+
     if not webapp_url:
         update.message.reply_text(
-            "⚠️ Mini App тек деплой (Koyeb) серверінде жұмыс істейді.\n"
-            "Бот арқылы ойнау үшін: /start → 🎮 Ойындар"
+            "⚠️ <b>Mini App тек Koyeb серверінде жұмыс істейді.</b>\n\n"
+            "Жергілікті тестілеу үшін: /start → 🎮 Ойындар",
+            parse_mode='HTML'
         )
         return
 
     from telegram import WebAppInfo
     keyboard = InlineKeyboardMarkup([[
         InlineKeyboardButton(
-            text="🎮 Ойынды ашу",
+            "🎮  Ойын Кітапханасы — Ашу",
             web_app=WebAppInfo(url=webapp_url)
         )
     ]])
     update.message.reply_text(
-        "🎮 <b>ҚАЗАҚ ӘДЕБИЕТІ — ИНТЕРАКТИВТІ ОЙЫН</b>\n\n"
-        "📱 Ойынды ашу үшін төмендегі батырманы басыңыз!\n\n"
-        "🎯 Визорина, Цитата, Блиц — барлығы осында!\n"
-        "⏱️ Таймер + Ұпай жүйесі + Нәтиже!",
+        "🎮 <b>ҚАЗАҚ ӘДЕБИЕТІ — ОЙЫН КІТАПХАНАСЫ</b>\n\n"
+        "👇 Төмендегі батырманы басыңыз.\n"
+        "Ойын Telegram ішінде <b>сайт сияқты ашылады!</b>\n\n"
+        "🎯 <b>6 ойын:</b> Викторина · Кім жазды? · Блиц · Цитата · Жад · Хронология\n"
+        "🏆 Ұпай жүйесі · Жетістіктер · Рейтинг",
         parse_mode='HTML',
         reply_markup=keyboard
     )
+
+
 
 
 # ── CALLBACK DISPATCHER ───────────────────────────────────────────────────────────

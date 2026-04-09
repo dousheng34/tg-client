@@ -2,11 +2,29 @@
 handlers/menu.py — Бас мәзір обработчиктері
 Тіл: Таза, дұрыс, мұғалімдік қазақ тілі
 """
+import os
 import random
 import datetime
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+try:
+    from telegram import WebAppInfo
+    HAS_WEBAPP = True
+except ImportError:
+    HAS_WEBAPP = False
 from telegram.ext import CallbackContext
 from database import get_or_create_user, get_level_info
+
+# Webapp URL конфигурациясы
+WEBHOOK_URL = os.getenv('WEBHOOK_URL', '')
+WEBAPP_URL  = os.getenv('WEBAPP_URL', '')
+
+def get_webapp_url():
+    """Mini App URL-ін қайтарады"""
+    if WEBAPP_URL:
+        return WEBAPP_URL
+    if WEBHOOK_URL:
+        return WEBHOOK_URL.rstrip('/') + '/app'
+    return None
 
 # Күнделікті қызықты деректер — таза қазақ тілінде
 DAILY_FACTS = [
@@ -39,29 +57,68 @@ MAIN_MENU_TEXT = (
 )
 
 
+def _build_webapp_keyboard():
+    """Mini App батырмасы бар клавиатура"""
+    from utils.keyboards import main_menu_keyboard
+    webapp_url = get_webapp_url()
+
+    if webapp_url and HAS_WEBAPP:
+        # WebApp батырмасы — Telegram ішінде тікелей ашылады
+        keyboard = [
+            [InlineKeyboardButton(
+                "🎮 Ойын Кітапханасы — Ашу",
+                web_app=WebAppInfo(url=webapp_url)
+            )],
+            [
+                InlineKeyboardButton("📖 Сабақтар", callback_data="menu_grades"),
+                InlineKeyboardButton("👤 Авторлар",  callback_data="menu_authors"),
+            ],
+            [
+                InlineKeyboardButton("🏆 Рейтинг",   callback_data="menu_rating"),
+                InlineKeyboardButton("📊 Прогресс",  callback_data="menu_profile"),
+            ],
+            [
+                InlineKeyboardButton("📅 Дерек",     callback_data="menu_daily"),
+                InlineKeyboardButton("ℹ️ Анықтама",  callback_data="menu_help"),
+            ],
+        ]
+        return InlineKeyboardMarkup(keyboard)
+    else:
+        # WebApp жоқ болса — кәдімгі мәзір
+        return main_menu_keyboard()
+
+
 def start_command(update: Update, context: CallbackContext):
     """Бот іске қосылғанда немесе /start командасы"""
-    from utils.keyboards import main_menu_keyboard
     user = update.effective_user
     db_user = get_or_create_user(user.id, user.username, user.full_name)
-    level = db_user.get('level', 1)
+    level  = db_user.get('level', 1)
     emoji, name = get_level_info(level)
     points = db_user.get('points', 0)
     streak = db_user.get('streak', 0)
 
     streak_txt = f"🔥 {streak} күндік серпіліс!" if streak > 1 else ""
 
+    webapp_url = get_webapp_url()
+    app_hint = (
+        "\n\n🎮 <b>«Ойын Кітапханасы»</b> батырмасын басыңыз —\n"
+        "   ол Telegram ішінде сайт сияқты ашылады!"
+    ) if webapp_url and HAS_WEBAPP else ""
+
     welcome = (
         f"🎓 <b>Қош келдіңіз, {user.first_name}!</b>\n\n"
         f"{emoji} Деңгей: <b>{name}</b>\n"
         f"⭐ Жинаған ұпай: <b>{points}</b>\n"
-        f"{streak_txt}\n\n"
-        f"{MAIN_MENU_TEXT}"
+        f"{streak_txt}"
+        f"{app_hint}\n\n"
+        f"📚 <b>ҚАЗАҚ ӘДЕБИЕТІ — БІЛІМ КІТАПХАНАСЫ</b>\n\n"
+        f"1–11 сынып материалдары, ойындар, авторлар — бәрі осында!\n"
+        f"👇 <b>Бөлімді таңдаңыз:</b>"
     )
     update.message.reply_text(
         welcome.strip(),
         parse_mode='HTML',
-        reply_markup=main_menu_keyboard()
+        reply_markup=_build_webapp_keyboard()
     )
 
 
@@ -69,20 +126,23 @@ def main_menu_callback(update: Update, context: CallbackContext):
     """Бас мәзірге оралу"""
     query = update.callback_query
     query.answer()
-    user = update.effective_user
+    user    = update.effective_user
     db_user = get_or_create_user(user.id, user.username, user.full_name)
-    level = db_user.get('level', 1)
+    level   = db_user.get('level', 1)
     emoji, name = get_level_info(level)
-    points = db_user.get('points', 0)
-    from utils.keyboards import main_menu_keyboard
+    points  = db_user.get('points', 0)
+
     text = (
         f"{emoji} <b>{name}</b>  |  ⭐ {points} ұпай\n\n"
-        f"{MAIN_MENU_TEXT}"
+        f"📚 <b>ҚАЗАҚ ӘДЕБИЕТІ — БІЛІМ КІТАПХАНАСЫ</b>\n"
+        f"👇 <b>Бөлімді таңдаңыз:</b>"
     )
     query.edit_message_text(
         text.strip(), parse_mode='HTML',
-        reply_markup=main_menu_keyboard()
+        reply_markup=_build_webapp_keyboard()
     )
+
+
 
 
 def daily_fact_callback(update: Update, context: CallbackContext):
