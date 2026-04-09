@@ -18,23 +18,20 @@ from telegram.ext import CallbackContext
 from database import get_or_create_user, get_level_info
 
 # Webapp URL конфигурациясы
-WEBHOOK_URL       = os.getenv('WEBHOOK_URL', '')
-WEBAPP_URL        = os.getenv('WEBAPP_URL', '')
-KOYEB_DOMAIN      = os.getenv('KOYEB_PUBLIC_DOMAIN', '')    # Koyeb автоматты береді
+WEBAPP_URL        = os.getenv('WEBAPP_URL', '').strip()
 KOYEB_BASE        = 'https://controversial-rosaleen-t44t-00f78407.koyeb.app'
 
 def get_webapp_url():
-    """Mini App URL-ін қайтарады — басымдық: WEBAPP_URL > KOYEB_PUBLIC_DOMAIN > WEBHOOK_URL > hardcoded"""
-    if WEBAPP_URL:
-        return WEBAPP_URL
-    if KOYEB_DOMAIN:
-        return f'https://{KOYEB_DOMAIN}/app'
-    if WEBHOOK_URL:
-        url = WEBHOOK_URL.rstrip('/')
-        if '/webhook/' in url:
-            url = url.split('/webhook/')[0]
-        return url + '/app'
-    # Хардкодталған fallback — әрқашан жұмыс істейді
+    """Mini App URL — әрқашан дұрыс https URL қайтарады"""
+    url = WEBAPP_URL
+    if url:
+        if not url.startswith('https://'):
+            url = 'https://' + url.lstrip('http://')
+        if url.endswith('/health'):
+            url = url.replace('/health', '/app')
+        if not url.endswith('/app'):
+            url = url.rstrip('/') + '/app'
+        return url
     return KOYEB_BASE + '/app'
 
 

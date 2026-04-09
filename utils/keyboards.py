@@ -2,22 +2,22 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMa
 import os
 
 def _get_webapp_url():
-    """Mini App URL - орталықтандырылған функция"""
-    import os
-    webapp_url   = os.getenv('WEBAPP_URL', '')
-    koyeb_domain = os.getenv('KOYEB_PUBLIC_DOMAIN', '')
-    webhook_url  = os.getenv('WEBHOOK_URL', '')
+    """Mini App URL — әрқашан дұрыс https URL қайтарады"""
+    # Env variable тексеру
+    webapp_url = os.getenv('WEBAPP_URL', '').strip()
     if webapp_url:
+        # https:// жоқ болса қос
+        if not webapp_url.startswith('https://'):
+            webapp_url = 'https://' + webapp_url.lstrip('http://')
+        # /app-пен аяқталуын тексер
+        if webapp_url.endswith('/health'):
+            webapp_url = webapp_url.replace('/health', '/app')
+        if not webapp_url.endswith('/app'):
+            webapp_url = webapp_url.rstrip('/') + '/app'
         return webapp_url
-    if koyeb_domain:
-        return f'https://{koyeb_domain}/app'
-    if webhook_url:
-        url = webhook_url.rstrip('/')
-        if '/webhook/' in url:
-            url = url.split('/webhook/')[0]
-        return url + '/app'
-    # Хардкодталған Koyeb домені — әрқашан жұмыс істейді
+    # Хардкодталған дұрыс URL — әрқашан жұмыс істейді
     return 'https://controversial-rosaleen-t44t-00f78407.koyeb.app/app'
+
 
 # ─── ГЛАВНОЕ МЕНЮ ──────────────────────────────────────────────────────────────
 
