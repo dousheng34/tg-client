@@ -10,11 +10,15 @@ from utils.keyboards import back_to_main
 
 
 def _grades_keyboard():
-    """1–11 сынып таңдау батырмалары"""
+    """5–11 сынып таңдау батырмалары"""
     buttons = []
     row = []
+    emojis = {5:"🌟",6:"⚔️",7:"💎",8:"🦥",9:"✍️",10:"🔥",11:"🏆"}
     for grade, emoji, title in list_all_grades():
-        short = f"{emoji}{grade}-сынып"
+        if grade < 5:
+            continue  # 1-4 сынып емес
+        em = emojis.get(grade, "📖")
+        short = f"{em}{grade}-сынып"
         row.append(InlineKeyboardButton(short, callback_data=f"grade_{grade}"))
         if len(row) == 3:
             buttons.append(row)
@@ -58,7 +62,7 @@ def grades_menu_callback(update: Update, context: CallbackContext):
     query.answer()
     query.edit_message_text(
         "📚 <b>СЫНЫПТАР БОЙЫНША ОҚУ МАТЕРИАЛЫ</b>\n\n"
-        "1-11 сынып бойынша барлық тақырыптар:\n"
+        "5-11 сынып бойынша барлық тақырыптар:\n"
         "• Авторлар өмірбаяны\n"
         "• Шығармалар мазмұны\n"
         "• Талдауы және идеясы\n"
