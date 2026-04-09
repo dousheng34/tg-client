@@ -18,20 +18,22 @@ from telegram.ext import CallbackContext
 from database import get_or_create_user, get_level_info
 
 # Webapp URL конфигурациясы
-WEBHOOK_URL = os.getenv('WEBHOOK_URL', '')
-WEBAPP_URL  = os.getenv('WEBAPP_URL', '')
-
-# GitHub Pages — тегін HTTPS hosting (Mini App міндетті түрде HTTPS керек)
-GITHUB_PAGES_URL = 'https://dousheng34.github.io/tg-client/webapp/'
+WEBHOOK_URL       = os.getenv('WEBHOOK_URL', '')
+WEBAPP_URL        = os.getenv('WEBAPP_URL', '')
+KOYEB_DOMAIN      = os.getenv('KOYEB_PUBLIC_DOMAIN', '')    # Koyeb автоматты береді
 
 def get_webapp_url():
-    """Mini App URL-ін қайтарады — басымдық: WEBAPP_URL > WEBHOOK_URL > GitHub Pages"""
+    """Mini App URL-ін қайтарады — басымдық: WEBAPP_URL > KOYEB_PUBLIC_DOMAIN > WEBHOOK_URL"""
     if WEBAPP_URL:
         return WEBAPP_URL
+    if KOYEB_DOMAIN:
+        return f'https://{KOYEB_DOMAIN}/app'
     if WEBHOOK_URL:
-        return WEBHOOK_URL.rstrip('/') + '/app'
-    # Әрқашан жұмыс істейді — GitHub Pages арқылы
-    return GITHUB_PAGES_URL
+        url = WEBHOOK_URL.rstrip('/')
+        if '/webhook/' in url:
+            url = url.split('/webhook/')[0]
+        return url + '/app'
+    return None
 
 
 # Күнделікті қызықты деректер — таза қазақ тілінде

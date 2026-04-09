@@ -6,8 +6,18 @@ services:
     env:
       - name: TELEGRAM_BOT_TOKEN
         value: $TELEGRAM_BOT_TOKEN
+      - name: PORT
+        value: "8000"
+    ports:
+      - port: 8000
+        protocol: http
     health_checks:
-      disabled: true
+      - grace_period: 10
+        interval: 30
+        path: /health
+        port: 8000
+        protocol: http
+        timeout: 5
     instance:
       type: nano
       regions:

@@ -1,7 +1,22 @@
-"""
-utils/keyboards.py — барлық клавиатуралар
-"""
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
+import os
+
+def _get_webapp_url():
+    """Mini App URL - орталықтандырылған функция"""
+    import os
+    webapp_url  = os.getenv('WEBAPP_URL', '')
+    koyeb_domain = os.getenv('KOYEB_PUBLIC_DOMAIN', '')
+    webhook_url = os.getenv('WEBHOOK_URL', '')
+    if webapp_url:
+        return webapp_url
+    if koyeb_domain:
+        return f'https://{koyeb_domain}/app'
+    if webhook_url:
+        url = webhook_url.rstrip('/')
+        if '/webhook/' in url:
+            url = url.split('/webhook/')[0]
+        return url + '/app'
+    return None
 
 # ─── ГЛАВНОЕ МЕНЮ ──────────────────────────────────────────────────────────────
 
@@ -12,12 +27,31 @@ MAIN_MENU_TEXT = (
 )
 
 def main_menu_keyboard():
-    keyboard = [
-        [InlineKeyboardButton("📖 Сабақтар (5–11 сынып)", callback_data="menu_grades")],
-        [InlineKeyboardButton("📚 Визуалды Энциклопедия", callback_data="encyclopedia")],
-        [InlineKeyboardButton("👤 Авторлар", callback_data="menu_authors")],
-    ]
+    try:
+        from telegram import WebAppInfo
+        webapp_url = _get_webapp_url()
+        if webapp_url:
+            keyboard = [
+                [InlineKeyboardButton("🎮 Ойын Кітапханасы (Mini App)",
+                                      web_app=WebAppInfo(url=webapp_url))],
+                [InlineKeyboardButton("📖 Сабақтар (5–11 сынып)", callback_data="menu_grades")],
+                [InlineKeyboardButton("📚 Визуалды Энциклопедия", callback_data="encyclopedia")],
+                [InlineKeyboardButton("👤 Авторлар", callback_data="menu_authors")],
+            ]
+        else:
+            keyboard = [
+                [InlineKeyboardButton("📖 Сабақтар (5–11 сынып)", callback_data="menu_grades")],
+                [InlineKeyboardButton("📚 Визуалды Энциклопедия", callback_data="encyclopedia")],
+                [InlineKeyboardButton("👤 Авторлар", callback_data="menu_authors")],
+            ]
+    except Exception:
+        keyboard = [
+            [InlineKeyboardButton("📖 Сабақтар (5–11 сынып)", callback_data="menu_grades")],
+            [InlineKeyboardButton("📚 Визуалды Энциклопедия", callback_data="encyclopedia")],
+            [InlineKeyboardButton("👤 Авторлар", callback_data="menu_authors")],
+        ]
     return InlineKeyboardMarkup(keyboard)
+
 
 
 
