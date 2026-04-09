@@ -9,13 +9,13 @@ MAIN_MENU_TEXT = (
     "📚 <b>ҚАЗАҚ ӘДЕБИЕТІ — БІЛІМ КІТАПХАНАСЫ</b>\n\n"
     "Сәлем, ардақты оқушы! 👋\n"
     "Мен — қазақ әдебиетін оқуға арналған ақылды серігің.\n"
-    "1-11 сынып материалдары, ойындар, авторлар — бәрі осында!\n\n"
+    "5-11 сынып материалдары, авторлар — бәрі осында!\n\n"
     "👇 <b>Бөлімді таңдаңыз:</b>"
 )
 
 def main_menu_keyboard():
     keyboard = [
-        [InlineKeyboardButton("📖 Сабақтар (1–11 сынып)", callback_data="menu_grades")],
+        [InlineKeyboardButton("📖 Сабақтар (5–11 сынып)", callback_data="menu_grades")],
         [InlineKeyboardButton("📚 Визуалды Энциклопедия", callback_data="encyclopedia")],
         [InlineKeyboardButton("👤 Авторлар", callback_data="menu_authors")],
         [InlineKeyboardButton("📊 Менің прогресім", callback_data="menu_profile"),
