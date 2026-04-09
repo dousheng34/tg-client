@@ -63,19 +63,17 @@ def show_encyclopedia_menu(update: Update, context: CallbackContext):
     query = update.callback_query
     query.answer()
 
-    emojis = {1:"🌱",2:"🌿",3:"📗",4:"🌺",5:"🌟",6:"⚔️",7:"💎",8:"🦅",9:"✍️",10:"🔥",11:"🏆"}
+    emojis = {5:"🌟",6:"⚔️",7:"💎",8:"🦅",9:"✍️",10:"🔥",11:"🏆"}
     grade_titles = {
-        1:"1-сынып", 2:"2-сынып", 3:"3-сынып", 4:"4-сынып",
         5:"5-сынып", 6:"6-сынып", 7:"7-сынып", 8:"8-сынып",
         9:"9-сынып", 10:"10-сынып", 11:"11-сынып"
     }
 
     keyboard = []
     row = []
-    for g in range(1, 12):
+    for g in range(5, 12):
         em = emojis.get(g, "📖")
         title = _grade(g).get("title") or grade_titles.get(g, f"{g}-сынып")
-        # Батырма мәтіні қысқа: "🌱 1-сынып"
         short = title.split("—")[0].strip() if "—" in title else title
         row.append(InlineKeyboardButton(f"{em} {short}", callback_data=f"enc_grade_{g}"))
         if len(row) == 2:
@@ -85,15 +83,16 @@ def show_encyclopedia_menu(update: Update, context: CallbackContext):
         keyboard.append(row)
     keyboard.append([InlineKeyboardButton("🏠 Бас мәзір", callback_data="menu_main")])
 
-    quiz_total = sum(len(v) for v in QUIZ_BANK.values())
+    quiz_total = sum(len(v) for k, v in QUIZ_BANK.items() if k >= 5)
     text = (
-        "<b>📚 ВИЗУАЛДЫ ЭНЦИКЛОПЕДИЯ</b>\n\n"
-        "🎓 1-11 сынып бойынша толық контент:\n"
+        "<b>📖 ҚАЗАҚ ӘДЕБИЕТІ — ВИЗУАЛДЫ ЭНЦИКЛОПЕДИЯ</b>\n\n"
+        "🎓 5-11 сынып бойынша толық контент:\n"
         "• 👨‍🏫 Авторлар өмірбаяны\n"
         "• 📖 Шығармалар талдауы\n"
         "• 🎭 Кейіпкерлер сипаты\n"
+        "• 🌟 Тақырыптар (100 тақырып/сынып)\n"
         "• 💡 Қызықты деректер\n"
-        f"• 🎯 Тест сұрақтары: <b>{quiz_total}+</b>\n"
+        f"• 🧩 Сұрақ-жауап: <b>{quiz_total}+</b>\n"
         "• 📑 Терминдер сөздігі\n\n"
         "👇 <b>Сыныпты таңдаңыз:</b>"
     )
