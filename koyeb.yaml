@@ -12,12 +12,7 @@ services:
       - port: 8000
         protocol: http
     health_checks:
-      - grace_period: 10
-        interval: 30
-        path: /health
-        port: 8000
-        protocol: http
-        timeout: 5
+      disabled: true
     instance:
       type: nano
       regions:
