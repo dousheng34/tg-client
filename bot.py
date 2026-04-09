@@ -105,12 +105,25 @@ def error_handler(update: Update, context: CallbackContext):
     logger.error(msg="Exception:", exc_info=error)
 
 
+# ── Webapp URL helper ────────────────────────────────────────────────────────────
+def _get_webapp_url():
+    """Mini App URL-ін дұрыс анықтайды (Koyeb базалық домен + /app)"""
+    if WEBAPP_URL:
+        return WEBAPP_URL
+    if WEBHOOK_URL:
+        # WEBHOOK_URL мысалы: https://xxx.koyeb.app/webhook/TOKEN
+        # Базалық домен: https://xxx.koyeb.app
+        url = WEBHOOK_URL.rstrip('/')
+        if '/webhook/' in url:
+            url = url.split('/webhook/')[0]
+        return url + '/app'
+    return None
+
+
 # ── /app команда — Mini App сілтемесі ───────────────────────────────────────────
 def app_command(update: Update, context: CallbackContext):
     """Mini App ойын беті — /app командасы"""
-    webapp_url = WEBAPP_URL or (
-        WEBHOOK_URL.rstrip('/') + '/app' if WEBHOOK_URL else None
-    )
+    webapp_url = _get_webapp_url()
 
     if not webapp_url:
         update.message.reply_text(
@@ -325,9 +338,7 @@ def callback_router(update: Update, context: CallbackContext):
 
 def _send_miniapp(update: Update, context: CallbackContext):
     """Mini App батырмасын жіберу"""
-    webapp_url = WEBAPP_URL or (
-        WEBHOOK_URL.rstrip('/') + '/app' if WEBHOOK_URL else None
-    )
+    webapp_url = _get_webapp_url()
     query = update.callback_query
     if not webapp_url:
         query.edit_message_text(
@@ -344,7 +355,7 @@ def _send_miniapp(update: Update, context: CallbackContext):
     query.edit_message_text(
         "🎮 <b>ОЙЫН — MINI APP</b>\n\n"
         "💡 Батырманы басыңыз — ойын ашылады!\n"
-        "🎯 4 ойын түрі: Викторина, Кім жазды?, Цитата, Блиц\n"
+        "🎯 6 ойын түрі: Викторина, Кім жазды?, Цитата, Блиц, Жад, Хронология\n"
         "⏱️ Таймер, ұпай жүйесі, нәтиже экраны",
         parse_mode='HTML',
         reply_markup=keyboard
