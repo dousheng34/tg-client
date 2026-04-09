@@ -21,13 +21,18 @@ from database import get_or_create_user, get_level_info
 WEBHOOK_URL = os.getenv('WEBHOOK_URL', '')
 WEBAPP_URL  = os.getenv('WEBAPP_URL', '')
 
+# GitHub Pages — тегін HTTPS hosting (Mini App міндетті түрде HTTPS керек)
+GITHUB_PAGES_URL = 'https://dousheng34.github.io/tg-client/webapp/'
+
 def get_webapp_url():
-    """Mini App URL-ін қайтарады"""
+    """Mini App URL-ін қайтарады — басымдық: WEBAPP_URL > WEBHOOK_URL > GitHub Pages"""
     if WEBAPP_URL:
         return WEBAPP_URL
     if WEBHOOK_URL:
         return WEBHOOK_URL.rstrip('/') + '/app'
-    return None
+    # Әрқашан жұмыс істейді — GitHub Pages арқылы
+    return GITHUB_PAGES_URL
+
 
 # Күнделікті қызықты деректер — таза қазақ тілінде
 DAILY_FACTS = [
