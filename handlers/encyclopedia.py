@@ -119,9 +119,8 @@ def show_grade_menu(update: Update, context: CallbackContext, grade_num: int):
         [InlineKeyboardButton(f"🌟 Тақырыптар ({th_count})", callback_data=f"enc_themes_{grade_num}")],
         [InlineKeyboardButton(f"💡 Қызықты деректер ({f_count})", callback_data=f"enc_facts_{grade_num}")],
         [InlineKeyboardButton(f"📑 Терминдер ({tr_count})", callback_data=f"enc_terms_{grade_num}")],
-        [InlineKeyboardButton(f"🎯 Тест ({q_count} сұрақ)", callback_data=f"enc_quiz_{grade_num}_0")],
-        [InlineKeyboardButton("◀️ Сыныптар", callback_data="encyclopedia"),
-         InlineKeyboardButton("🏠 Бас мәзір", callback_data="menu_main")],
+        [InlineKeyboardButton(f"🧩 Сұрақ-жауап ({q_count})", callback_data=f"enc_quiz_{grade_num}_0")],
+        [InlineKeyboardButton("◀️ Артқа", callback_data="encyclopedia")],
     ]
 
     title = grade.get("title", f"{grade_num}-сынып")
@@ -134,7 +133,7 @@ def show_grade_menu(update: Update, context: CallbackContext, grade_num: int):
         f"• 🌟 {th_count} тақырып\n"
         f"• 💡 {f_count} қызықты дерек\n"
         f"• 📑 {tr_count} термин\n"
-        f"• 🎯 {q_count} тест сұрағы\n\n"
+        f"• 🧩 {q_count} сұрақ-жауап\n\n"
         "👇 <b>Бөлімді таңдаңыз:</b>"
     )
     query.edit_message_text(text, parse_mode="HTML",
