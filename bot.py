@@ -29,6 +29,9 @@ WEBHOOK_URL = os.getenv('WEBHOOK_URL', '')
 PORT        = int(os.getenv('PORT', 8000))
 WEBAPP_URL  = os.getenv('WEBAPP_URL', '')   # Mini App URL (автоматты анықталады)
 
+# Koyeb нақты домені — fallback
+KOYEB_BASE  = 'https://controversial-rosaleen-t44t-00f78407.koyeb.app'
+
 if not BOT_TOKEN:
     logger.error("❌ TELEGRAM_BOT_TOKEN жоқ!")
     sys.exit(1)
@@ -107,17 +110,16 @@ def error_handler(update: Update, context: CallbackContext):
 
 # ── Webapp URL helper ────────────────────────────────────────────────────────────
 def _get_webapp_url():
-    """Mini App URL-ін дұрыс анықтайды (Koyeb базалық домен + /app)"""
+    """Mini App URL-ін дұрыс анықтайды"""
     if WEBAPP_URL:
         return WEBAPP_URL
     if WEBHOOK_URL:
-        # WEBHOOK_URL мысалы: https://xxx.koyeb.app/webhook/TOKEN
-        # Базалық домен: https://xxx.koyeb.app
         url = WEBHOOK_URL.rstrip('/')
         if '/webhook/' in url:
             url = url.split('/webhook/')[0]
         return url + '/app'
-    return None
+    # Хардкодталған Koyeb домені — әрқашан жұмыс істейді
+    return KOYEB_BASE + '/app'
 
 
 # ── /app команда — Mini App сілтемесі ───────────────────────────────────────────

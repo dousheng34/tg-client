@@ -21,9 +21,10 @@ from database import get_or_create_user, get_level_info
 WEBHOOK_URL       = os.getenv('WEBHOOK_URL', '')
 WEBAPP_URL        = os.getenv('WEBAPP_URL', '')
 KOYEB_DOMAIN      = os.getenv('KOYEB_PUBLIC_DOMAIN', '')    # Koyeb автоматты береді
+KOYEB_BASE        = 'https://controversial-rosaleen-t44t-00f78407.koyeb.app'
 
 def get_webapp_url():
-    """Mini App URL-ін қайтарады — басымдық: WEBAPP_URL > KOYEB_PUBLIC_DOMAIN > WEBHOOK_URL"""
+    """Mini App URL-ін қайтарады — басымдық: WEBAPP_URL > KOYEB_PUBLIC_DOMAIN > WEBHOOK_URL > hardcoded"""
     if WEBAPP_URL:
         return WEBAPP_URL
     if KOYEB_DOMAIN:
@@ -33,7 +34,8 @@ def get_webapp_url():
         if '/webhook/' in url:
             url = url.split('/webhook/')[0]
         return url + '/app'
-    return None
+    # Хардкодталған fallback — әрқашан жұмыс істейді
+    return KOYEB_BASE + '/app'
 
 
 # Күнделікті қызықты деректер — таза қазақ тілінде

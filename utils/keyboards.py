@@ -4,9 +4,9 @@ import os
 def _get_webapp_url():
     """Mini App URL - орталықтандырылған функция"""
     import os
-    webapp_url  = os.getenv('WEBAPP_URL', '')
+    webapp_url   = os.getenv('WEBAPP_URL', '')
     koyeb_domain = os.getenv('KOYEB_PUBLIC_DOMAIN', '')
-    webhook_url = os.getenv('WEBHOOK_URL', '')
+    webhook_url  = os.getenv('WEBHOOK_URL', '')
     if webapp_url:
         return webapp_url
     if koyeb_domain:
@@ -16,7 +16,8 @@ def _get_webapp_url():
         if '/webhook/' in url:
             url = url.split('/webhook/')[0]
         return url + '/app'
-    return None
+    # Хардкодталған Koyeb домені — әрқашан жұмыс істейді
+    return 'https://controversial-rosaleen-t44t-00f78407.koyeb.app/app'
 
 # ─── ГЛАВНОЕ МЕНЮ ──────────────────────────────────────────────────────────────
 
