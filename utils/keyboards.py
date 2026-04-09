@@ -16,6 +16,7 @@ MAIN_MENU_TEXT = (
 def main_menu_keyboard():
     keyboard = [
         [InlineKeyboardButton("📖 Сабақтар (1–11 сынып)", callback_data="menu_grades")],
+        [InlineKeyboardButton("📚 Визуалды Энциклопедия", callback_data="encyclopedia")],
         [InlineKeyboardButton("🎮 Ойындар", callback_data="menu_games"),
          InlineKeyboardButton("👤 Авторлар", callback_data="menu_authors")],
         [InlineKeyboardButton("📊 Менің прогресім", callback_data="menu_profile"),

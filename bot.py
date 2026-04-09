@@ -266,14 +266,8 @@ def callback_router(update: Update, context: CallbackContext):
 
     # ── Визуалды Энциклопедия ─────────────────────────────────────────────────
     elif data == "encyclopedia" or data.startswith("enc_"):
-        import asyncio
         from handlers.encyclopedia import encyclopedia_callback_handler
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-        loop.run_until_complete(encyclopedia_callback_handler(update, context))
+        encyclopedia_callback_handler(update, context)
 
     elif data == "main_menu":
         from handlers.menu import main_menu_callback
