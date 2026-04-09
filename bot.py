@@ -169,6 +169,9 @@ def callback_router(update: Update, context: CallbackContext):
     elif data == "menu_help":
         from handlers.menu import help_callback
         help_callback(update, context)
+    elif data == "menu_terms":
+        from handlers.grades import terms_callback
+        terms_callback(update, context)
     elif data == "menu_app":
         _send_miniapp(update, context)
 
