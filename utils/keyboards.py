@@ -6,10 +6,8 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMa
 # ─── ГЛАВНОЕ МЕНЮ ──────────────────────────────────────────────────────────────
 
 MAIN_MENU_TEXT = (
-    "📚 <b>ҚАЗАҚ ӘДЕБИЕТІ — БІЛІМ КІТАПХАНАСЫ</b>\n\n"
-    "Сәлем, ардақты оқушы! 👋\n"
-    "Мен — қазақ әдебиетін оқуға арналған ақылды серігің.\n"
-    "5-11 сынып материалдары, авторлар — бәрі осында!\n\n"
+    "<b>📚 ҚАЗАҚ ӘДЕБИЕТІ — БІЛІМ КІТАПХАНАСЫ</b>\n\n"
+    "🎓 5-11 сынып қазақ әдебиеті — тақырыптар, авторлар, сұрақ-жауап\n\n"
     "👇 <b>Бөлімді таңдаңыз:</b>"
 )
 
@@ -18,20 +16,17 @@ def main_menu_keyboard():
         [InlineKeyboardButton("📖 Сабақтар (5–11 сынып)", callback_data="menu_grades")],
         [InlineKeyboardButton("📚 Визуалды Энциклопедия", callback_data="encyclopedia")],
         [InlineKeyboardButton("👤 Авторлар", callback_data="menu_authors")],
-        [InlineKeyboardButton("📊 Менің прогресім", callback_data="menu_profile"),
-         InlineKeyboardButton("🏆 Рейтинг", callback_data="menu_rating")],
-        [InlineKeyboardButton("📅 Күнделікті дерек", callback_data="menu_daily"),
-         InlineKeyboardButton("ℹ️ Анықтама", callback_data="menu_help")],
     ]
     return InlineKeyboardMarkup(keyboard)
+
 
 
 # ─── Сыныптар меню ─────────────────────────────────────────────────────────────
 def grades_keyboard():
     buttons = []
     row = []
-    emojis = {1:"🌱",2:"🌿",3:"📗",4:"🌺",5:"🌟",6:"⚔️",7:"💎",8:"🦅",9:"✍️",10:"🔥",11:"🏆"}
-    for g in range(1, 12):
+    emojis = {5:"🌟",6:"⚔️",7:"💎",8:"🦅",9:"✍️",10:"🔥",11:"🏆"}
+    for g in range(5, 12):
         row.append(InlineKeyboardButton(f"{emojis[g]}{g}-сынып", callback_data=f"grade_{g}"))
         if len(row) == 3:
             buttons.append(row)
