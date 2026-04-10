@@ -207,6 +207,9 @@ def callback_router(update: Update, context: CallbackContext):
     elif data == "fb_cancel":
         from handlers.feedback import feedback_cancel_callback
         feedback_cancel_callback(update, context)
+    elif data == "admin_feedbacks":
+        from handlers.feedback import admin_feedbacks_inline_callback
+        admin_feedbacks_inline_callback(update, context)
 
     # ── Сыныптар ─────────────────────────────────────────────────────────────
     elif data.startswith("grade_"):

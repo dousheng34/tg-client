@@ -198,3 +198,56 @@ def admin_feedbacks_callback(update: Update, context: CallbackContext):
 
     from utils.keyboards import back_to_main
     query.edit_message_text(text[:4000], parse_mode="HTML", reply_markup=back_to_main())
+
+
+def admin_feedbacks_inline_callback(update: Update, context: CallbackContext):
+    """Бас мәзірдегі 📬 Пікірлерді оқу батырмасы — Inline нұсқасы"""
+    query = update.callback_query
+    query.answer()
+    user = update.effective_user
+
+    if ADMIN_ID and str(user.id) != str(ADMIN_ID):
+        query.answer("❌ Рұқсат жоқ.", show_alert=True)
+        return
+
+    try:
+        from database import get_all_feedbacks
+        feedbacks = get_all_feedbacks(limit=20)
+    except Exception:
+        feedbacks = []
+
+    if not feedbacks:
+        from utils.keyboards import back_to_main
+        query.edit_message_text(
+            "📭 <b>Әлі пікір жоқ.</b>\n\nОқушылар мен мұғалімдер әлі ұсыныс қалдырмаған.",
+            parse_mode="HTML",
+            reply_markup=back_to_main()
+        )
+        return
+
+    # Мазмұнды жинақта
+    lines = [f"📬 <b>ҰСЫНЫСТАР МЕН ПІКІРЛЕР ({len(feedbacks)} дана)</b>\n{'═' * 28}\n\n"]
+    for i, fb in enumerate(feedbacks, 1):
+        emoji, title, _ = FEEDBACK_CATEGORIES.get(fb.get("category", ""), ("💬", "Пікір", ""))
+        name  = fb.get("full_name") or "Анықталмаған"
+        uname = fb.get("username") or "жоқ"
+        txt   = fb.get("text", "")
+        dt    = (fb.get("created_at") or "")[:16].replace("T", " ")
+        lines.append(
+            f"{i}. {emoji} <b>{title}</b>\n"
+            f"👤 {name} (@{uname})\n"
+            f"📅 {dt}\n"
+            f"💬 {txt}\n"
+            f"{'─' * 28}\n\n"
+        )
+
+    full_text = "".join(lines)
+
+    from utils.keyboards import back_to_main
+    # Telegram 4096 символ шегі — кесіп жібереміз
+    query.edit_message_text(
+        full_text[:4096],
+        parse_mode="HTML",
+        reply_markup=back_to_main()
+    )
+

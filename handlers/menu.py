@@ -17,6 +17,8 @@ except ImportError:
 from telegram.ext import CallbackContext
 from database import get_or_create_user, get_level_info
 
+ADMIN_ID = os.getenv("ADMIN_TELEGRAM_ID", "")
+
 # Webapp URL конфигурациясы
 WEBAPP_URL        = os.getenv('WEBAPP_URL', '').strip()
 KOYEB_BASE        = 'https://controversial-rosaleen-t44t-00f78407.koyeb.app'
@@ -81,10 +83,19 @@ def _open_app_reply_kb(webapp_url: str):
     )
 
 
-def _build_inline_menu():
+def _build_inline_menu(user_id: int = None):
     """Inline мәзір батырмалары (хабарлама ішінде)"""
     from utils.keyboards import main_menu_keyboard
-    return main_menu_keyboard()
+    kb = main_menu_keyboard()
+    # Админ болса — қосымша пікір батырмасы
+    if ADMIN_ID and str(user_id) == str(ADMIN_ID):
+        admin_row = [InlineKeyboardButton(
+            "📬 Пікірлерді оқу (Админ)",
+            callback_data="admin_feedbacks"
+        )]
+        new_keyboard = list(kb.inline_keyboard) + [admin_row]
+        return InlineKeyboardMarkup(new_keyboard)
+    return kb
 
 
 def start_command(update: Update, context: CallbackContext):
@@ -113,7 +124,7 @@ def start_command(update: Update, context: CallbackContext):
     update.message.reply_text(
         welcome.strip(),
         parse_mode='HTML',
-        reply_markup=_build_inline_menu()
+        reply_markup=_build_inline_menu(user.id)
     )
 
 
@@ -134,7 +145,7 @@ def main_menu_callback(update: Update, context: CallbackContext):
     )
     query.edit_message_text(
         text.strip(), parse_mode='HTML',
-        reply_markup=_build_inline_menu()
+        reply_markup=_build_inline_menu(user.id)
     )
 
 
