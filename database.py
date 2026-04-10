@@ -73,6 +73,16 @@ def init_db():
         shown_at TEXT
     )''')
 
+    c.execute('''CREATE TABLE IF NOT EXISTS feedbacks (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id    INTEGER,
+        username   TEXT,
+        full_name  TEXT,
+        category   TEXT,
+        text       TEXT,
+        created_at TEXT DEFAULT (datetime('now'))
+    )''')
+
     conn.commit()
     conn.close()
 
@@ -191,6 +201,28 @@ def give_achievement(user_id: int, badge: str) -> bool:
         return True
     conn.close()
     return False
+
+
+def save_feedback(user_id: int, username: str, full_name: str, category: str, text: str):
+    """Пайдаланушы пікірін сақтайды"""
+    conn = get_connection()
+    conn.execute(
+        'INSERT INTO feedbacks (user_id, username, full_name, category, text) VALUES (?,?,?,?,?)',
+        (user_id, username, full_name, category, text)
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_all_feedbacks(limit: int = 20) -> list:
+    """Соңғы пікірлерді қайтарады"""
+    conn = get_connection()
+    rows = conn.execute(
+        'SELECT * FROM feedbacks ORDER BY created_at DESC LIMIT ?',
+        (limit,)
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
 
 
 LEVEL_NAMES = {

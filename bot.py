@@ -91,6 +91,10 @@ def unknown_command(update: Update, context: CallbackContext):
     )
 
 def text_message(update: Update, context: CallbackContext):
+    # Пікір жазу режимі алдымен тексер
+    from handlers.feedback import handle_feedback_text
+    if handle_feedback_text(update, context):
+        return
     from utils.keyboards import main_menu_keyboard
     update.message.reply_text(
         "📚 Мәзірді пайдаланыңыз:",
@@ -192,6 +196,17 @@ def callback_router(update: Update, context: CallbackContext):
         terms_callback(update, context)
     elif data == "menu_app":
         _send_miniapp(update, context)
+    elif data == "menu_feedback":
+        from handlers.feedback import feedback_menu_callback
+        feedback_menu_callback(update, context)
+
+    # ── Пікір санаттары ───────────────────────────────────────────────
+    elif data in ("fb_suggest", "fb_error", "fb_thanks", "fb_question"):
+        from handlers.feedback import feedback_category_callback
+        feedback_category_callback(update, context)
+    elif data == "fb_cancel":
+        from handlers.feedback import feedback_cancel_callback
+        feedback_cancel_callback(update, context)
 
     # ── Сыныптар ─────────────────────────────────────────────────────────────
     elif data.startswith("grade_"):

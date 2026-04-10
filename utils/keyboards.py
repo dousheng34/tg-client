@@ -38,18 +38,21 @@ def main_menu_keyboard():
                 [InlineKeyboardButton("📖 Сабақтар (5–11 сынып)", callback_data="menu_grades")],
                 [InlineKeyboardButton("📚 Визуалды Энциклопедия", callback_data="encyclopedia")],
                 [InlineKeyboardButton("👤 Авторлар", callback_data="menu_authors")],
+                [InlineKeyboardButton("📬 Ұсыныстар мен пікірлер", callback_data="menu_feedback")],
             ]
         else:
             keyboard = [
                 [InlineKeyboardButton("📖 Сабақтар (5–11 сынып)", callback_data="menu_grades")],
                 [InlineKeyboardButton("📚 Визуалды Энциклопедия", callback_data="encyclopedia")],
                 [InlineKeyboardButton("👤 Авторлар", callback_data="menu_authors")],
+                [InlineKeyboardButton("📬 Ұсыныстар мен пікірлер", callback_data="menu_feedback")],
             ]
     except Exception:
         keyboard = [
             [InlineKeyboardButton("📖 Сабақтар (5–11 сынып)", callback_data="menu_grades")],
             [InlineKeyboardButton("📚 Визуалды Энциклопедия", callback_data="encyclopedia")],
             [InlineKeyboardButton("👤 Авторлар", callback_data="menu_authors")],
+            [InlineKeyboardButton("📬 Ұсыныстар мен пікірлер", callback_data="menu_feedback")],
         ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -181,6 +184,16 @@ def set_grade_keyboard():
 def back_to_main():
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("🏠 Бас мәзір", callback_data="menu_main")]
+    ])
+
+def feedback_keyboard():
+    """Пікір санаттары клавиатурасы"""
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("💡 Ұсыныс",   callback_data="fb_suggest"),
+         InlineKeyboardButton("🐛 Қате табу", callback_data="fb_error")],
+        [InlineKeyboardButton("🙏 Алғыс",    callback_data="fb_thanks"),
+         InlineKeyboardButton("❓ Сұрақ",    callback_data="fb_question")],
+        [InlineKeyboardButton("🏠 Бас мәзір", callback_data="menu_main")],
     ])
 
 def back_to_authors():
