@@ -378,6 +378,62 @@ def _send_miniapp(update: Update, context: CallbackContext):
         reply_markup=keyboard
     )
 
+# ── /feedbacks командасы — Админ үшін ──────────────────────────────────────────
+def feedbacks_command(update: Update, context: CallbackContext):
+    """/feedbacks — соңғы пікірлерді көру (Админ үшін)"""
+    user = update.effective_user
+    admin_id = os.getenv("ADMIN_TELEGRAM_ID", "")
+
+    # Рұқсат тексеру
+    if admin_id and str(user.id) != str(admin_id):
+        update.message.reply_text("❌ Бұл команда тек админге қатысты.")
+        return
+
+    from database import get_all_feedbacks
+    feedbacks = get_all_feedbacks(limit=20)
+
+    CATEGORIES = {
+        "fb_suggest":  ("💡", "Ұсыныс"),
+        "fb_error":    ("🐛", "Қате табу"),
+        "fb_thanks":   ("🙏", "Алғыс"),
+        "fb_question": ("❓", "Сұрақ"),
+    }
+
+    if not feedbacks:
+        update.message.reply_text("💭 Әлі пікір жоқ.\n\nОқушылар әлі ұсыныс қалдырмаған.")
+        return
+
+    # 20 пікір — бірнеше хабарламада сияды 4096 сымвол— батчалар бөлеміз
+    header = f"📬 <b>ҰСЫНЫСТАР МЕН ПІКІРЛЕР ({len(feedbacks)})</b>\n"
+    header += "═" * 30 + "\n\n"
+
+    chunks = [header]
+    current = header
+
+    for i, fb in enumerate(feedbacks, 1):
+        emoji, title = CATEGORIES.get(fb.get("category", ""), ("💬", "Пікір"))
+        name = fb.get("full_name") or "Анықталмаған"
+        uname = fb.get("username") or "жоқ"
+        text = fb.get("text", "")
+        dt = fb.get("created_at", "")[:16].replace("T", " ")
+
+        entry = (
+            f"{i}. {emoji} <b>{title}</b>\n"
+            f"👤 {name} (@{uname})\n"
+            f"📅 {dt}\n"
+            f"💬 {text}\n"
+            f"────────────────────────────\n\n"
+        )
+
+        if len(current) + len(entry) > 3800:
+            update.message.reply_text(current, parse_mode="HTML")
+            current = entry
+        else:
+            current += entry
+
+    if current.strip():
+        update.message.reply_text(current, parse_mode="HTML")
+
 
 # ── MAIN ─────────────────────────────────────────────────────────────────────────
 def main() -> None:
@@ -399,10 +455,12 @@ def main() -> None:
 
     # Командалар
     from handlers.menu import start_command
-    dp.add_handler(CommandHandler("start",  start_command))
-    dp.add_handler(CommandHandler("menu",   start_command))
-    dp.add_handler(CommandHandler("help",   start_command))
-    dp.add_handler(CommandHandler("app",    app_command))
+    dp.add_handler(CommandHandler("start",     start_command))
+    dp.add_handler(CommandHandler("menu",      start_command))
+    dp.add_handler(CommandHandler("help",      start_command))
+    dp.add_handler(CommandHandler("app",       app_command))
+    dp.add_handler(CommandHandler("feedbacks", feedbacks_command))
+    dp.add_handler(CommandHandler("admin",     feedbacks_command))
 
     # Барлық callback
     dp.add_handler(CallbackQueryHandler(callback_router))
