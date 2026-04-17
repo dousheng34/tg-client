@@ -1,14 +1,26 @@
 services:
   tg-client:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    env:
-      - name: TELEGRAM_BOT_TOKEN
-        value: $TELEGRAM_BOT_TOKEN
-    health_checks:
-      disabled: true
-    instance:
-      type: nano
-      regions:
-        - fra
+      build:
+            context: .
+                  dockerfile: Dockerfile
+                      env:
+                            - name: TELEGRAM_BOT_TOKEN
+                                    value: $TELEGRAM_BOT_TOKEN
+                                        health_checks:
+                                              disabled: true
+                                                  instance:
+                                                        type: nano
+                                                            regions:
+                                                                  - fra
+                                                                      routes:
+                                                                            - path: /
+                                                                                    port: 8000
+                                                                                        scaling:
+                                                                                              min_instances: 1
+                                                                                                    max_instances: 1
+                                                                                                        autoscaling:
+                                                                                                              enabled: false
+                                                                                                                  deployment:
+                                                                                                                        auto_deploy: true
+                                                                                                                              git_branch: main
+                                                                                                                                    git_repository: https://github.com/dousheng34/tg-client.git
