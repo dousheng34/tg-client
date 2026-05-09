@@ -18,12 +18,10 @@ def _get_webapp_url():
     # Хардкодталған дұрыс URL — әрқашан жұмыс істейді
     return 'https://controversial-rosaleen-t44t-00f78407.koyeb.app/app'
 
-
 # ─── ГЛАВНОЕ МЕНЮ ──────────────────────────────────────────────────────────────
-
 MAIN_MENU_TEXT = (
     "<b>📚 ҚАЗАҚ ӘДЕБИЕТІ — БІЛІМ КІТАПХАНАСЫ</b>\n\n"
-    "🎓 5-11 сынып қазақ әдебиеті — тақырыптар, авторлар, сұрақ-жауап\n\n"
+    "🎓 7-9 сынып қазақ әдебиеті — тақырыптар, авторлар, сұрақ-жауап\n\n"
     "👇 <b>Бөлімді таңдаңыз:</b>"
 )
 
@@ -35,36 +33,33 @@ def main_menu_keyboard():
             keyboard = [
                 [InlineKeyboardButton("🎮 Ойын Кітапханасы (Mini App)",
                                       web_app=WebAppInfo(url=webapp_url))],
-                [InlineKeyboardButton("📖 Сабақтар (5–11 сынып)", callback_data="menu_grades")],
+                [InlineKeyboardButton("📖 Сабақтар (7–9 сынып)", callback_data="menu_grades")],
                 [InlineKeyboardButton("📚 Визуалды Энциклопедия", callback_data="encyclopedia")],
                 [InlineKeyboardButton("👤 Авторлар", callback_data="menu_authors")],
                 [InlineKeyboardButton("📬 Ұсыныстар мен пікірлер", callback_data="menu_feedback")],
             ]
         else:
             keyboard = [
-                [InlineKeyboardButton("📖 Сабақтар (5–11 сынып)", callback_data="menu_grades")],
+                [InlineKeyboardButton("📖 Сабақтар (7–9 сынып)", callback_data="menu_grades")],
                 [InlineKeyboardButton("📚 Визуалды Энциклопедия", callback_data="encyclopedia")],
                 [InlineKeyboardButton("👤 Авторлар", callback_data="menu_authors")],
                 [InlineKeyboardButton("📬 Ұсыныстар мен пікірлер", callback_data="menu_feedback")],
             ]
     except Exception:
         keyboard = [
-            [InlineKeyboardButton("📖 Сабақтар (5–11 сынып)", callback_data="menu_grades")],
+            [InlineKeyboardButton("📖 Сабақтар (7–9 сынып)", callback_data="menu_grades")],
             [InlineKeyboardButton("📚 Визуалды Энциклопедия", callback_data="encyclopedia")],
             [InlineKeyboardButton("👤 Авторлар", callback_data="menu_authors")],
             [InlineKeyboardButton("📬 Ұсыныстар мен пікірлер", callback_data="menu_feedback")],
         ]
     return InlineKeyboardMarkup(keyboard)
 
-
-
-
 # ─── Сыныптар меню ─────────────────────────────────────────────────────────────
 def grades_keyboard():
     buttons = []
     row = []
-    emojis = {5:"🌟",6:"⚔️",7:"💎",8:"🦅",9:"✍️",10:"🔥",11:"🏆"}
-    for g in range(5, 12):
+    emojis = {7:"💎",8:"🦅",9:"✍️"}
+    for g in range(7, 10):
         row.append(InlineKeyboardButton(f"{emojis[g]}{g}-сынып", callback_data=f"grade_{g}"))
         if len(row) == 3:
             buttons.append(row)
@@ -118,17 +113,17 @@ def games_keyboard():
     ])
 
 def grade_select_for_game_keyboard(game_type: str):
-    emojis = {1:"🌱",2:"🌿",3:"📗",4:"🌺",5:"🌟",6:"⚔️",7:"💎",8:"🦅",9:"✍️",10:"🔥",11:"🏆"}
+    emojis = {7:"💎",8:"🦅",9:"✍️"}
     buttons = []
     row = []
-    for g in range(1, 12):
+    for g in range(7, 10):
         row.append(InlineKeyboardButton(f"{emojis[g]}{g}", callback_data=f"game_{game_type}_grade_{g}"))
-        if len(row) == 4:
+        if len(row) == 3:
             buttons.append(row)
             row = []
     if row:
         buttons.append(row)
-    buttons.append([InlineKeyboardButton("🎲 Барлық класс", callback_data=f"game_{game_type}_grade_0")])
+    buttons.append([InlineKeyboardButton("🎲 Барлық сынып", callback_data=f"game_{game_type}_grade_0")])
     buttons.append([InlineKeyboardButton("🔙 Ойындарға", callback_data="menu_games")])
     return InlineKeyboardMarkup(buttons)
 
@@ -158,7 +153,6 @@ def game_result_keyboard():
          InlineKeyboardButton("🏠 Бас мәзір", callback_data="menu_main")],
     ])
 
-# ─── ПРОФИЛЬ ───────────────────────────────────────────────────────────────────
 def profile_keyboard():
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("🎓 Сынып таңдау", callback_data="profile_set_grade")],
@@ -168,12 +162,12 @@ def profile_keyboard():
     ])
 
 def set_grade_keyboard():
-    emojis = {1:"🌱",2:"🌿",3:"📗",4:"🌺",5:"🌟",6:"⚔️",7:"💎",8:"🦅",9:"✍️",10:"🔥",11:"🏆"}
+    emojis = {7:"💎",8:"🦅",9:"✍️"}
     buttons = []
     row = []
-    for g in range(1, 12):
+    for g in range(7, 10):
         row.append(InlineKeyboardButton(f"{emojis[g]}{g}", callback_data=f"set_grade_{g}"))
-        if len(row) == 4:
+        if len(row) == 3:
             buttons.append(row)
             row = []
     if row:
