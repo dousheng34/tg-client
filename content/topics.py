@@ -96,7 +96,7 @@ TOPICS_CONTENT = {
         )
     },
     "tampish_qara_7": {
-        "title": "Сайын Мұратбеков «Тәмпіш қара»", # Note: С. Сарғасқаев деп тұрғанда қате болмауы үшін, бірақ Мұратбеков жазған еді. User said С. Сарғасқаев "Тәмпіш қара", wait, user said С. Сарғасқаев "Тәмпіш қара", I must write exactly as user said.
+        "title": "С. Сарғасқаев «Тәмпіш қара»",
         "content": (
             "<b>Сансызбай Сарғасқаев (1925-1993)</b> — балалар жазушысы.\n\n"
             "📖 <b>«Тәмпіш қара» повесі:</b>\n"
@@ -140,7 +140,6 @@ TOPICS_CONTENT = {
             "🌟 <b>Идеясы:</b> Ақын мен поэзияның мәңгілігі."
         )
     },
-
     # 8-сынып
     "qorqyt_8": {
         "title": "Қорқыт «Бамсы-Байрақ» және нақыл сөздері",
@@ -194,7 +193,6 @@ TOPICS_CONTENT = {
         "title": "Р. Мұқанова «Мәңгілік бала бейне»",
         "content": "Семей полигонының зардабы, Ләйләнің қайғылы тағдыры."
     },
-
     # 9-сынып
     "balasagun_9": {
         "title": "Ж. Баласағұн «Құтты білік»",
@@ -264,3 +262,37 @@ def count_topics(grade: int) -> int:
         return len(GRADE_DATA.get(grade, {}).get("topics", []))
     except Exception:
         return 0
+
+def get_topics(grade: int) -> list:
+    try:
+        from .grades import GRADE_DATA
+        topics_list = GRADE_DATA.get(grade, {}).get("topics", [])
+        result = []
+        for t in topics_list:
+            key = t.get("key")
+            result.append({
+                "id": key,
+                "title": t.get("title", ""),
+                "emoji": "📖",
+                "quiz": []
+            })
+        return result
+    except Exception:
+        return []
+
+def get_topic(grade: int, topic_id: str) -> dict:
+    content_data = TOPICS_CONTENT.get(topic_id, {})
+    return {
+        "id": topic_id,
+        "title": content_data.get("title", "Тақырып"),
+        "content": content_data.get("content", "Мазмұны табылған жоқ."),
+        "quiz": get_topic_quiz(grade, topic_id)
+    }
+
+def get_topic_quiz(grade: int, topic_id: str) -> list:
+    try:
+        from .quiz_bank import QUIZ_BANK
+        grade_quiz = QUIZ_BANK.get(grade, [])
+        return [q for q in grade_quiz if q.get("topic") == topic_id]
+    except Exception:
+        return []
