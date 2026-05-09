@@ -58,7 +58,7 @@ def main_menu_keyboard():
 def grades_keyboard():
     buttons = []
     row = []
-    emojis = {7:"💎",8:"🦅",9:"✍️"}
+    emojis = {7:"💎", 8:"🦅", 9:"✍️"}
     for g in range(7, 10):
         row.append(InlineKeyboardButton(f"{emojis[g]}{g}-сынып", callback_data=f"grade_{g}"))
         if len(row) == 3:
@@ -113,11 +113,11 @@ def games_keyboard():
     ])
 
 def grade_select_for_game_keyboard(game_type: str):
-    emojis = {7:"💎",8:"🦅",9:"✍️"}
+    emojis = {7:"💎", 8:"🦅", 9:"✍️"}
     buttons = []
     row = []
     for g in range(7, 10):
-        row.append(InlineKeyboardButton(f"{emojis[g]}{g}", callback_data=f"game_{game_type}_grade_{g}"))
+        row.append(InlineKeyboardButton(f"{emojis[g]} {g}", callback_data=f"game_{game_type}_grade_{g}"))
         if len(row) == 3:
             buttons.append(row)
             row = []
@@ -162,11 +162,11 @@ def profile_keyboard():
     ])
 
 def set_grade_keyboard():
-    emojis = {7:"💎",8:"🦅",9:"✍️"}
+    emojis = {7:"💎", 8:"🦅", 9:"✍️"}
     buttons = []
     row = []
     for g in range(7, 10):
-        row.append(InlineKeyboardButton(f"{emojis[g]}{g}", callback_data=f"set_grade_{g}"))
+        row.append(InlineKeyboardButton(f"{emojis[g]} {g}", callback_data=f"set_grade_{g}"))
         if len(row) == 3:
             buttons.append(row)
             row = []
