@@ -19,7 +19,6 @@ from database import get_or_create_user, get_level_info
 
 ADMIN_ID = os.getenv("ADMIN_TELEGRAM_ID", "")
 
-# Webapp URL конфигурациясы
 WEBAPP_URL        = os.getenv('WEBAPP_URL', '').strip()
 KOYEB_BASE        = 'https://controversial-rosaleen-t44t-00f78407.koyeb.app'
 
@@ -36,8 +35,6 @@ def get_webapp_url():
         return url
     return KOYEB_BASE + '/app'
 
-
-# Күнделікті қызықты деректер — таза қазақ тілінде
 DAILY_FACTS = [
     "💡 Абайдың шын есімі — Ибраһим. «Абай» лақап атын сүйіктілі алтын шәкіртіне оның әжесі Зере берген!",
     "💡 Жамбыл Жабаев 99 жыл өмір сүрді — қазақ ақындарының ішіндегі ең ұзақ ғұмырлысы!",
@@ -61,7 +58,7 @@ DAILY_FACTS = [
 
 MAIN_MENU_TEXT = (
     "<b>📚 ҚАЗАҚ ӘДЕБИЕТІ — БІЛІМ КІТАПХАНАСЫ</b>\n\n"
-    "🎓 5-11 сынып қазақ әдебиеті — тақырыптар, авторлар, сұрақ-жауап\n\n"
+    "🎓 7-9 сынып қазақ әдебиеті — тақырыптар, авторлар, сұрақ-жауап\n\n"
     "👇 <b>Бөлімді таңдаңыз:</b>"
 )
 
@@ -116,7 +113,7 @@ def start_command(update: Update, context: CallbackContext):
         f"⭐ Жинаған ұпай: <b>{points}</b>\n"
         f"{streak_txt}\n"
         f"<b>📚 ҚАЗАҚ ӘДЕБИЕТІ — БІЛІМ КІТАПХАНАСЫ</b>\n\n"
-        f"🎓 5–11 сынып қазақ әдебиеті — тақырыптар, авторлар, сұрақ-жауап\n\n"
+        f"🎓 7–9 сынып қазақ әдебиеті — тақырыптар, авторлар, сұрақ-жауап\n\n"
         f"👇 <b>Бөлімді таңдаңыз:</b>"
     )
 
@@ -148,10 +145,6 @@ def main_menu_callback(update: Update, context: CallbackContext):
         reply_markup=_build_inline_menu(user.id)
     )
 
-
-
-
-
 def daily_fact_callback(update: Update, context: CallbackContext):
     """Күнделікті қызықты дерек"""
     query = update.callback_query
@@ -175,7 +168,7 @@ def help_callback(update: Update, context: CallbackContext):
     from utils.keyboards import back_to_main
     help_text = (
         "ℹ️ <b>АНЫҚТАМА — Қалай пайдалану керек?</b>\n\n"
-        "📖 <b>САБАҚТАР (1–11 сынып)</b>\n"
+        "📖 <b>САБАҚТАР (7–9 сынып)</b>\n"
         "   Сыныбыңды таңда → Тақырыпты оқы → Ұпай жина!\n\n"
         "🎮 <b>ОЙЫНДАР — 6 түрлі</b>\n"
         "   🎯 Викторина — 4 нұсқалы сұрақтар\n"
