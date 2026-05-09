@@ -1,1759 +1,253 @@
 <!DOCTYPE html>
 <html lang="kk">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Қазақ Әдебиеті — Ойын Кітапханасы</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-/* ══════════════════ DESIGN TOKENS ════════════════════════════════════════ */
-:root {
-  --bg:        #10141a;
-  --bg-low:    #181c22;
-  --bg-mid:    #1c2026;
-  --bg-high:   #262a31;
-  --bg-top:    #31353c;
-  --bright:    #353940;
-  --gold:      #e5c27f;
-  --gold-dim:  #c0a060;
-  --silver:    #bcc7db;
-  --blue:      #a9c7fe;
-  --text:      #dfe2eb;
-  --subtext:   #d0c5b5;
-  --outline:   rgba(78, 68, 55, 0.3);
-  --r4:        4px;
-  --r8:        8px;
-  --r12:       12px;
-  --r16:       16px;
-  --r24:       24px;
-  --r-pill:    999px;
-  --shadow:    0 24px 48px rgba(0,0,0,0.4);
-  --shadow-sm: 0 8px 20px rgba(0,0,0,0.3);
-}
+  <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>Adebiette Alemi - Oqu Game</title>
+      <script src="https://telegram.org/js/telegram-web-app.js"></script>
+      <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+      <style>
+                :root {
+                              --primary: #2c3e50;
+                              --secondary: #34495e;
+                              --accent: #e67e22;
+                              --success: #27ae60;
+                              --bg: #f5f6fa;
+                              --text: #2f3640;
+                              --white: #ffffff;
+                }
 
-/* ══════════════════ RESET + BASE ══════════════════════════════════════════ */
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html { height: 100%; }
-body {
-  font-family: 'Manrope', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100%;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  overscroll-behavior: none;
-}
-h1, h2, h3 { font-family: 'Noto Serif', serif; }
+                * {
+                              box-sizing: border-box;
+                              margin: 0;
+                              padding: 0;
+                              -webkit-tap-highlight-color: transparent;
+                }
+                body {
+                              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                              background-color: var(--bg);
+                              color: var(--text);
+                              line-height: 1.6;
+                              overflow-x: hidden;
+                }
 
-/* ══════════════════ SCREENS ═══════════════════════════════════════════════ */
-.screen { display: none; min-height: 100vh; padding-bottom: 80px; }
-.screen.active { display: block; }
-.page-enter { animation: pageIn 0.3s cubic-bezier(0.22,1,0.36,1); }
-@keyframes pageIn { from { opacity:0; transform: translateY(18px); } to { opacity:1; transform: none; } }
+                .container {
+                              max-width: 600px;
+                              margin: 0 auto;
+                              padding: 20px;
+                }
 
-/* ══════════════════ HEADER ════════════════════════════════════════════════ */
-.app-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: rgba(16,20,26,0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  padding: 14px 20px 12px;
-  border-bottom: 1px solid var(--outline);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.header-left { display: flex; align-items: center; gap: 10px; }
-.header-logo { font-family: 'Noto Serif', serif; font-size: 1.1rem; font-weight: 700; color: var(--gold); }
-.header-sub { font-size: 0.7rem; color: var(--subtext); }
-.back-btn {
-  width: 36px; height: 36px;
-  background: var(--bg-mid);
-  border: none;
-  border-radius: var(--r8);
-  color: var(--text);
-  font-size: 1.1rem;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.15s;
-}
-.back-btn:active { background: var(--bright); }
+                header {
+                              background: linear-gradient(135deg, var(--primary), var(--secondary));
+                              color: var(--white);
+                              padding: 25px 20px;
+                              text-align: center;
+                              border-radius: 0 0 25px 25px;
+                              box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                              margin-bottom: 20px;
+                }
 
-/* ══════════════════ STATS BAR ═════════════════════════════════════════════ */
-.stats-bar {
-  display: flex;
-  gap: 8px;
-  padding: 12px 20px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.stats-bar::-webkit-scrollbar { display: none; }
-.stat-pill {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--bg-mid);
-  border-radius: var(--r-pill);
-  padding: 6px 14px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.stat-pill .sp-icon { font-size: 1rem; }
-.stat-pill .sp-val { font-size: 0.85rem; font-weight: 700; color: var(--gold); }
-.stat-pill .sp-lbl { font-size: 0.7rem; color: var(--subtext); }
+                h1 { font-size: 1.8rem; margin-bottom: 5px; }
+                .subtitle { font-size: 0.9rem; opacity: 0.9; }
+        <body>
+            <div id="home-view">
+                <header>
+                    <h1>Adebiette Alemi</h1>
+                    <p class="subtitle">7-9 grade curriculum alignment</p>
+                </header>
 
-/* ══════════════════ SECTION TITLE ═════════════════════════════════════════ */
-.section-hdr {
-  padding: 16px 20px 10px;
-  font-family: 'Noto Serif', serif;
-  font-size: 1.1rem;
-  color: var(--gold);
-  letter-spacing: 0.01em;
-}
-
-/* ══════════════════ GAME CARDS GRID ═══════════════════════════════════════ */
-.games-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  padding: 0 20px 8px;
-}
-.game-card {
-  position: relative;
-  background: var(--bg-low);
-  border-radius: var(--r16);
-  padding: 20px 14px;
-  cursor: pointer;
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  border: 1px solid rgba(255,255,255,0.04);
-}
-.game-card::before {
-  content: '';
-  position: absolute;
-  top: -30px; right: -30px;
-  width: 80px; height: 80px;
-  border-radius: 50%;
-  opacity: 0.12;
-  filter: blur(20px);
-}
-.game-card.glow-blue::before   { background: #3b82f6; }
-.game-card.glow-purple::before { background: #8b5cf6; }
-.game-card.glow-orange::before { background: #f97316; }
-.game-card.glow-green::before  { background: #10b981; }
-.game-card.glow-pink::before   { background: #ec4899; }
-.game-card.glow-teal::before   { background: #06b6d4; }
-.game-card:active { transform: scale(0.96); box-shadow: var(--shadow); }
-.game-card .gc-emoji { font-size: 1.8rem; display: block; margin-bottom: 8px; }
-.game-card .gc-title { font-weight: 700; font-size: 0.9rem; color: var(--text); }
-.game-card .gc-desc { font-size: 0.68rem; color: var(--subtext); margin-top: 3px; }
-.game-card .gc-badge {
-  position: absolute;
-  top: 10px; right: 10px;
-  background: var(--gold-dim);
-  color: #261900;
-  font-size: 0.6rem;
-  font-weight: 800;
-  padding: 2px 6px;
-  border-radius: var(--r-pill);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-/* ══════════════════ DIFFICULTY CHIPS ══════════════════════════════════════ */
-.diff-chips {
-  display: flex;
-  gap: 8px;
-  padding: 8px 20px 16px;
-}
-.diff-chip {
-  padding: 6px 14px;
-  border-radius: var(--r-pill);
-  font-size: 0.78rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-  background: var(--bg-mid);
-  color: var(--subtext);
-  border: 1px solid transparent;
-}
-.diff-chip.active {
-  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-  color: #261900;
-  border-color: transparent;
-}
-
-/* ══════════════════ BOTTOM NAV ════════════════════════════════════════════ */
-.bottom-nav {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  height: 64px;
-  background: rgba(28,32,38,0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--outline);
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  z-index: 200;
-}
-.nav-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  cursor: pointer;
-  padding: 6px 12px;
-  border-radius: var(--r8);
-  transition: background 0.15s;
-  background: none;
-  border: none;
-  color: var(--subtext);
-}
-.nav-btn .nb-icon { font-size: 1.2rem; }
-.nav-btn .nb-lbl { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
-.nav-btn.active { color: var(--gold); }
-.nav-btn:active { background: var(--bg-mid); }
-
-/* ══════════════════ GOLDEN BUTTON ═════════════════════════════════════════ */
-.btn-gold {
-  width: calc(100% - 40px);
-  margin: 0 20px;
-  padding: 16px;
-  border: none;
-  border-radius: var(--r-pill);
-  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-  color: #261900;
-  font-family: 'Manrope', sans-serif;
-  font-size: 1rem;
-  font-weight: 800;
-  cursor: pointer;
-  letter-spacing: 0.02em;
-  box-shadow: 0 8px 24px rgba(193,158,86,0.35);
-  transition: all 0.15s;
-}
-.btn-gold:active { transform: scale(0.97); box-shadow: 0 4px 12px rgba(193,158,86,0.2); }
-.btn-outline {
-  width: calc(100% - 40px);
-  margin: 0 20px;
-  padding: 14px;
-  border: 1.5px solid rgba(229,194,127,0.3);
-  border-radius: var(--r-pill);
-  background: transparent;
-  color: var(--gold);
-  font-family: 'Manrope', sans-serif;
-  font-size: 0.95rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.btn-outline:active { background: rgba(229,194,127,0.06); }
-
-/* ══════════════════ GAME SCREENS — COMMON ═════════════════════════════════ */
-.game-header {
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.progress-track {
-  height: 4px;
-  background: var(--bg-mid);
-  border-radius: 2px;
-  margin: 0 20px 16px;
-  position: relative;
-  overflow: hidden;
-}
-.progress-fill {
-  height: 100%;
-  border-radius: 2px;
-  background: linear-gradient(90deg, var(--gold), var(--blue));
-  transition: width 0.4s cubic-bezier(0.22,1,0.36,1);
-}
-.score-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 0 20px 16px;
-  align-items: center;
-}
-.score-row .sr-score { font-size: 1rem; font-weight: 800; color: var(--gold); }
-.score-row .sr-timer {
-  display: flex; align-items: center; gap: 4px;
-  font-size: 1rem; font-weight: 700;
-  color: var(--text);
-  background: var(--bg-mid);
-  padding: 4px 12px;
-  border-radius: var(--r-pill);
-}
-.sr-timer.urgent { color: #ff6b6b; animation: pulse 0.6s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-
-/* QUESTION CARD */
-.q-card {
-  margin: 0 20px 20px;
-  background: linear-gradient(135deg, var(--bg-low), var(--bg-mid));
-  border-radius: var(--r16);
-  padding: 24px 20px;
-  min-height: 90px;
-  display: flex; align-items: center; justify-content: center;
-  text-align: center;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--outline);
-}
-.q-card .q-hint { font-size: 0.7rem; color: var(--subtext); margin-bottom: 8px; }
-.q-card .q-text { font-family: 'Noto Serif', serif; font-size: 1.05rem; line-height: 1.6; }
-
-/* OPTIONS */
-.options { padding: 0 20px; display: flex; flex-direction: column; gap: 10px; }
-.opt-btn {
-  background: var(--bg-mid);
-  border: 1.5px solid rgba(255,255,255,0.05);
-  border-radius: var(--r12);
-  padding: 14px 18px;
-  color: var(--text);
-  font-family: 'Manrope', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  text-align: left;
-  display: flex; align-items: center; gap: 12px;
-  transition: all 0.15s;
-  position: relative;
-  overflow: hidden;
-}
-.opt-btn::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  width: 3px; height: 100%;
-  background: var(--gold);
-  transform: scaleY(0);
-  transition: transform 0.15s;
-  border-radius: 0 2px 2px 0;
-}
-.opt-btn:active { background: var(--bg-high); }
-.opt-btn:active::before { transform: scaleY(1); }
-.opt-btn .opt-ltr {
-  width: 30px; height: 30px;
-  border-radius: 50%;
-  background: var(--bg-high);
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 0.8rem;
-  flex-shrink: 0;
-  transition: background 0.2s;
-}
-.opt-btn.correct { background: rgba(16,185,129,0.15); border-color: #10b981; }
-.opt-btn.correct .opt-ltr { background: #10b981; color: #fff; }
-.opt-btn.wrong { background: rgba(239,68,68,0.15); border-color: #ef4444; }
-.opt-btn.wrong .opt-ltr { background: #ef4444; color: #fff; }
-.opt-btn.disabled { pointer-events: none; }
-
-/* ══════════════════ CARD GAME (Карточкалар) ═══════════════════════════════ */
-.cards-info { padding: 0 20px 16px; display: flex; justify-content: space-between; font-size:0.8rem; color:var(--subtext); }
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  padding: 0 16px 20px;
-}
-.mem-card {
-  aspect-ratio: 1;
-  border-radius: var(--r8);
-  cursor: pointer;
-  position: relative;
-  transform-style: preserve-3d;
-  transition: transform 0.4s cubic-bezier(0.22,1,0.36,1);
-}
-.mem-card.flipped { transform: rotateY(180deg); }
-.mem-card.matched { transform: rotateY(180deg); opacity:0.5; pointer-events:none; }
-.mem-card .mc-front,
-.mem-card .mc-back {
-  position: absolute; inset: 0;
-  border-radius: var(--r8);
-  display: flex; align-items: center; justify-content: center;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-.mem-card .mc-front {
-  background: var(--bg-mid);
-  border: 1px solid var(--outline);
-  font-size: 1.4rem;
-}
-.mem-card .mc-back {
-  background: linear-gradient(135deg, var(--bg-low), var(--bg-mid));
-  border: 1.5px solid var(--gold-dim);
-  transform: rotateY(180deg);
-  font-size: 0.6rem;
-  font-weight: 600;
-  text-align: center;
-  padding: 4px;
-  color: var(--gold);
-  line-height: 1.3;
-}
-
-/* ══════════════════ TIMELINE GAME ═════════════════════════════════════════ */
-.timeline-list {
-  padding: 0 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.tl-item {
-  background: var(--bg-mid);
-  border-radius: var(--r12);
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: grab;
-  transition: background 0.15s, box-shadow 0.15s;
-  border: 1.5px solid transparent;
-  user-select: none;
-}
-.tl-item.dragging {
-  background: var(--bg-high);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  border-color: var(--gold-dim);
-  cursor: grabbing;
-}
-.tl-item.drag-over { border-color: var(--blue); }
-.tl-item .tl-handle { color: var(--subtext); font-size:1rem; }
-.tl-item .tl-content { flex:1; }
-.tl-item .tl-name { font-weight: 600; font-size: 0.9rem; }
-.tl-item .tl-hint { font-size: 0.7rem; color: var(--subtext); margin-top: 2px; }
-.tl-item .tl-year {
-  font-family: 'Noto Serif', serif;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--gold);
-  background: rgba(229,194,127,0.1);
-  padding: 3px 8px;
-  border-radius: var(--r-pill);
-}
-.tl-item.correct-pos { border-color: #10b981; background: rgba(16,185,129,0.1); }
-.tl-item.wrong-pos   { border-color: #ef4444; background: rgba(239,68,68,0.1); }
-
-/* ══════════════════ RESULT SCREEN ═════════════════════════════════════════ */
-.result-hero {
-  text-align: center;
-  padding: 30px 20px 20px;
-}
-.result-ring {
-  width: 130px; height: 130px;
-  margin: 0 auto 20px;
-  border-radius: 50%;
-  position: relative;
-  display: flex; align-items: center; justify-content: center;
-  flex-direction: column;
-}
-.result-ring svg.ring-svg {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  transform: rotate(-90deg);
-}
-.ring-track { fill: none; stroke: var(--bg-high); stroke-width: 8; }
-.ring-fill  { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1.2s cubic-bezier(0.22,1,0.36,1); }
-.result-ring .r-score { font-family:'Noto Serif',serif; font-size:2.5rem; font-weight:700; color:var(--gold); z-index:1; line-height:1; }
-.result-ring .r-of    { font-size:0.75rem; color:var(--subtext); z-index:1; }
-.res-title { font-family:'Noto Serif',serif; font-size:1.4rem; font-weight:700; margin-bottom:6px; }
-.res-sub   { color:var(--subtext); font-size:0.875rem; margin-bottom:24px; }
-.res-stars { font-size:2rem; letter-spacing:4px; margin-bottom:20px; }
-.res-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  padding: 0 20px 20px;
-}
-.res-stat {
-  background: var(--bg-mid);
-  border-radius: var(--r12);
-  padding: 14px;
-  text-align: center;
-}
-.res-stat .rs-val { font-size:1.5rem; font-weight:800; color:var(--gold); }
-.res-stat .rs-lbl { font-size:0.7rem; color:var(--subtext); margin-top:2px; }
-.btn-row { display:flex; flex-direction:column; gap:10px; padding:0 20px 20px; }
-
-/* ══════════════════ PROFILE SCREEN ════════════════════════════════════════ */
-.profile-hero {
-  padding: 24px 20px 16px;
-  display: flex; align-items: center; gap: 16px;
-}
-.avatar {
-  width: 64px; height: 64px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.8rem;
-  flex-shrink: 0;
-}
-.profile-name { font-family:'Noto Serif',serif; font-size:1.2rem; font-weight:700; }
-.profile-lvl  { font-size:0.8rem; color:var(--gold); margin-top:2px; }
-.profile-pts  { font-size:0.75rem; color:var(--subtext); margin-top:1px; }
-.level-bar {
-  margin: 0 20px 20px;
-  background: var(--bg-mid);
-  border-radius: var(--r8);
-  padding: 14px;
-}
-.lb-top { display:flex; justify-content:space-between; margin-bottom:8px; font-size:0.8rem; }
-.lb-top span:first-child { color:var(--subtext); }
-.lb-top span:last-child  { color:var(--gold); font-weight:700; }
-.lb-track { height:6px; background: var(--bg-high); border-radius:3px; }
-.lb-fill  { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--gold),var(--blue)); }
-.badges-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  padding: 0 20px 16px;
-}
-.badge-cell {
-  background: var(--bg-mid);
-  border-radius: var(--r8);
-  padding: 12px 8px;
-  text-align: center;
-  border: 1px solid var(--outline);
-}
-.badge-cell .bc-icon { font-size:1.5rem; }
-.badge-cell .bc-name { font-size:0.55rem; color:var(--subtext); margin-top:4px; line-height:1.2; }
-.badge-cell.earned { border-color: rgba(229,194,127,0.3); background: rgba(229,194,127,0.06); }
-.badge-cell.locked { opacity:0.4; }
-
-/* ══════════════════ LEADERBOARD ════════════════════════════════════════════ */
-.leader-list {
-  padding: 0 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.leader-item {
-  background: var(--bg-mid);
-  border-radius: var(--r12);
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border: 1px solid var(--outline);
-}
-.leader-item.top1 { border-color: rgba(229,194,127,0.4); background: rgba(229,194,127,0.06); }
-.leader-item.top2 { border-color: rgba(188,199,219,0.3); }
-.leader-item.top3 { border-color: rgba(180,120,80,0.3); }
-.li-rank { font-size:1.2rem; width:30px; text-align:center; font-weight:800; }
-.li-ava {
-  width:38px; height:38px;
-  border-radius:50%;
-  background:var(--bg-high);
-  display:flex; align-items:center; justify-content:center;
-  font-size:1.2rem;
-  flex-shrink:0;
-}
-.li-name { font-weight:600; font-size:0.9rem; }
-.li-sub  { font-size:0.7rem; color:var(--subtext); }
-.li-pts  { margin-left:auto; font-weight:800; color:var(--gold); font-size:0.9rem; }
-
-/* ══════════════════ MICRO-ANIMATIONS ══════════════════════════════════════ */
-.pop { animation: pop 0.25s cubic-bezier(0.22,1,0.36,1); }
-@keyframes pop { 0%{transform:scale(0.8);opacity:0} 60%{transform:scale(1.05)} 100%{transform:scale(1);opacity:1} }
-.shake { animation: shake 0.3s; }
-@keyframes shake { 0%,100%{transform:none} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
-.bounce-in { animation: bounceIn 0.5s cubic-bezier(0.22,1,0.36,1); }
-@keyframes bounceIn { 0%{transform:scale(0)} 60%{transform:scale(1.1)} 100%{transform:scale(1)} }
-
-/* Confetti */
-.confetti-wrap { position:fixed; inset:0; pointer-events:none; z-index:9999; overflow:hidden; }
-.cf { position:absolute; width:8px; height:8px; border-radius:2px; animation:cf-fall linear forwards; }
-@keyframes cf-fall {
-  0%  { transform: translateY(-20px) rotate(0deg); opacity:1; }
-  100%{ transform: translateY(105vh) rotate(720deg); opacity:0; }
-}
-
-/* Misc */
-.divider { height:1px; background:var(--outline); margin:0 20px 16px; }
-.gap { height: 12px; }
-</style>
-</head>
-<body>
-
-<!-- ═══════════ HOME SCREEN ════════════════════════════════════════════════ -->
-<div class="screen active page-enter" id="homeScreen">
-  <div class="app-header">
-    <div class="header-left">
-      <div>
-        <div class="header-logo">📚 Қазақ Әдебиеті</div>
-        <div class="header-sub">Ойын Кітапханасы</div>
+                <div class="container">
+                    <div class="stats-bar">
+                        <div class="stat-item">
+                            <span class="stat-value" id="total-score">0</span>
+                            <span class="stat-label">Points</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="games-played">0</span>
+                            <span class="stat-label">Games</span></div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="rank">Beginner</span>
+                            <span class="stat-label">Level</span></div></div>
+                    <div class="game-grid">
+                        <div class="game-card" onclick="startGame('quiz')">
+                            <i class="fas fa-question-circle"></i>
+                            <h3>Quiz</h3>
+                            <p>7-9 grade questions</p>
+                        </div>
+                        <div class="game-card" onclick="startGame('who')">
+                            <i class="fas fa-user-edit"></i>
+                            <h3>Who wrote?</h3>
+                            <p>Find the author</p>
+                        </div>
+                        <div class="game-card" onclick="startGame('blitz')">
+                            <i class="fas fa-bolt"></i>
+                            <h3>Blitz</h3>
+                            <p>Speed test</p>
+                        </div>
+                        <div class="game-card" onclick="startGame('quotes')">
+                            <i class="fas fa-quote-left"></i>
+                            <h3>Quotes</h3>
+                            <p>Continue the quote</p>
+                        </div>
+                        <div class="game-card" onclick="startGame('memory')">
+                            <i class="fas fa-th"></i>
+                            <h3>Memory</h3>
+                            <p>Find the pair</p>
+                        </div>
+                        <div class="game-card" onclick="startGame('timeline')">
+                            <i class="fas fa-history"></i>
+                            <h3>Timeline</h3>
+                            <p>Put in order</p>
+                        </div>
+                    </div>
+                    <div style="background:#e1f5fe;padding:15px;border-radius:15px;border:1px solid #b3e5fc">
+                        <h4 style="color:#0277bd;margin-bottom:8px"><i class="fas fa-star"></i> Topic of the week:</h4>
+                        <p style="font-size:0.9rem">"Jau tylyndagy bala" - Kasym Kaisenov. Double points for this topic!</p>
+                    </div>
+                </div>
       </div>
-    </div>
-    <button class="back-btn" onclick="showLeaderboard()">🏆</button>
-  </div>
 
-  <!-- Stats -->
-  <div class="stats-bar">
-    <div class="stat-pill">
-      <span class="sp-icon">⭐</span>
-      <span class="sp-val" id="homeLevel">Оқушы</span>
-      <span class="sp-lbl">деңгей</span>
-    </div>
-    <div class="stat-pill">
-      <span class="sp-icon">🪙</span>
-      <span class="sp-val" id="homePoints">0</span>
-      <span class="sp-lbl">ұпай</span>
-    </div>
-    <div class="stat-pill">
-      <span class="sp-icon">🔥</span>
-      <span class="sp-val" id="homeStreak">0</span>
-      <span class="sp-lbl">күн стрик</span>
-    </div>
-    <div class="stat-pill">
-      <span class="sp-icon">🎮</span>
-      <span class="sp-val" id="homeGames">0</span>
-      <span class="sp-lbl">ойын</span>
-    </div>
-  </div>
-
-  <!-- Difficulty -->
-  <div class="section-hdr">🎯 Қиындық деңгейі</div>
-  <div class="diff-chips">
-    <div class="diff-chip active" data-diff="all"    onclick="setDiff('all',this)">Барлығы</div>
-    <div class="diff-chip"        data-diff="easy"   onclick="setDiff('easy',this)">Оңай</div>
-    <div class="diff-chip"        data-diff="medium" onclick="setDiff('medium',this)">Орташа</div>
-    <div class="diff-chip"        data-diff="hard"   onclick="setDiff('hard',this)">Қиын</div>
-  </div>
-
-  <!-- Games -->
-  <div class="section-hdr">🎮 Ойын таңда</div>
-  <div class="games-grid">
-    <div class="game-card glow-blue"   onclick="startGame('quiz')">
-      <div class="gc-badge">ТОП</div>
-      <span class="gc-emoji">🎯</span>
-      <div class="gc-title">Викторина</div>
-      <div class="gc-desc">4 нұсқалы сұрақтар</div>
-    </div>
-    <div class="game-card glow-purple" onclick="startGame('whowrote')">
-      <span class="gc-emoji">✍️</span>
-      <div class="gc-title">Кім жазды?</div>
-      <div class="gc-desc">Авторды тап</div>
-    </div>
-    <div class="game-card glow-orange" onclick="startGame('blitz')">
-      <div class="gc-badge">⚡</div>
-      <span class="gc-emoji">⚡</span>
-      <div class="gc-title">Блиц-тур</div>
-      <div class="gc-desc">10 сек жауап</div>
-    </div>
-    <div class="game-card glow-green"  onclick="startGame('quote')">
-      <span class="gc-emoji">💬</span>
-      <div class="gc-title">Цитата</div>
-      <div class="gc-desc">Кімнің сөзі?</div>
-    </div>
-    <div class="game-card glow-pink"   onclick="startGame('memory')">
-      <div class="gc-badge">ЖАЛ</div>
-      <span class="gc-emoji">🎴</span>
-      <div class="gc-title">Жад Карточкасы</div>
-      <div class="gc-desc">Жұп тап!</div>
-    </div>
-    <div class="game-card glow-teal"   onclick="startGame('timeline')">
-      <span class="gc-emoji">📅</span>
-      <div class="gc-title">Хронология</div>
-      <div class="gc-desc">Ретімен орналастыр</div>
-    </div>
-  </div>
-  <div class="gap"></div>
-</div>
-
-<!-- ═══════════ QUIZ SCREEN (Викторина / Кім жазды? / Цитата) ════════════ -->
-<div class="screen" id="quizScreen">
-  <div class="app-header">
-    <button class="back-btn" onclick="goHome()">←</button>
-    <div class="header-left">
-      <div>
-        <div class="header-logo" id="quizTitle">Викторина</div>
-        <div class="header-sub" id="quizSubtitle">Білімді сынаймыз!</div>
-      </div>
-    </div>
-    <div style="width:36px"></div>
-  </div>
-
-  <div class="progress-track">
-    <div class="progress-fill" id="qProgress" style="width:0%"></div>
-  </div>
-
-  <div class="score-row">
-    <div class="sr-score">⭐ <span id="qScore">0</span></div>
-    <div class="sr-timer" id="qTimer">⏱ 30</div>
-    <div style="font-size:0.85rem;color:var(--subtext)"><span id="qNum">1</span>/<span id="qTotal">10</span></div>
-  </div>
-
-  <div class="q-card">
-    <div>
-      <div class="q-hint" id="qHint"></div>
-      <div class="q-text" id="qText">Сұрақ жүктелуде...</div>
-    </div>
-  </div>
-
-  <div class="options" id="qOptions"></div>
-</div>
-
-<!-- ═══════════ BLITZ SCREEN ═════════════════════════════════════════════ -->
-<div class="screen" id="blitzScreen">
-  <div class="app-header">
-    <button class="back-btn" onclick="goHome()">←</button>
-    <div class="header-left">
-      <div>
-        <div class="header-logo">⚡ Блиц-тур</div>
-        <div class="header-sub">10 секунд жауап бер!</div>
-      </div>
-    </div>
-    <div style="width:36px"></div>
-  </div>
-
-  <div class="progress-track">
-    <div class="progress-fill" id="bProgress" style="width:0%"></div>
-  </div>
-
-  <div class="score-row">
-    <div class="sr-score">⭐ <span id="bScore">0</span></div>
-    <div class="sr-timer" id="bTimer">⚡ 10</div>
-    <div style="font-size:0.85rem;color:var(--subtext)"><span id="bNum">1</span>/15</div>
-  </div>
-
-  <div class="q-card" style="min-height:110px">
-    <div class="q-text" id="bText"></div>
-  </div>
-
-  <div class="options" id="bOptions"></div>
-</div>
-
-<!-- ═══════════ MEMORY CARD SCREEN ═══════════════════════════════════════ -->
-<div class="screen" id="memoryScreen">
-  <div class="app-header">
-    <button class="back-btn" onclick="goHome()">←</button>
-    <div class="header-left">
-      <div>
-        <div class="header-logo">🎴 Жад Карточкасы</div>
-        <div class="header-sub">Жұп тап — автор+шығарма</div>
-      </div>
-    </div>
-    <div style="width:36px"></div>
-  </div>
-
-  <div class="cards-info">
-    <span>Табылды: <b id="memMatched" style="color:var(--gold)">0</b>/8</span>
-    <span>Сынақ: <b id="memMoves" style="color:var(--gold)">0</b></span>
-    <span id="memTimer" style="color:var(--subtext)">⏱ 00:00</span>
-  </div>
-
-  <div class="card-grid" id="memGrid"></div>
-</div>
-
-<!-- ═══════════ TIMELINE SCREEN ══════════════════════════════════════════ -->
-<div class="screen" id="timelineScreen">
-  <div class="app-header">
-    <button class="back-btn" onclick="goHome()">←</button>
-    <div class="header-left">
-      <div>
-        <div class="header-logo">📅 Хронология</div>
-        <div class="header-sub">Ескіден жаңаға реттеңіз</div>
-      </div>
-    </div>
-    <div style="width:36px"></div>
-  </div>
-  <div style="padding:12px 20px 4px; color:var(--subtext); font-size:0.8rem;">
-    💡 Карточкаларды сүйреп жылжытыңыз (ескіден жаңаға!)
-  </div>
-  <div class="timeline-list" id="tlList"></div>
-  <div class="gap"></div>
-  <button class="btn-gold" onclick="checkTimeline()" style="margin-top:16px">Тексеру ✓</button>
-  <div class="gap"></div>
-</div>
-
-<!-- ═══════════ RESULT SCREEN ═════════════════════════════════════════════ -->
-<div class="screen" id="resultScreen">
-  <div class="result-hero">
-    <div class="result-ring">
-      <svg class="ring-svg" viewBox="0 0 130 130">
-        <circle class="ring-track" cx="65" cy="65" r="55"/>
-        <circle class="ring-fill" id="ringCircle" cx="65" cy="65" r="55"
-          stroke="url(#rg)"
-          stroke-dasharray="345.6"
-          stroke-dashoffset="345.6"/>
-        <defs>
-          <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#e5c27f"/>
-            <stop offset="100%" stop-color="#a9c7fe"/>
-          </linearGradient>
-        </defs>
-      </svg>
-      <div class="r-score" id="resScore">0</div>
-      <div class="r-of"   id="resOf">/10</div>
-    </div>
-    <div class="res-stars" id="resStars">⭐⭐⭐</div>
-    <div class="res-title" id="resTitle">Нәтиже</div>
-    <div class="res-sub"   id="resSub">Жалғастырыңыз!</div>
-  </div>
-
-  <div class="res-stats">
-    <div class="res-stat">
-      <div class="rs-val" id="resCorrect">0</div>
-      <div class="rs-lbl">Дұрыс жауап</div>
-    </div>
-    <div class="res-stat">
-      <div class="rs-val" id="resAcc">0%</div>
-      <div class="rs-lbl">Дәлдік</div>
-    </div>
-    <div class="res-stat">
-      <div class="rs-val" id="resPts">+0</div>
-      <div class="rs-lbl">Ұпай жинады</div>
-    </div>
-    <div class="res-stat">
-      <div class="rs-val" id="resTime">0с</div>
-      <div class="rs-lbl">Орт. уақыт</div>
-    </div>
-  </div>
-
-  <div class="btn-row">
-    <button class="btn-gold"    onclick="restartGame()">🔄 Қайталау</button>
-    <button class="btn-outline" onclick="goHome()">🏠 Басты бетке</button>
-  </div>
-</div>
-
-<!-- ═══════════ PROFILE SCREEN ════════════════════════════════════════════ -->
-<div class="screen" id="profileScreen">
-  <div class="app-header">
-    <button class="back-btn" onclick="showHome()">←</button>
-    <div class="header-left">
-      <div>
-        <div class="header-logo">👤 Профиль</div>
-        <div class="header-sub">Менің жетістіктерім</div>
-      </div>
-    </div>
-    <div style="width:36px"></div>
-  </div>
-
-  <div class="profile-hero">
-    <div class="avatar">📚</div>
-    <div>
-      <div class="profile-name" id="profName">Оқушы</div>
-      <div class="profile-lvl"  id="profLvl">⭐ Оқушы деңгейі</div>
-      <div class="profile-pts"  id="profPts">0 ұпай жиналды</div>
-    </div>
-  </div>
-
-  <div class="level-bar">
-    <div class="lb-top">
-      <span>Келесі деңгейге дейін</span>
-      <span id="profNext">100 ұпай</span>
-    </div>
-    <div class="lb-track">
-      <div class="lb-fill" id="profBar" style="width:0%"></div>
-    </div>
-  </div>
-
-  <div class="section-hdr">🏅 Жетістіктер</div>
-  <div class="badges-grid" id="badgesGrid"></div>
-
-  <div class="section-hdr">📊 Статистика</div>
-  <div class="res-stats" id="profStats" style="margin:0 0 16px"></div>
-</div>
-
-<!-- ═══════════ LEADERBOARD SCREEN ════════════════════════════════════════ -->
-<div class="screen" id="leaderScreen">
-  <div class="app-header">
-    <button class="back-btn" onclick="showHome()">←</button>
-    <div class="header-left">
-      <div>
-        <div class="header-logo">🏆 Рейтинг</div>
-        <div class="header-sub">Үздік оқушылар</div>
-      </div>
-    </div>
-    <div style="width:36px"></div>
-  </div>
-  <div class="leader-list" id="leaderList"></div>
-  <div class="gap"></div>
-</div>
-
-<!-- BOTTOM NAV -->
-<nav class="bottom-nav">
-  <button class="nav-btn active" id="nav-home"   onclick="showHome();setNav('nav-home')">
-    <span class="nb-icon">🏠</span><span class="nb-lbl">Басты</span>
-  </button>
-  <button class="nav-btn" id="nav-rating" onclick="showLeaderboard();setNav('nav-rating')">
-    <span class="nb-icon">🏆</span><span class="nb-lbl">Рейтинг</span>
-  </button>
-  <button class="nav-btn" id="nav-profile" onclick="showProfile();setNav('nav-profile')">
-    <span class="nb-icon">👤</span><span class="nb-lbl">Профиль</span>
-  </button>
-</nav>
-
-<!-- CONFETTI -->
-<div class="confetti-wrap" id="confettiWrap"></div>
-
-<!-- ══════════════════════════════════════════════════════════════════════ -->
-<!-- JAVASCRIPT ENGINE                                                     -->
-<!-- ══════════════════════════════════════════════════════════════════════ -->
-<script>
-// ─── Telegram Init ────────────────────────────────────────────────────────────
-const tg = window.Telegram?.WebApp;
-if (tg) {
-  tg.ready(); tg.expand();
-  tg.setHeaderColor && tg.setHeaderColor('#10141a');
-  tg.setBackgroundColor && tg.setBackgroundColor('#10141a');
-}
-
-// ─── DATA: 100 Сұрақ (Викторина) ─────────────────────────────────────────────
-const DATA = {
-  quiz: {
-    easy: [
-      // 1-20: Оңай деңгей — Викторина
-      {q:"Абай Құнанбайұлының туған жылы қандай?", a:"1845", o:["1845","1840","1830","1850"]},
-      {q:"«Абай жолы» романы неше томнан тұрады?", a:"4 том", o:["4 том","2 том","3 том","5 том"]},
-      {q:"Ыбырай Алтынсариннің атақты өлеңі қайсы?", a:"Кел, балалар, оқылық", o:["Кел, балалар, оқылық","Желсіз түнде жарық ай","Ғылым таппай мақтанба","Өзгеге, көңілім, тоярсың"]},
-      {q:"Жамбыл Жабаев неше жыл өмір сүрді?", a:"99 жыл", o:["99 жыл","85 жыл","120 жыл","75 жыл"]},
-      {q:"Абайдың шын аты-жөні қалай?", a:"Ибраһим Құнанбайұлы", o:["Ибраһим Құнанбайұлы","Абай Қазақбаев","Мұса Құнанбайұлы","Иса Алашбеков"]},
-      {q:"«Абай жолы» романының авторы кім?", a:"Мұхтар Әуезов", o:["Мұхтар Әуезов","Сәкен Сейфуллин","Беймбет Майлин","Жүсіпбек Аймауытов"]},
-      {q:"Ахмет Байтұрсынов қандай лақап атпен белгілі?", a:"Ұлт ұстазы", o:["Ұлт ұстазы","Халық батыры","Ел данасы","Жыр алыбы"]},
-      {q:"«Оян, қазақ!» жинағын кім жазды?", a:"Міржақып Дулатов", o:["Міржақып Дулатов","Ахмет Байтұрсынов","Мағжан Жұмабаев","Шәкәрім Құдайбердіұлы"]},
-      {q:"Абайдың «Қара сөздері» қанша болды?", a:"45 қара сөз", o:["45 қара сөз","30 қара сөз","56 қара сөз","70 қара сөз"]},
-      {q:"Қазақтың тұңғыш романы қайсы?", a:"Бақытсыз Жамал", o:["Бақытсыз Жамал","Абай жолы","Ақбілек","Тар жол, тайғақ кешу"]},
-      {q:"«Маса» жинағының авторы кім?", a:"Ахмет Байтұрсынов", o:["Ахмет Байтұрсынов","Міржақып Дулатов","Мағжан Жұмабаев","Шәкәрім"]},
-      {q:"Жамбыл Жабаев туған жылы?", a:"1846", o:["1846","1840","1855","1860"]},
-      {q:"«Еңлік-Кебек» поэмасының авторы кім?", a:"Шәкәрім Құдайбердіұлы", o:["Шәкәрім Құдайбердіұлы","Мұхтар Әуезов","Мағжан Жұмабаев","Міржақып Дулатов"]},
-      {q:"Мұқағали Мақатаев туған жылы?", a:"1931", o:["1931","1920","1940","1925"]},
-      {q:"«Алаш» партиясы қай жылы құрылды?", a:"1917 жыл", o:["1917 жыл","1905 жыл","1920 жыл","1930 жыл"]},
-      {q:"Абай дүниеден қай жылы қайтты?", a:"1904 жыл", o:["1904 жыл","1900 жыл","1910 жыл","1895 жыл"]},
-      {q:"Ыбырай Алтынсарин туған жылы?", a:"1841", o:["1841","1835","1850","1845"]},
-      {q:"«Тар жол, тайғақ кешу» кімнің шығармасы?", a:"Сәкен Сейфуллин", o:["Сәкен Сейфуллин","Беймбет Майлин","Мұхтар Әуезов","Жүсіпбек Аймауытов"]},
-      {q:"Мағжан Жұмабаевтың туған жылы?", a:"1893", o:["1893","1885","1900","1875"]},
-      {q:"«Алпамыс батыр» эпосындағы батырдың аты?", a:"Алпамыс", o:["Алпамыс","Ер Тарғын","Қобыланды","Қамбар батыр"]},
-    ],
-    medium: [
-      // 21-40: Орташа деңгей — Викторина
-      {q:"«Абай жолы» романы Лениндік сыйлықты қай жылы алды?", a:"1959 жыл", o:["1959 жыл","1955 жыл","1962 жыл","1948 жыл"]},
-      {q:"«Батыр Баян» поэмасының авторы кім?", a:"Мағжан Жұмабаев", o:["Мағжан Жұмабаев","Ілияс Жансүгіров","Сәкен Сейфуллин","Жамбыл Жабаев"]},
-      {q:"Шәкәрімнің «Еңлік-Кебек» поэмасы қай оқиғаға негізделген?", a:"Шындықтағы махаббат трагедиясы", o:["Шындықтағы махаббат трагедиясы","Аңыз ертегі","Тарихи шайқас","Батыр жорығы"]},
-      {q:"«Ақбілек» романының авторы кім?", a:"Жүсіпбек Аймауытов", o:["Жүсіпбек Аймауытов","Беймбет Майлин","Мұхтар Әуезов","Сәкен Сейфуллин"]},
-      {q:"«Күй» поэмасын кім жазды?", a:"Ілияс Жансүгіров", o:["Ілияс Жансүгіров","Мағжан Жұмабаев","Сәкен Сейфуллин","Жамбыл Жабаев"]},
-      {q:"«Шұғаның белгісі» кімнің туындысы?", a:"Беймбет Майлин", o:["Беймбет Майлин","Сәкен Сейфуллин","Мұхтар Әуезов","Жүсіпбек Аймауытов"]},
-      {q:"«Көшпенділер» трилогиясын кім жазды?", a:"Іле Есенберлин", o:["Іле Есенберлин","Мұхтар Әуезов","Мұхтар Мағауин","Бауыржан Момышұлы"]},
-      {q:"Ахмет Байтұрсынов туған жылы?", a:"1872", o:["1872","1865","1880","1890"]},
-      {q:"«Маса» жинағы қай жылы жарық көрді?", a:"1911 жыл", o:["1911 жыл","1905 жыл","1917 жыл","1920 жыл"]},
-      {q:"Мұхтар Әуезов туған жылы?", a:"1897", o:["1897","1890","1905","1910"]},
-      {q:"«Бақытсыз Жамал» романын кім жазды?", a:"Міржақып Дулатов", o:["Міржақып Дулатов","Жүсіпбек Аймауытов","Беймбет Майлин","Сәкен Сейфуллин"]},
-      {q:"Оралхан Бөкейдің атақты романы қайсы?", a:"Мұзтау", o:["Мұзтау","Абай жолы","Ақбілек","Ер Тарғын"]},
-      {q:"Бауыржан Момышұлының мемуарлық кітабы қайсы?", a:"Ұшқан ұя", o:["Ұшқан ұя","Тар жол","Соғыс жолы","Батыр туды"]},
-      {q:"«Мөлдір махаббат» кімнің шығармасы?", a:"Мұқағали Мақатаев", o:["Мұқағали Мақатаев","Оралхан Бөкей","Ілияс Жансүгіров","Мағжан Жұмабаев"]},
-      {q:"Сәкен Сейфуллин туған жылы?", a:"1894", o:["1894","1890","1900","1905"]},
-      {q:"«Қарақыпшақ Қобыланды» атты эпос кімге арналған?", a:"Қобыланды батырға", o:["Қобыланды батырға","Алпамысқа","Қамбарға","Ер Тарғынға"]},
-      {q:"Шәкәрім Құдайбердіұлы туған жылы?", a:"1858", o:["1858","1850","1865","1875"]},
-      {q:"«Жер тұтқыны» кімнің романы?", a:"Мұхтар Мағауин", o:["Мұхтар Мағауин","Іле Есенберлин","Оралхан Бөкей","Мұхтар Әуезов"]},
-      {q:"Абайдың қанша өлеңі сақталған?", a:"170-тен аса өлеңі", o:["170-тен аса өлеңі","50 өлеңі","100 өлеңі","300 өлеңі"]},
-      {q:"«Ел анасы» кімнің поэмасы?", a:"Сәкен Сейфуллин", o:["Сәкен Сейфуллин","Мағжан Жұмабаев","Ілияс Жансүгіров","Беймбет Майлин"]},
-    ],
-    hard: [
-      // 41-60: Қиын деңгей — Викторина
-      {q:"Абайдың «Желсіз түнде жарық ай» өлеңі қандай жанрға жатады?", a:"Пейзаждық лирика", o:["Пейзаждық лирика","Азаматтық лирика","Философиялық лирика","Сатиралық лирика"]},
-      {q:"«Ер Едіге» жырындағы Едіге кімнің батыры болған?", a:"Ноғайлы жұртының", o:["Ноғайлы жұртының","Қыпшақ жұртының","Орта жүздің","Ұлы жүздің"]},
-      {q:"Мұхтар Әуезовтің «Абай жолы» қандай ағылшын тіліне аударылды?", a:"Abai: Book of Words", o:["Abai: Book of Words","The Path of Abai","Abai's Way","Great Steppe Poet"]},
-      {q:"«Қазақ айнасы» тарихи еңбегін кім жазды?", a:"Шәкәрім Құдайбердіұлы", o:["Шәкәрім Құдайбердіұлы","Ахмет Байтұрсынов","Міржақып Дулатов","Жүсіпбек Аймауытов"]},
-      {q:"Абайдың «Қара сөздері» неше тілге аударылған?", a:"50-ден астам тілге", o:["50-ден астам тілге","10 тілге","30 тілге","100 тілге"]},
-      {q:"«Ленинградтық өренімді» поэмасын кім жазды?", a:"Жамбыл Жабаев", o:["Жамбыл Жабаев","Мұхтар Әуезов","Бауыржан Момышұлы","Мұқағали Мақатаев"]},
-      {q:"Мұқағали Мақатаев қанша өлең жазды?", a:"4000-нан аса өлең", o:["4000-нан аса өлең","500 өлең","1000 өлең","2000 өлең"]},
-      {q:"Ілияс Жансүгіров туған жылы?", a:"1894", o:["1894","1890","1900","1905"]},
-      {q:"«Ботагөз» романын кім жазды?", a:"Сәбит Мұқанов", o:["Сәбит Мұқанов","Мұхтар Әуезов","Жүсіпбек Аймауытов","Сәкен Сейфуллин"]},
-      {q:"Беймбет Майлин туған жылы?", a:"1894", o:["1894","1890","1900","1905"]},
-      {q:"«Жоңғар» эпопеясын кім жазды?", a:"Іле Есенберлин", o:["Іле Есенберлин","Мұхтар Мағауин","Сәбит Мұқанов","Мұхтар Әуезов"]},
-      {q:"Абайдың бірінші «Қара сөзінде» не туралы айтылады?", a:"Адамның мақсаты — ғылым мен мораль", o:["Адамның мақсаты — ғылым мен мораль","Туған жер сұлулығы","Батырлар ерлігі","Достық пен адалдық"]},
-      {q:"«Ер Тарғын» жырының кейіпкері қай жүзден?", a:"Орта жүзден", o:["Орта жүзден","Ұлы жүзден","Кіші жүзден","Ноғайлыдан"]},
-      {q:"Шәкәрімнің «Дубровский» аудармасы қандай тілден жасалды?", a:"Орыс тілінен", o:["Орыс тілінен","Француз тілінен","Ағылшын тілінен","Неміс тілінен"]},
-      {q:"«Менің Мещерам» шығармасы кімнен аударылды?", a:"К.Паустовскийден", o:["К.Паустовскийден","Л.Толстойдан","А.Пушкиннен","М.Горькийден"]},
-      {q:"Мұхтар Мағауин туған жылы?", a:"1940", o:["1940","1935","1945","1950"]},
-      {q:"«Алаш» газетін кім шығарды?", a:"Ахмет Байтұрсынов", o:["Ахмет Байтұрсынов","Міржақып Дулатов","Мағжан Жұмабаев","Шәкәрім"]},
-      {q:"Оралхан Бөкей туған жылы?", a:"1943", o:["1943","1940","1950","1935"]},
-      {q:"«Сайтан көпір» кімнің шығармасы?", a:"Оралхан Бөкей", o:["Оралхан Бөкей","Мұхтар Мағауин","Сәбит Мұқанов","Іле Есенберлин"]},
-      {q:"Беймбет Майлиннің «Шұғаның белгісі» қай жанрда жазылған?", a:"Хикаят (повесть)", o:["Хикаят (повесть)","Роман","Поэма","Пьеса"]},
-    ],
-  },
-
-  whowrote: {
-    easy: [
-      // Кім жазды? — Оңай
-      {q:"«Абай жолы» романын кім жазды?", a:"Мұхтар Әуезов", o:["Мұхтар Әуезов","Абай Құнанбайұлы","Сәкен Сейфуллин","Жамбыл Жабаев"]},
-      {q:"«Тар жол, тайғақ кешу» кімнің романы?", a:"Сәкен Сейфуллин", o:["Сәкен Сейфуллин","Беймбет Майлин","Мұхтар Мағауин","Мағжан Жұмабаев"]},
-      {q:"«Оян, қазақ!» жинағын кім жазды?", a:"Міржақып Дулатов", o:["Міржақып Дулатов","Ахмет Байтұрсынов","Мағжан Жұмабаев","Шәкәрім"]},
-      {q:"«Маса» жинағының авторы кім?", a:"Ахмет Байтұрсынов", o:["Ахмет Байтұрсынов","Міржақып Дулатов","Абай","Мағжан Жұмабаев"]},
-      {q:"«Еңлік-Кебек» поэмасын кім жазды?", a:"Шәкәрім Құдайбердіұлы", o:["Шәкәрім Құдайбердіұлы","Мұхтар Әуезов","Мағжан Жұмабаев","Беймбет Майлин"]},
-      {q:"«Кел, балалар, оқылық» өлеңін кім жазды?", a:"Ыбырай Алтынсарин", o:["Ыбырай Алтынсарин","Абай","Жамбыл","Мағжан"]},
-      {q:"«Ақбілек» романын кім жазды?", a:"Жүсіпбек Аймауытов", o:["Жүсіпбек Аймауытов","Беймбет Майлин","Мұхтар Аузов","Сәкен Сейфуллин"]},
-      {q:"«Бақытсыз Жамал» романын кім жазды?", a:"Міржақып Дулатов", o:["Міржақып Дулатов","Жүсіпбек Аймауытов","Беймбет Майлин","Сәкен Сейфуллин"]},
-      {q:"«Батыр Баян» поэмасын кім жазды?", a:"Мағжан Жұмабаев", o:["Мағжан Жұмабаев","Ілияс Жансүгіров","Сәкен Сейфуллин","Жамбыл Жабаев"]},
-      {q:"«Шұғаның белгісі» кімнің туындысы?", a:"Беймбет Майлин", o:["Беймбет Майлин","Сәкен Сейфуллин","Мұхтар Әуезов","Жүсіпбек Аймауытов"]},
-    ],
-    medium: [
-      // Кім жазды? — Орташа
-      {q:"«Күй» поэмасын кім жазды?", a:"Ілияс Жансүгіров", o:["Ілияс Жансүгіров","Мағжан Жұмабаев","Сәкен Сейфуллин","Жамбыл Жабаев"]},
-      {q:"«Көшпенділер» трилогиясын кім жазды?", a:"Іле Есенберлин", o:["Іле Есенберлин","Мұхтар Мағауин","Мұхтар Әуезов","Бауыржан Момышұлы"]},
-      {q:"«Ленинградтық өренімді» поэмасын кім жазды?", a:"Жамбыл Жабаев", o:["Жамбыл Жабаев","Мұхтар Әуезов","Бауыржан Момышұлы","Мұқағали Мақатаев"]},
-      {q:"«Мұзтау» романын кім жазды?", a:"Оралхан Бөкей", o:["Оралхан Бөкей","Мұқағали Мақатаев","Мұхтар Мағауин","Іле Есенберлин"]},
-      {q:"«Ботагөз» романын кім жазды?", a:"Сәбит Мұқанов", o:["Сәбит Мұқанов","Мұхтар Әуезов","Сәкен Сейфуллин","Жүсіпбек Аймауытов"]},
-      {q:"«Мөлдір махаббат» өлеңін кім жазды?", a:"Мұқағали Мақатаев", o:["Мұқағали Мақатаев","Оралхан Бөкей","Ілияс Жансүгіров","Мағжан Жұмабаев"]},
-      {q:"«Қазақ айнасы» еңбегін кім жазды?", a:"Шәкәрім Құдайбердіұлы", o:["Шәкәрім Құдайбердіұлы","Ахмет Байтұрсынов","Міржақып Дулатов","Жүсіпбек Аймауытов"]},
-      {q:"«Жер тұтқыны» романын кім жазды?", a:"Мұхтар Мағауин", o:["Мұхтар Мағауин","Іле Есенберлин","Оралхан Бөкей","Мұхтар Әуезов"]},
-      {q:"«Ел анасы» поэмасын кім жазды?", a:"Сәкен Сейфуллин", o:["Сәкен Сейфуллин","Мағжан Жұмабаев","Ілияс Жансүгіров","Беймбет Майлин"]},
-      {q:"Ұшқан ұя кімнің кітабы?", a:"Бауыржан Момышұлы", o:["Бауыржан Момышұлы","Іле Есенберлин","Сәбит Мұқанов","Мұхтар Мағауин"]},
-    ],
-    hard: [
-      // Кім жазды? — Қиын
-      {q:"«Дубровский» аудармасын қазақ тіліне кім аударды?", a:"Шәкәрім Құдайбердіұлы", o:["Шәкәрім Құдайбердіұлы","Мұхтар Әуезов","Жүсіпбек Аймауытов","Сәбит Мұқанов"]},
-      {q:"«Сайтан көпір» шығармасын кім жазды?", a:"Оралхан Бөкей", o:["Оралхан Бөкей","Мұхтар Мағауин","Сәбит Мұқанов","Іле Есенберлин"]},
-      {q:"«Жоңғар» эпопеясын кім жазды?", a:"Іле Есенберлин", o:["Іле Есенберлин","Мұхтар Мағауин","Сәбит Мұқанов","Мұхтар Әуезов"]},
-      {q:"«Соңғы парыз» романын кім жазды?", a:"Оралхан Бөкей", o:["Оралхан Бөкей","Мұхтар Мағауин","Іле Есенберлин","Сәбит Мұқанов"]},
-      {q:"«Ер Тарғын» жырын жазба мәтінде кім жасақтаған?", a:"Ахмет Байтұрсынов", o:["Ахмет Байтұрсынов","Шәкәрім","Абай","Мұхтар Әуезов"]},
-      {q:"«Тоқаш Бокин» пьесасын кім жазды?", a:"Мұхтар Әуезов", o:["Мұхтар Әуезов","Беймбет Майлин","Сәкен Сейфуллин","Ілияс Жансүгіров"]},
-      {q:"«Алдар Көсе» ертегісін қазақ жазба мәдениетіне кім таратты?", a:"Халық шығармашылығы", o:["Халық шығармашылығы","Абай","Жамбыл","Мұхтар Әуезов"]},
-      {q:"«Армысың, Алаш!» жырын кім жазды?", a:"Міржақып Дулатов", o:["Міржақып Дулатов","Ахмет Байтұрсынов","Мағжан Жұмабаев","Шәкәрім"]},
-      {q:"«Бүркітші» романын кім жазды?", a:"Мұхтар Мағауин", o:["Мұхтар Мағауин","Оралхан Бөкей","Сәбит Мұқанов","Іле Есенберлин"]},
-      {q:"«Ұлы дала» поэмасын кім жазды?", a:"Ілияс Жансүгіров", o:["Ілияс Жансүгіров","Мағжан Жұмабаев","Сәкен Сейфуллин","Беймбет Майлин"]},
-    ],
-  },
-
-  quote: {
-    easy: [
-      // Цитата — Оңай
-      {q:"«Кел, балалар, оқылық, Оқығанды көңілге ықыласпен тоқылық!» — кімнің сөзі?", a:"Ыбырай Алтынсарин", o:["Ыбырай Алтынсарин","Абай","Жамбыл","Мағжан"]},
-      {q:"«Ғылым таппай мақтанба, Орындасаң барша талап» — кімнің өлеңі?", a:"Абай", o:["Абай","Ахмет Байтұрсынов","Міржақып Дулатов","Мағжан Жұмабаев"]},
-      {q:"«Оян, қазақ, ұйқыдан, Ойраны шықты ойбайдың!» — кімнен?", a:"Міржақып Дулатов", o:["Міржақып Дулатов","Ахмет Байтұрсынов","Мағжан Жұмабаев","Абай"]},
-      {q:"«Адамзаттың бәрін сүй, бауырым деп» — кімнен?", a:"Абай", o:["Абай","Жамбыл","Мағжан Жұмабаев","Ыбырай"]},
-      {q:"«Менің халқым болашақта ел болады» — кімнің сөзі?", a:"Абай", o:["Абай","Шәкәрім","Байтұрсынов","Мағжан"]},
-      {q:"«Туған жерім — Алтайдың арғы жағы» — кімнің жыры?", a:"Жамбыл Жабаев", o:["Жамбыл Жабаев","Абай","Мұқағали Мақатаев","Ілияс Жансүгіров"]},
-      {q:"«Сен мені сүй, мен сені...» — кімнің өлеңі?", a:"Мұқағали Мақатаев", o:["Мұқағали Мақатаев","Мағжан Жұмабаев","Оралхан Бөкей","Беймбет Майлин"]},
-      {q:"«Туған жер — алтын бесік» — бұл не?", a:"Халық мақалы", o:["Халық мақалы","Абай өлеңі","Жамбыл жыры","Мағжан сөзі"]},
-      {q:"«Жастықта алған білім — тасқа басылған із» — кімнен?", a:"Абай", o:["Абай","Ыбырай Алтынсарин","Мағжан","Міржақып Дулатов"]},
-      {q:"«Мен жастарға сенемін» — кімнің жыры?", a:"Мұқағали Мақатаев", o:["Мұқағали Мақатаев","Жамбыл","Сәкен Сейфуллин","Оралхан Бөкей"]},
-    ],
-    medium: [
-      // Цитата — Орташа
-      {q:"«Тіл — халықтың жаны» деген кімнің сөзі?", a:"Ахмет Байтұрсынов", o:["Ахмет Байтұрсынов","Абай","Міржақып Дулатов","Жамбыл"]},
-      {q:"«Батыр өледі — аты өлмейді» — кімнен?", a:"Бауыржан Момышұлы", o:["Бауыржан Момышұлы","Абай","Жамбыл","Мағжан Жұмабаев"]},
-      {q:"«Дүниеде тіршілік те, тіршіліктен де артық нәрсе бар — ол өнер мен ғылым» — кімнен?", a:"Абай 1-ші Қара сөз", o:["Абай 1-ші Қара сөз","Байтұрсынов","Мағжан","Шәкәрім"]},
-      {q:"«Ел болам десең — бесігіңді түзе» — кімнен?", a:"Ахмет Байтұрсынов", o:["Ахмет Байтұрсынов","Абай","Мағжан Жұмабаев","Міржақып Дулатов"]},
-      {q:"«Мен — Мағжан, ме, жарығым» — кімнің шумағы?", a:"Мағжан Жұмабаев", o:["Мағжан Жұмабаев","Мұқағали Мақатаев","Беймбет Майлин","Оралхан Бөкей"]},
-      {q:"«Ленинград, алтын шаһар...» — кімнің жыры?", a:"Жамбыл Жабаев", o:["Жамбыл Жабаев","Мұхтар Әуезов","Сәкен Сейфуллин","Ілияс Жансүгіров"]},
-      {q:"«Бауырым, ашылған гүлдей ашыл!» — кімнен?", a:"Ілияс Жансүгіров", o:["Ілияс Жансүгіров","Мағжан","Сәкен","Абай"]},
-      {q:"«Адам баласы өмір бойы оқуы керек» — кімнен?", a:"Ыбырай Алтынсарин", o:["Ыбырай Алтынсарин","Абай","Байтұрсынов","Дулатов"]},
-      {q:"«Қаза болсам, жер астында жатайын, Қазақтың жері үстінде шөп шығарып» — кімнен?", a:"Мұқағали Мақатаев", o:["Мұқағали Мақатаев","Жамбыл","Сейфуллин","Мағжан"]},
-      {q:"«Маса болып ызыңдадым, бұл халыққа» — кімнен?", a:"Ахмет Байтұрсынов", o:["Ахмет Байтұрсынов","Абай","Дулатов","Шәкәрім"]},
-    ],
-    hard: [
-      // Цитата — Қиын
-      {q:"«Жігіттің жасы жиырмаға жетсе, ата-анасы алғы жолды аша білсін» — бұл Абайдың нешінші Қара сөзінен?", a:"7-ші Қара сөзден", o:["7-ші Қара сөзден","1-ші","15-ші","45-ші"]},
-      {q:"«Ер жігіт өз ісін тындыра алмаса — ұят» — Абайдың нешінші Қара сөзінен?", a:"45-ші Қара сөзден", o:["45-ші Қара сөзден","7-ші Қара сөзден","1-ші Қара сөзден","30-шы Қара сөзден"]},
-      {q:"«Қыз — халықтың ары, ары жоқ жерде жары жоқ» — кімнен?", a:"Ахмет Байтұрсынов", o:["Ахмет Байтұрсынов","Абай","Шәкәрім","Дулатов"]},
-      {q:"«Жолдас болдым жұлдызға, Достасқаным — барлық жер» — кімнін шумағы?", a:"Мағжан Жұмабаев", o:["Мағжан Жұмабаев","Мұқағали Мақатаев","Сейфуллин","Жансүгіров"]},
-      {q:"«Ат — мердің қанаты» — халық мақалын кімнің шығармасынан кездестіруге болады?", a:"«Алпамыс батыр» эпосынан", o:["«Алпамыс батыр» эпосынан","Абай Қара сөзінен","Жамбыл жырынан","Байтұрсынов мақаласынан"]},
-      {q:"«Абай ізімен» мақаласын кім жазды?", a:"Мұхтар Әуезов", o:["Мұхтар Әуезов","Шәкәрім","Байтұрсынов","Сейфуллин"]},
-      {q:"«Жастық шақта жол іздеймін, Мен де жасап жатырмын» — кімнен?", a:"Сәкен Сейфуллин", o:["Сәкен Сейфуллин","Мағжан","Мұқағали","Ілияс Жансүгіров"]},
-      {q:"«Тас мүсіндей тұрмаймын, Тас жүрекпін деп» — кімнен?", a:"Мұқағали Мақатаев", o:["Мұқағали Мақатаев","Оралхан Бөкей","Мағжан Жұмабаев","Беймбет Майлин"]},
-      {q:"«Туысқаным» өлеңін кім жазды, кімге арналды?", a:"Мұқағали, туған жеріне", o:["Мұқағали, туған жеріне","Мағжан, ел-жұртына","Жансүгіров, анасына","Сейфуллин, Алашқа"]},
-      {q:"«Алтынсарин реформасы» нені ұсынды?", a:"Балаларды орысша оқытуды", o:["Балаларды орысша оқытуды","Балаларды тек дінге оқытуды","Балаларды жер айдауға алуды","Балаларды шетелге жіберуді"]},
-    ],
-  },
-
-  blitz: [
-    // 15 Блиц сұрақ (жылдам жауап)
-    {q:"Абай дүниеден өткен жылы?", a:"1904", o:["1904","1900","1910","1895"]},
-    {q:"«Абай жолы» авторы?", a:"Мұхтар Әуезов", o:["Мұхтар Әуезов","Абай","Беймбет Майлин","Жамбыл"]},
-    {q:"Абайдың шын есімі?", a:"Ибраһим", o:["Ибраһим","Абай","Мұса","Иса"]},
-    {q:"«Оян, қазақ!» авторы?", a:"Міржақып Дулатов", o:["Міржақып Дулатов","Абай","Мағжан","Байтұрсынов"]},
-    {q:"«Маса» жинағы қай жылы шықты?", a:"1911", o:["1911","1905","1917","1925"]},
-    {q:"«Батыр Баян» авторы?", a:"Мағжан Жұмабаев", o:["Мағжан Жұмабаев","Жансүгіров","Сейфуллин","Жамбыл"]},
-    {q:"«Тар жол, тайғақ кешу» авторы?", a:"Сәкен Сейфуллин", o:["Сәкен Сейфуллин","Беймбет Майлин","Жүсіпбек Аймауытов","Мағжан"]},
-    {q:"«Күй» поэмасының авторы?", a:"Ілияс Жансүгіров", o:["Ілияс Жансүгіров","Мағжан","Сейфуллин","Жамбыл"]},
-    {q:"Алаш партиясы ашылған жыл?", a:"1917", o:["1917","1905","1920","1930"]},
-    {q:"«Ақбілек» авторы?", a:"Жүсіпбек Аймауытов", o:["Жүсіпбек Аймауытов","Беймбет Майлин","Мұхтар Аузов","Мағжан"]},
-    {q:"Жамбыл Жабаев туған жылы?", a:"1846", o:["1846","1855","1840","1860"]},
-    {q:"«Еңлік-Кебек» авторы?", a:"Шәкәрім Құдайбердіұлы", o:["Шәкәрім Құдайбердіұлы","Мұхтар Әуезов","Дулатов","Мағжан"]},
-    {q:"«Мұзтау» авторы?", a:"Оралхан Бөкей", o:["Оралхан Бөкей","Мұқағали Мақатаев","Мұхтар Мағауин","Сейфуллин"]},
-    {q:"Абайдың «Қара сөздері» саны?", a:"45", o:["45","40","30","56"]},
-    {q:"Ыбырай Алтынсарин туған жылы?", a:"1841", o:["1841","1835","1850","1845"]},
-  ],
-};
-
-// Memory game pairs
-const MEMORY_PAIRS = [
-  ["📚 Мұхтар Әуезов",   "«Абай жолы»"],
-  ["🖊 Ыбырай",          "«Кел, балалар»"],
-  ["🎵 Жамбыл Жабаев",   "«Ленинград»"],
-  ["✒️ Міржақып Дулатов","«Оян, қазақ!»"],
-  ["📜 Байтұрсынов",     "«Маса»"],
-  ["🌙 Мағжан Жұмабаев", "«Батыр Баян»"],
-  ["🕊 Шәкәрім",         "«Еңлік-Кебек»"],
-  ["🎭 Аймауытов",       "«Ақбілек»"],
-  ["📗 Сейфуллин",       "«Тар жол»"],
-  ["🔥 Жансүгіров",      "«Күй» поэмасы"],
-  ["💎 Оралхан Бөкей",   "«Мұзтау»"],
-  ["⭐ Мұхтар Мағауин",  "«Жер тұтқыны»"],
-];
-
-// Timeline data
-const TIMELINE_DATA = [
-  {name:"Ыбырай Алтынсарин",      year:1841, hint:"Қазақтың ұлы педагогы",    id:0},
-  {name:"Абай Құнанбайұлы",       year:1845, hint:"Ұлы ақын, пайымшыл",       id:1},
-  {name:"Жамбыл Жабаев",          year:1846, hint:"Халық жырауы",              id:2},
-  {name:"Шәкәрім Құдайбердіұлы",  year:1858, hint:"Ойшыл ақын-философ",       id:3},
-  {name:"Ахмет Байтұрсынов",      year:1872, hint:"Ұлт ұстазы",               id:4},
-  {name:"Міржақып Дулатов",       year:1885, hint:"«Оян, қазақ!» авторы",     id:5},
-  {name:"Мағжан Жұмабаев",        year:1893, hint:"Символист ақын",            id:6},
-  {name:"Мұхтар Әуезов",          year:1897, hint:"«Абай жолы» авторы",       id:7},
-  {name:"Мұқағали Мақатаев",      year:1931, hint:"Жастар ақыны",              id:8},
-  {name:"Оралхан Бөкей",          year:1943, hint:"«Мұзтау» авторы",          id:9},
-];
-
-const LEVEL_THRESHOLDS = [0,100,300,600,1000,1500,2200,3000,4000,5500,7500];
-const LEVEL_NAMES = ["Оқушы","Ынталы","Білімді","Зерделі","Дана","Оқырман","Сүйер","Ұлы","Шебер","Данагөй","Ұстаз"];
-
-// ─── STATE ────────────────────────────────────────────────────────────────────
-let S = {
-  points: +localStorage.getItem('kl_pts') || 0,
-  games:  +localStorage.getItem('kl_games') || 0,
-  streak: +localStorage.getItem('kl_streak') || 1,
-  badges: JSON.parse(localStorage.getItem('kl_badges') || '[]'),
-  diff:   'all',
-  // game state
-  mode:   null,
-  pool:   [],
-  qi:     0,
-  score:  0,
-  correct:0,
-  timer:  null,
-  timeLeft: 30,
-  totalTime: 0,
-  startT: 0,
-  answered: false,
-  lastGame: null,
-  // memory
-  memFlipped: [],
-  memMatched: 0,
-  memMoves:   0,
-  memTimerSec:0,
-  memTimerInt:null,
-  memLocked: false,
-  // timeline
-  tlData: [],
-};
-
-function saveState() {
-  localStorage.setItem('kl_pts',    S.points);
-  localStorage.setItem('kl_games',  S.games);
-  localStorage.setItem('kl_streak', S.streak);
-  localStorage.setItem('kl_badges', JSON.stringify(S.badges));
-}
-
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
-function shuffle(a) {
-  const b = [...a];
-  for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}
-  return b;
-}
-function clamp(v,mn,mx){return Math.min(Math.max(v,mn),mx);}
-function levelOf(pts) { return LEVEL_THRESHOLDS.filter(t=>pts>=t).length; }
-function levelName(pts) { return LEVEL_NAMES[Math.min(levelOf(pts)-1,10)] || "Ұстаз"; }
-function levelProgress(pts) {
-  const lv = levelOf(pts);
-  if (lv >= LEVEL_THRESHOLDS.length) return 1;
-  const lo = LEVEL_THRESHOLDS[lv-1], hi = LEVEL_THRESHOLDS[lv] || lo+500;
-  return clamp((pts-lo)/(hi-lo),0,1);
-}
-function nextLevelPts(pts) {
-  const lv = levelOf(pts);
-  const hi = LEVEL_THRESHOLDS[lv];
-  return hi ? (hi - pts) : 0;
-}
-function fmt00(n) { return String(n).padStart(2,'0'); }
-
-// ─── SCREEN ROUTING ───────────────────────────────────────────────────────────
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active','page-enter'); });
-  const el = document.getElementById(id);
-  el.classList.add('active','page-enter');
-  window.scrollTo(0, 0);
-}
-function showHome()        { refreshHomeStats(); showScreen('homeScreen'); }
-function showLeaderboard() { buildLeaderboard(); showScreen('leaderScreen'); }
-function showProfile()     { buildProfile();    showScreen('profileScreen'); }
-function goHome()          { stopTimers(); showHome(); }
-
-function setNav(id) {
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById(id)?.classList.add('active');
-}
-
-// ─── HOME STATS ───────────────────────────────────────────────────────────────
-function refreshHomeStats() {
-  document.getElementById('homePoints').textContent = S.points;
-  document.getElementById('homeLevel').textContent  = levelName(S.points);
-  document.getElementById('homeStreak').textContent = S.streak;
-  document.getElementById('homeGames').textContent  = S.games;
-  setNav('nav-home');
-}
-
-function setDiff(val, el) {
-  S.diff = val;
-  document.querySelectorAll('.diff-chip').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');
-}
-
-// ─── GAME STARTERS ────────────────────────────────────────────────────────────
-function startGame(mode) {
-  S.mode = mode;
-  stopTimers();
-  if (mode === 'memory')   { startMemory();   return; }
-  if (mode === 'timeline') { startTimeline(); return; }
-  if (mode === 'blitz')    { startBlitz();    return; }
-
-  const src = DATA[mode];
-  if (!src) { console.error('Unknown mode:', mode); return; }
-
-  let pool;
-  if (S.diff === 'all') {
-    pool = [...(src.easy||[]), ...(src.medium||[]), ...(src.hard||[])];
-  } else {
-    pool = [...(src[S.diff] || src.easy || [])];
-  }
-  pool = shuffle(pool).slice(0, 10);
-  S.pool = pool; S.qi = 0; S.score = 0; S.correct = 0; S.totalTime = 0;
-  S.answered = false;
-  S.lastGame = mode;
-
-  const titles = { quiz:'🎯 Викторина', whowrote:'✍️ Кім жазды?', quote:'💬 Цитата' };
-  document.getElementById('quizTitle').textContent    = titles[mode] || '🎯 Викторина';
-  document.getElementById('quizSubtitle').textContent = 'Білімді сынаймыз!';
-
-  showScreen('quizScreen');
-  renderQuestion();
-}
-
-// ─── QUIZ ENGINE ──────────────────────────────────────────────────────────────
-function renderQuestion() {
-  if (S.qi >= S.pool.length) { showResult(); return; }
-  const q = S.pool[S.qi];
-  if (!q) { showResult(); return; }
-  const opts = shuffle([...q.o]);
-  S.answered = false;
-  S.timeLeft = 30; S.startT = Date.now();
-
-  document.getElementById('qProgress').style.width = (S.qi/S.pool.length*100)+'%';
-  document.getElementById('qNum').textContent   = S.qi+1;
-  document.getElementById('qTotal').textContent = S.pool.length;
-  document.getElementById('qScore').textContent = S.score;
-  document.getElementById('qText').textContent  = q.q;
-  document.getElementById('qHint').textContent  = '';
-
-  const letters = ['A','B','C','D'];
-  const container = document.getElementById('qOptions');
-  container.innerHTML = '';
-  opts.forEach((opt,i) => {
-    const btn = document.createElement('button');
-    btn.className = 'opt-btn';
-    btn.innerHTML = `<span class="opt-ltr">${letters[i]}</span><span>${opt}</span>`;
-    btn.onclick = () => answerQuiz(opt, q.a, btn);
-    container.appendChild(btn);
-  });
-
-  startTimer('q', 30, () => autoMiss(q.a));
-}
-
-function answerQuiz(selected, correct, btn) {
-  if (S.answered) return;
-  S.answered = true;
-  clearInterval(S.timer);
-  const elapsed = (Date.now()-S.startT)/1000;
-  S.totalTime += elapsed;
-
-  const isRight = selected === correct;
-  document.querySelectorAll('#qOptions .opt-btn').forEach(b => {
-    const txt = b.querySelector('span:last-child').textContent;
-    b.classList.add('disabled');
-    if (txt === correct)   b.classList.add('correct');
-    else if (b === btn && !isRight) b.classList.add('wrong');
-  });
-
-  if (isRight) {
-    S.correct++;
-    const bonus = Math.floor(S.timeLeft/3);
-    S.score += 10 + bonus;
-    document.getElementById('qScore').textContent = S.score;
-    btn.classList.add('pop');
-  } else {
-    btn.classList.add('shake');
-  }
-
-  setTimeout(() => { S.qi++; renderQuestion(); }, 1100);
-}
-
-function autoMiss(correct) {
-  if(S.answered) return;
-  S.answered = true;
-  S.totalTime += 30;
-  document.querySelectorAll('#qOptions .opt-btn').forEach(b => {
-    const txt = b.querySelector('span:last-child').textContent;
-    b.classList.add('disabled');
-    if (txt === correct) b.classList.add('correct');
-  });
-  setTimeout(() => { S.qi++; renderQuestion(); }, 1100);
-}
-
-// ─── BLITZ ENGINE ─────────────────────────────────────────────────────────────
-function startBlitz() {
-  S.pool = shuffle([...DATA.blitz]).slice(0, 15);
-  S.qi = 0; S.score = 0; S.correct = 0; S.totalTime = 0;
-  S.answered = false;
-  S.lastGame = 'blitz';
-  showScreen('blitzScreen');
-  renderBlitz();
-}
-
-function renderBlitz() {
-  if (S.qi >= S.pool.length) { showResult(); return; }
-  const q = S.pool[S.qi];
-  if (!q) { showResult(); return; }
-  const opts = shuffle([...q.o]);
-  S.answered = false; S.startT = Date.now(); S.timeLeft = 10;
-
-  document.getElementById('bProgress').style.width = (S.qi/S.pool.length*100)+'%';
-  document.getElementById('bNum').textContent   = S.qi+1;
-  document.getElementById('bScore').textContent = S.score;
-  document.getElementById('bText').textContent  = q.q;
-
-  const letters = ['A','B','C','D'];
-  const container = document.getElementById('bOptions');
-  container.innerHTML = '';
-  opts.forEach((opt,i) => {
-    const btn = document.createElement('button');
-    btn.className = 'opt-btn';
-    btn.innerHTML = `<span class="opt-ltr">${letters[i]}</span><span>${opt}</span>`;
-    btn.onclick = () => answerBlitz(opt, q.a, btn);
-    container.appendChild(btn);
-  });
-
-  startTimer('b', 10, () => {
-    if (!S.answered) {
-      S.answered = true; S.totalTime += 10;
-      document.querySelectorAll('#bOptions .opt-btn').forEach(b => {
-        b.classList.add('disabled');
-        if (b.querySelector('span:last-child').textContent===q.a) b.classList.add('correct');
-      });
-      setTimeout(() => { S.qi++; renderBlitz(); }, 900);
-    }
-  });
-}
-
-function answerBlitz(selected, correct, btn) {
-  if (S.answered) return;
-  S.answered = true;
-  clearInterval(S.timer);
-  const elapsed = (Date.now()-S.startT)/1000;
-  S.totalTime += elapsed;
-
-  const isRight = selected === correct;
-  document.querySelectorAll('#bOptions .opt-btn').forEach(b => {
-    const txt = b.querySelector('span:last-child').textContent;
-    b.classList.add('disabled');
-    if (txt === correct)  b.classList.add('correct');
-    else if (b === btn && !isRight)  b.classList.add('wrong');
-  });
-
-  if (isRight) {
-    S.correct++;
-    S.score += 8 + Math.floor(S.timeLeft);
-    document.getElementById('bScore').textContent = S.score;
-    btn.classList.add('pop');
-  } else {
-    btn.classList.add('shake');
-  }
-  setTimeout(() => { S.qi++; renderBlitz(); }, 900);
-}
-
-// ─── TIMER UTIL ───────────────────────────────────────────────────────────────
-function startTimer(prefix, secs, onDone) {
-  clearInterval(S.timer);
-  S.timeLeft = secs;
-  updateTimerUI(prefix, secs, secs);
-  S.timer = setInterval(() => {
-    S.timeLeft--;
-    updateTimerUI(prefix, S.timeLeft, secs);
-    if (S.timeLeft <= 0) { clearInterval(S.timer); onDone(); }
-  }, 1000);
-}
-
-function updateTimerUI(prefix, left, max) {
-  const el = document.getElementById(prefix === 'q' ? 'qTimer' : 'bTimer');
-  if (!el) return;
-  const icon = prefix === 'b' ? '⚡' : '⏱';
-  el.textContent = `${icon} ${left}`;
-  el.className = 'sr-timer' + (left <= (prefix==='b'?4:7) ? ' urgent' : '');
-  const pct = (left/max)*100;
-  const pBar = document.getElementById(prefix+'Progress');
-  if(pBar) {
-    pBar.style.width = ((S.qi/S.pool.length) * 100 + (1/S.pool.length)*(100-pct))+'%';
-  }
-}
-
-function stopTimers() {
-  clearInterval(S.timer);
-  clearInterval(S.memTimerInt);
-}
-
-// ─── MEMORY GAME ──────────────────────────────────────────────────────────────
-function startMemory() {
-  S.memFlipped = []; S.memMatched = 0; S.memMoves = 0; S.memTimerSec = 0;
-  S.memLocked = false;
-  S.lastGame = 'memory';
-  showScreen('memoryScreen');
-  buildMemoryGrid();
-  clearInterval(S.memTimerInt);
-  S.memTimerInt = setInterval(() => {
-    S.memTimerSec++;
-    const m = Math.floor(S.memTimerSec/60), sc = S.memTimerSec%60;
-    const el = document.getElementById('memTimer');
-    if(el) el.textContent = `⏱ ${fmt00(m)}:${fmt00(sc)}`;
-  }, 1000);
-}
-
-function buildMemoryGrid() {
-  const pairs = shuffle(MEMORY_PAIRS).slice(0,8);
-  const cards = [];
-  pairs.forEach((p,i) => {
-    cards.push({id:i,   type:'A', text:p[0], pairId:i});
-    cards.push({id:i+100, type:'B', text:p[1], pairId:i});
-  });
-  const shuffled = shuffle(cards);
-  const grid = document.getElementById('memGrid');
-  grid.innerHTML = '';
-  document.getElementById('memMatched').textContent = '0';
-  document.getElementById('memMoves').textContent   = '0';
-
-  shuffled.forEach((card) => {
-    const div = document.createElement('div');
-    div.className = 'mem-card';
-    div.dataset.pairId = card.pairId;
-    const displayText = card.text.replace(/ /g, '\n');
-    div.innerHTML = `
-      <div class="mc-front">📖</div>
-      <div class="mc-back">${displayText}</div>`;
-    div.onclick = () => flipCard(div, card.pairId);
-    grid.appendChild(div);
-  });
-}
-
-function flipCard(el, pairId) {
-  if (S.memLocked) return;
-  if (el.classList.contains('flipped') || el.classList.contains('matched')) return;
-  if (S.memFlipped.length >= 2) return;
-
-  el.classList.add('flipped');
-  S.memFlipped.push({el, pairId});
-
-  if (S.memFlipped.length === 2) {
-    S.memMoves++;
-    document.getElementById('memMoves').textContent = S.memMoves;
-    const [a, b] = S.memFlipped;
-    if (a.pairId === b.pairId && a.el !== b.el) {
-      // Match!
-      S.memLocked = true;
-      setTimeout(() => {
-        a.el.classList.add('matched'); b.el.classList.add('matched');
-        a.el.classList.remove('flipped'); b.el.classList.remove('flipped');
-        S.memFlipped = [];
-        S.memLocked = false;
-        S.memMatched++;
-        document.getElementById('memMatched').textContent = S.memMatched;
-        if (S.memMatched === 8) {
-          clearInterval(S.memTimerInt);
-          const bonus = Math.max(0, 200 - S.memTimerSec*2 - S.memMoves*5);
-          S.score = 80 + bonus;
-          S.correct = S.memMatched;
-          S.pool = {length:8};
-          setTimeout(() => showResult(), 800);
-        }
-      }, 500);
-    } else {
-      S.memLocked = true;
-      a.el.classList.add('shake'); b.el.classList.add('shake');
-      setTimeout(() => {
-        a.el.classList.remove('flipped','shake');
-        b.el.classList.remove('flipped','shake');
-        S.memFlipped = [];
-        S.memLocked = false;
-      }, 900);
-    }
-  }
-}
-
-// ─── TIMELINE GAME ────────────────────────────────────────────────────────────
-function startTimeline() {
-  S.tlData = shuffle([...TIMELINE_DATA]);
-  S.lastGame = 'timeline';
-  buildTimelineUI();
-  showScreen('timelineScreen');
-}
-
-function buildTimelineUI() {
-  const list = document.getElementById('tlList');
-  list.innerHTML = '';
-  S.tlData.forEach((item, idx) => {
-    const div = document.createElement('div');
-    div.className = 'tl-item';
-    div.draggable = true;
-    div.dataset.idx = idx;
-    div.innerHTML = `
-      <span class="tl-handle">⠿</span>
-      <div class="tl-content">
-        <div class="tl-name">${item.name}</div>
-        <div class="tl-hint">${item.hint}</div>
-      </div>
-      <span class="tl-year">${item.year}</span>`;
-
-    // Drag events
-    div.addEventListener('dragstart', e => {
-      div.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', idx);
-    });
-    div.addEventListener('dragend', () => div.classList.remove('dragging','drag-over'));
-    div.addEventListener('dragover', e => {
-      e.preventDefault();
-      div.classList.add('drag-over');
-    });
-    div.addEventListener('dragleave', () => div.classList.remove('drag-over'));
-    div.addEventListener('drop', e => {
-      e.preventDefault();
-      div.classList.remove('drag-over');
-      const fromIdx = +e.dataTransfer.getData('text/plain');
-      const toIdx   = +div.dataset.idx;
-      if (fromIdx === toIdx) return;
-      const tmp = S.tlData[fromIdx];
-      S.tlData[fromIdx] = S.tlData[toIdx];
-      S.tlData[toIdx]   = tmp;
-      buildTimelineUI();
-    });
-
-    // Touch drag (mobile)
-    let touchY = 0, touchFrom = -1;
-    div.addEventListener('touchstart', e => { touchY = e.touches[0].clientY; touchFrom = idx; }, {passive:true});
-    div.addEventListener('touchmove', e => {
-      e.preventDefault();
-      const dy = e.touches[0].clientY - touchY;
-      div.style.transform = `translateY(${dy}px)`;
-      div.style.zIndex = '10';
-    }, {passive:false});
-    div.addEventListener('touchend', e => {
-      div.style.transform = '';
-      div.style.zIndex = '';
-      const touchTarget = document.elementFromPoint(
-        e.changedTouches[0].clientX, e.changedTouches[0].clientY
-      );
-      const targetItem = touchTarget?.closest('.tl-item');
-      if (targetItem && targetItem !== div) {
-        const toIdx = +targetItem.dataset.idx;
-        const tmp = S.tlData[touchFrom]; S.tlData[touchFrom]=S.tlData[toIdx]; S.tlData[toIdx]=tmp;
-        buildTimelineUI();
-      }
-    });
-
-    list.appendChild(div);
-  });
-}
-
-function checkTimeline() {
-  let correct = 0;
-  const sorted = [...S.tlData].sort((a,b)=>a.year-b.year);
-  const items = document.querySelectorAll('#tlList .tl-item');
-  S.tlData.forEach((item, i) => {
-    const el = items[i];
-    if (!el) return;
-    if (item.id === sorted[i].id) {
-      el.classList.add('correct-pos');
-      el.classList.remove('wrong-pos');
-      correct++;
-    } else {
-      el.classList.add('wrong-pos');
-      el.classList.remove('correct-pos');
-    }
-  });
-  S.correct = correct;
-  S.score = correct * 15;
-  S.pool = {length: S.tlData.length};
-  S.totalTime = 0;
-  setTimeout(() => showResult(), 1200);
-}
-
-// ─── RESULT ───────────────────────────────────────────────────────────────────
-function showResult() {
-  stopTimers();
-
-  const total = (typeof S.pool.length === 'number') ? S.pool.length : 10;
-  const pct   = total > 0 ? Math.round((S.correct / total) * 100) : 0;
-  const avgT  = (S.totalTime > 0 && total > 0) ? Math.round(S.totalTime / total) : 0;
-  const pts   = S.score;
-
-  // Award points
-  S.points += pts;
-  S.games++;
-  checkBadges();
-  saveState();
-
-  document.getElementById('resScore').textContent   = S.correct;
-  document.getElementById('resOf').textContent      = '/'+total;
-  document.getElementById('resCorrect').textContent = S.correct;
-  document.getElementById('resAcc').textContent     = pct+'%';
-  document.getElementById('resPts').textContent     = '+'+pts;
-  document.getElementById('resTime').textContent    = avgT+'с';
-
-  // Animated ring
-  const circumference = 2 * Math.PI * 55; // ~345.6
-  const offset = circumference * (1 - pct/100);
-  const ring = document.getElementById('ringCircle');
-  ring.style.stroke = 'url(#rg)';
-  ring.style.strokeDashoffset = circumference;
-  setTimeout(() => { ring.style.strokeDashoffset = offset; }, 100);
-  const sc = pct >= 90 ? '#e5c27f' : pct >= 60 ? '#a9c7fe' : '#ef4444';
-  ring.style.stroke = sc;
-
-  let stars, title, sub;
-  if (pct >= 90) {
-    stars='⭐⭐⭐'; title='🏆 Тамаша нәтиже!'; sub='Сіз — Қазақ Әдебиеті шебері!';
-    launchConfetti();
-  } else if (pct >= 70) {
-    stars='⭐⭐'; title='🌟 Жақсы нәтиже!'; sub='Тағы да жаттықсаңыз — тамаша болады!';
-  } else if (pct >= 50) {
-    stars='⭐'; title='📖 Орташа нәтиже'; sub='Материалдарды қайта оқыңыз.';
-  } else {
-    stars='📚'; title='💪 Жаттыққа жалғастыр!'; sub='Оқу бөлімін пайдаланыңыз!';
-  }
-  document.getElementById('resStars').textContent = stars;
-  document.getElementById('resTitle').textContent = title;
-  document.getElementById('resSub').textContent   = sub;
-
-  showScreen('resultScreen');
-  setNav('nav-home');
-}
-
-function restartGame() {
-  if (S.lastGame) startGame(S.lastGame);
-  else showHome();
-}
-
-// ─── BADGES ──────────────────────────────────────────────────────────────────
-const BADGES = [
-  {id:'first_game',  icon:'🎮', name:'Алғашқы ойын', cond:()=>S.games>=1},
-  {id:'10_games',    icon:'🎯', name:'10 ойын',       cond:()=>S.games>=10},
-  {id:'pts_100',     icon:'⭐', name:'100 ұпай',       cond:()=>S.points>=100},
-  {id:'pts_500',     icon:'🌟', name:'500 ұпай',       cond:()=>S.points>=500},
-  {id:'pts_1000',    icon:'💫', name:'1000 ұпай',      cond:()=>S.points>=1000},
-  {id:'pts_3000',    icon:'👑', name:'3000 ұпай',      cond:()=>S.points>=3000},
-  {id:'perfect',     icon:'💎', name:'Мінсіз',         cond:()=>false},
-  {id:'streak7',     icon:'🔥', name:'7 күн стрик',    cond:()=>S.streak>=7},
-];
-
-function checkBadges() {
-  BADGES.forEach(b => {
-    if (!S.badges.includes(b.id) && b.cond()) S.badges.push(b.id);
-  });
-  const total = (typeof S.pool.length === 'number') ? S.pool.length : 10;
-  if (S.correct === total && total > 0 && !S.badges.includes('perfect')) S.badges.push('perfect');
-}
-
-// ─── PROFILE ──────────────────────────────────────────────────────────────────
-function buildProfile() {
-  // Try to get name from Telegram
-  const tgName = tg?.initDataUnsafe?.user?.first_name || 'Оқушы';
-  document.getElementById('profName').textContent = '📚 ' + tgName;
-  document.getElementById('profLvl').textContent  = '⭐ '+levelName(S.points)+' деңгейі';
-  document.getElementById('profPts').textContent  = S.points+' ұпай жиналды';
-  document.getElementById('profNext').textContent = nextLevelPts(S.points)+' ұпай қалды';
-  document.getElementById('profBar').style.width  = (levelProgress(S.points)*100)+'%';
-
-  // Badges
-  const grid = document.getElementById('badgesGrid');
-  grid.innerHTML = '';
-  BADGES.forEach(b => {
-    const d = document.createElement('div');
-    const earned = S.badges.includes(b.id);
-    d.className = 'badge-cell '+(earned?'earned':'locked');
-    d.innerHTML = `<div class="bc-icon">${b.icon}</div><div class="bc-name">${b.name}</div>`;
-    grid.appendChild(d);
-  });
-
-  // Stats
-  const st = document.getElementById('profStats');
-  st.innerHTML = `
-    <div class="res-stat"><div class="rs-val">${S.points}</div><div class="rs-lbl">Ұпай</div></div>
-    <div class="res-stat"><div class="rs-val">${S.games}</div><div class="rs-lbl">Ойын</div></div>
-    <div class="res-stat"><div class="rs-val">${S.badges.length}</div><div class="rs-lbl">Жетістік</div></div>
-    <div class="res-stat"><div class="rs-val">${S.streak}</div><div class="rs-lbl">Стрик</div></div>
-  `;
-}
-
-// ─── LEADERBOARD (local demo) ────────────────────────────────────────────────
-function buildLeaderboard() {
-  const tgName = tg?.initDataUnsafe?.user?.first_name || 'Сізің нәтижеңіз';
-  const DEMO = [
-    {name: tgName,         pts: S.points, icon:'📚'},
-    {name:'Айгерім Б.',    pts:4850,      icon:'👑'},
-    {name:'Нұрлан М.',     pts:3920,      icon:'🔥'},
-    {name:'Жансая Қ.',     pts:3100,      icon:'⭐'},
-    {name:'Дарина С.',     pts:2670,      icon:'📖'},
-    {name:'Асхат Т.',      pts:2300,      icon:'🎯'},
-    {name:'Камила Ж.',     pts:1980,      icon:'💫'},
-    {name:'Серік А.',      pts:1450,      icon:'✨'},
-  ];
-  DEMO.sort((a,b)=>b.pts-a.pts);
-
-  const medals = ['🥇','🥈','🥉'];
-  const list = document.getElementById('leaderList');
-  list.innerHTML = '';
-  DEMO.forEach((u,i) => {
-    const cls = i===0?'top1':i===1?'top2':i===2?'top3':'';
-    const div = document.createElement('div');
-    div.className = 'leader-item '+cls;
-    div.innerHTML = `
-      <div class="li-rank">${medals[i]||'#'+(i+1)}</div>
-      <div class="li-ava">${u.icon}</div>
-      <div>
-        <div class="li-name">${u.name}</div>
-        <div class="li-sub">${levelName(u.pts)} деңгей</div>
-      </div>
-      <div class="li-pts">${u.pts} ⭐</div>
-    `;
-    list.appendChild(div);
-  });
-}
-
-// ─── CONFETTI ─────────────────────────────────────────────────────────────────
-function launchConfetti() {
-  const wrap = document.getElementById('confettiWrap');
-  wrap.innerHTML = '';
-  const colors = ['#e5c27f','#c0a060','#a9c7fe','#10b981','#f472b6','#fb923c'];
-  for (let i=0; i<60; i++) {
-    const c = document.createElement('div');
-    c.className = 'cf';
-    c.style.cssText = `
-      left:${Math.random()*100}vw;
-      background:${colors[Math.floor(Math.random()*colors.length)]};
-      animation: cf-fall ${1.5+Math.random()*2.5}s linear ${Math.random()*1.2}s forwards;
-      width:${5+Math.random()*8}px; height:${5+Math.random()*8}px;
-      border-radius:${Math.random()>0.5?'50%':'2px'};
-    `;
-    wrap.appendChild(c);
-  }
-  setTimeout(() => wrap.innerHTML='', 5000);
-}
-
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-refreshHomeStats();
-</script>
-</body>
-</html>
+            <div id="game-view" class="container">
+                <div id="game-header" style="display:flex;justify-content:space-between;margin-bottom:15px">
+                    <span id="game-title" style="font-weight:700">Game</span>
+                    <span id="current-points" style="color:var(--accent)">+10 points</span>
+                </div>
+                <div id="timer-wrap"><div id="timer-bar"></div></div>
+                <div id="game-content"></div>
+                <button class="btn btn-secondary" onclick="exitGame()">Exit Game</button>
+            </div>
+
+            <div id="result-modal" class="modal">
+                <div class="modal-content">
+                    <h2 id="result-title">Great!</h2>
+                    <div style="font-size:3rem;margin:20px 0;color:var(--accent)" id="result-score">0</div>
+                    <p id="result-text">New record!</p>
+                    <button class="btn" onclick="closeResult()">Menu</button>
+                </div>
+            </div>
+            <script>
+                let tg = window.Telegram.WebApp;
+                tg.expand();
+
+                let score = parseInt(localStorage.getItem('edu_score') || 0);
+                let games = parseInt(localStorage.getItem('edu_games') || 0);
+
+                const data = {
+                              quiz: [
+                                                { q: "In 'Jau tylyndagy bala', who is the main character?", a: ["Serik", "Serezha", "Bolat", "Vasya"], c: 1 },
+                        { q: "In 'Koksekrek', who raised the wolf?", a: ["Kurmash", "Ali", "Asan", "Batyr"], c: 0 },
+                        { q: "In which century did Kaztugan zhyrau live?", a: ["XV", "XVII", "XIX", "XIII"], c: 0 },
+                        { q: "Orkhon-Enisei script is used on which monument?", a: ["Arab", "Latin", "Kultegin", "Cyrillic"], c: 2 },
+                        { q: "Where does 'Jau tylyndagy bala' take place?", a: ["Germany", "Ukraine", "Russia", "Poland"], c: 1 }
+                    ],
+                    who: [
+                        { q: "Author of 'Abai Zholy'?", a: ["S. Mukanov", "M. Auezov", "G. Musrepov", "J. Aimauytov"], c: 1 },
+                        { q: "Author of 'Men jastarga senemin'?", a: ["M. Jumabayev", "A. Baitursynov", "M. Dulatov", "S. Kudaiberdiuly"], c: 0 },
+                        { q: "'Oyan, qazaq!' slogan author?", a: ["S. Toraigyrov", "M. Dulatov", "A. Kunanbayev", "J. Jabaev"], c: 1 }
+                    ],
+                    quotes: [
+                        { q: "'Olen - sozdin patshasy, soz ...'", a: ["sarasy", "danasy", "magynasy", "tulgasy"], c: 0 },
+                        { q: "'Enbek etsen erinbei, toyady ...'", a: ["ishin berilmei", "qarnyn tilenbei", "omirin tungilmei", "bagyn jenilmei"], c: 1 }
+                    ]
+        };
+                let currentPoints = 0;
+                let timerInterval;
+
+                function updateStats() {
+                              document.getElementById('total-score').innerText = score;
+                              document.getElementById('games-played').innerText = games;
+
+                              let rank = "Beginner";
+                              if(score > 500) rank = "Reader";
+                              if(score > 1000) rank = "Expert";
+                              if(score > 2000) rank = "Master";
+
+                              document.getElementById('rank').innerText = rank;
+                              localStorage.setItem('edu_score', score);
+                              localStorage.setItem('edu_games', games);
+                }
+
+                function startGame(type) {
+                              document.getElementById('home-view').style.display = 'none';
+                              document.getElementById('game-view').style.display = 'block';
+                              document.getElementById('game-title').innerText = getGameName(type);
+                              currentPoints = 0;
+                              loadGameContent(type);
+                }
+
+                function getGameName(type) {
+                              const names = {
+                                                quiz: "Quiz",
+                                                                  who: "Who wrote?",
+                                                                  blitz: "Blitz",
+                                  quotes: "Quotes",
+                                  memory: "Memory",
+                                  timeline: "Timeline"
+                };
+                    return names[type];
+                }
+                function loadGameContent(type) {
+                              const content = document.getElementById('game-content');
+                              content.innerHTML = "";
+
+                              if(type === 'quiz' || type === 'who' || type === 'quotes') {
+                                                const list = data[type];
+                                                const item = list[Math.floor(Math.random() * list.length)];
+
+                                                content.innerHTML = `<h3 style="margin-bottom:20px">${item.q}</h3>`;
+                                                item.a.forEach((opt, idx) => {
+                                                                      content.innerHTML += `<button class="option-btn" onclick="checkAnswer(this, ${idx === item.c})">${opt}</button>`;
+                                                  });
+                              } else if(type === 'memory') {
+                                                content.innerHTML = '<div class="memory-grid"></div>';
+                                                const grid = content.querySelector('.memory-grid');
+                                                const terms = ["Abai", "Kara sozdar", "Auezov", "Abai zholy", "Kaisenov", "Jau tyly", "Jambyl", "Leningradtyk", "Magjan", "Senemin"];
+                                                terms.sort(() => Math.random() - 0.5).forEach(term => {
+                                                                      grid.innerHTML += `<div class="memory-card" onclick="this.classList.toggle('flipped'); this.innerText='${term}'">?</div>`;
+                                                  });
+                                                  } else {
+                                                                    content.innerHTML = "<h3>Under construction</h3>";
+                                                  }
+                                                }
+
+                                        function checkAnswer(btn, isCorrect) {
+                                                      const btns = document.querySelectorAll('.option-btn');
+                                                      btns.forEach(b => b.disabled = true);
+
+                                                      if(isCorrect) {
+                                                                        btn.classList.add('correct');
+                                                                        currentPoints += 20;
+                                                                        score += 20;
+                                                                        setTimeout(() => showResult(true), 1000);
+                                                        } else {
+                                                                          btn.classList.add('wrong');
+                                                                          setTimeout(() => showResult(false), 1000);
+                                                          }
+                                                                      updateStats();
+                                                        }
+
+                                                                function showResult(win) {
+                                                                              games++;
+                                                                              updateStats();
+                                                                              document.getElementById('result-modal').style.display = 'flex';
+                                                                              document.getElementById('result-score').innerText = win ? `+${currentPoints}` : "0";
+                                                                              document.getElementById('result-title').innerText = win ? "Great!" : "Next time!";
+                                                                  }
+
+                                                                          function closeResult() {
+                                                                                            document.getElementById('result-modal').style.display = 'none';
+                                                                                            exitGame();
+                                                                              }
+
+                                                                          function exitGame() {
+                                                                                        document.getElementById('home-view').style.display = 'block';
+                                                                                        document.getElementById('game-view').style.display = 'none';
+                                                                          }
+
+                                                                          updateStats();
+                                                                      </script>
+                                                                  </body>
+
+                                                                  </body>
+        </html>
+  
