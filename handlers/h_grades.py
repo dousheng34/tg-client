@@ -1,5 +1,5 @@
 """handlers/grades.py — Сыныптар бойынша оқу материалдары"""
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.ext import CallbackContext
 from content.grades import (
     get_grade_info, get_grade_topics, get_topic_content,
@@ -42,16 +42,27 @@ def _topics_keyboard(grade: int, topics: list):
     return InlineKeyboardMarkup(buttons)
 
 
-def _topic_done_keyboard(grade: int):
+def _topic_done_keyboard(grade: int, topic_key: str = None):
     """Тақырып аяқтағаннан кейінгі батырмалар"""
-    return InlineKeyboardMarkup([
+    keyboard = [
         [InlineKeyboardButton("✅ Аяқтадым! (+15 ұпай)", callback_data=f"topic_done_{grade}")],
+    ]
+    
+    # "Жау тылындағы бала" үшін арнайы ойын батырмасы
+    if topic_key == "zhau_tylyndagy_bala_7":
+        webapp_url = "https://controversial-rosaleen-t44t-00f78407.koyeb.app/app?game=special_zhau"
+        keyboard.append([
+            InlineKeyboardButton("👦 Арнайы ойын: Жау тылындағы бала", web_app=WebAppInfo(url=webapp_url))
+        ])
+
+    keyboard.extend([
         [
             InlineKeyboardButton("🔙 Тақырыптарға", callback_data=f"grade_{grade}"),
             InlineKeyboardButton("🏠 Мәзір", callback_data="menu_main"),
         ],
         [InlineKeyboardButton("📖 Сөздік", callback_data="menu_terms")],
     ])
+    return InlineKeyboardMarkup(keyboard)
 
 
 # ─── ХЕНДЛЕРЛЕР ──────────────────────────────────────────────────────────────
@@ -120,7 +131,7 @@ def topic_callback(update: Update, context: CallbackContext):
     context.user_data['last_topic_grade'] = grade
     query.edit_message_text(
         content, parse_mode='HTML',
-        reply_markup=_topic_done_keyboard(grade)
+        reply_markup=_topic_done_keyboard(grade, topic_key)
     )
 
 
