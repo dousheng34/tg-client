@@ -939,6 +939,15 @@ if (tg) {
   tg.setBackgroundColor && tg.setBackgroundColor('#10141a');
 }
 
+// Deep Linking check
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const game = params.get('game');
+  if (game && typeof startGame === 'function') {
+    setTimeout(() => startGame(game), 500);
+  }
+});
+
 // ─── DATA: 100 Сұрақ (Викторина) ─────────────────────────────────────────────
 const DATA = {
   quiz: {
