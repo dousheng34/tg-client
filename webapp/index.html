@@ -688,14 +688,86 @@ h1, h2, h3 { font-family: 'Noto Serif', serif; }
 
   <!-- Special Topic Section -->
   <div class="section-hdr">🌟 Арнайы Тақырып</div>
-  <div class="game-card glow-gold" style="margin: 0 20px 20px; flex-direction: row; align-items: center; gap: 20px; padding: 20px;" onclick="startGame('special_zhau')">
+  <div class="game-card glow-gold" style="margin: 0 20px 20px; flex-direction: row; align-items: center; gap: 20px; padding: 20px;" onclick="showZhauScreen()">
     <div class="gc-emoji" style="font-size: 3rem; margin-bottom: 0;">👦</div>
     <div style="text-align: left;">
       <div class="gc-badge" style="position: static; margin-bottom: 6px;">ЖАҢА</div>
       <div class="gc-title" style="font-size: 1.1rem;">Жау тылындағы бала</div>
       <div class="gc-desc">Қ. Қайсеновтің шығармасы бойынша арнайы ойын</div>
     </div>
-    <div style="margin-left: auto; color: var(--gold); font-size: 1.5rem;">➔</div>
+    <div style="margin-left: auto; color: var(--gold); font-size: 1.5rem;">⮕</div>
+  </div>
+  <div class="gap"></div>
+</div>
+
+<!-- ═══════════════ ZHAU TYLYNDAGY BALA SCREEN ═══════════════ -->
+<div class="screen" id="zhauScreen">
+  <div class="app-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="header-left">
+      <div>
+        <div class="header-logo">👦 Жау тылындағы бала</div>
+        <div class="header-sub">Қ. Қайсеновтің шығармасы</div>
+      </div>
+    </div>
+    <div style="width:36px"></div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-pill">
+      <span class="sp-icon">⭐</span>
+      <span class="sp-val" id="zhauLevel">Оқушы</span>
+      <span class="sp-lbl">деңгей</span>
+    </div>
+    <div class="stat-pill">
+      <span class="sp-icon">🪙</span>
+      <span class="sp-val" id="zhauPoints">0</span>
+      <span class="sp-lbl">ұпай</span>
+    </div>
+    <div class="stat-pill">
+      <span class="sp-icon">🔥</span>
+      <span class="sp-val" id="zhauStreak">0</span>
+      <span class="sp-lbl">күн стрик</span>
+    </div>
+    <div class="stat-pill">
+      <span class="sp-icon">🎮</span>
+      <span class="sp-val" id="zhauGames">0</span>
+      <span class="sp-lbl">ойын</span>
+    </div>
+  </div>
+
+  <div class="section-hdr">🎯 Қиындық деңгейі</div>
+  <div class="diff-chips">
+    <div class="diff-chip active" data-diff="all" onclick="setDiff('all',this)">Барлығы</div>
+    <div class="diff-chip" data-diff="easy" onclick="setDiff('easy',this)">Оңай</div>
+    <div class="diff-chip" data-diff="medium" onclick="setDiff('medium',this)">Орташа</div>
+    <div class="diff-chip" data-diff="hard" onclick="setDiff('hard',this)">Қиын</div>
+  </div>
+
+  <div class="section-hdr">🎮 Ойын таңда</div>
+  <div class="games-grid">
+    <div class="game-card glow-blue" onclick="startGame('special_zhau')">
+      <div class="gc-badge">ТОП</div>
+      <span class="gc-emoji">🎯</span>
+      <div class="gc-title">Викторина</div>
+      <div class="gc-desc">4 нұсқалы сұрақтар</div>
+    </div>
+    <div class="game-card glow-purple" onclick="startGame('zhau_whowrote')">
+      <span class="gc-emoji">✍️</span>
+      <div class="gc-title">Кім жазды?</div>
+      <div class="gc-desc">Авторды тап</div>
+    </div>
+    <div class="game-card glow-orange" onclick="startGame('zhau_blitz')">
+      <div class="gc-badge">⚡</div>
+      <span class="gc-emoji">⚡</span>
+      <div class="gc-title">Блиц-тур</div>
+      <div class="gc-desc">10 сек жауап</div>
+    </div>
+    <div class="game-card glow-green" onclick="startGame('zhau_quote')">
+      <span class="gc-emoji">💬</span>
+      <div class="gc-title">Цитата</div>
+      <div class="gc-desc">Кімнің сөзі?</div>
+    </div>
   </div>
   <div class="gap"></div>
 </div>
@@ -1144,6 +1216,39 @@ const DATA = {
     {q:"Серіктің (Сережа) ерлігі үшін алған жоғары марапаты?", a:"«Отан соғысы» ордені", o:["«Отан соғысы» ордені","«Алтын Жұлдыз»","«Ерен ерлігі үшін»","Құрмет грамотасы"]},
     {q:"Неміс жазалаушылары Серікті қалай атап кетті?", a:"«Кішкентай партизан»", o:["«Кішкентай партизан»","«Қара бала»","«Қазақ баласы»","«Жау баласы»"]},
     {q:"Қасым Қайсеновтің өзі соғыс кезінде кім болды?", a:"Партизан-барлаушы", o:["Партизан-барлаушы","Ұшқыш","Танкист","Мерген"]}
+  ],
+  zhau_whowrote: [
+    {q:"«Жау тылындағы бала» повесінің авторы кім?", a:"Қасым Қайсенов", o:["Қасым Қайсенов","Мұхтар Әуезов","Бауыржан Момышұлы","Сәбит Мұқанов"]},
+    {q:"Партизандар отрядының командирі — Серікке қамқор болған тұлға кім?", a:"Константин Спижевский", o:["Константин Спижевский","Иван Петров","Василий Иванов","Сергей Николаев"]},
+    {q:"Серікке аналық мейірімін төккен ауыл мұғалімі кім?", a:"Анна Ивановна", o:["Анна Ивановна","Мария Петровна","Нина Сергеевна","Ольга Ивановна"]},
+    {q:"Серіктің партизандар берген орысша аты қандай?", a:"Сережа", o:["Сережа","Вася","Коля","Саша"]},
+    {q:"«Жау тылындағы бала» қай жанрда жазылған?", a:"Повесть", o:["Повесть","Роман","Поэма","Пьеса"]},
+    {q:"Шығармада бала қай жаста жау қолында қалады?", a:"10 жаста", o:["10 жаста","8 жаста","12 жаста","14 жаста"]},
+    {q:"Қасым Қайсенов «Халық Қаһарманы» атағын қай жылы алды?", a:"1995", o:["1995","1944","1945","2000"]},
+    {q:"Серік партизандар арасында қандай қызмет атқарды?", a:"Барлаушы", o:["Барлаушы","Аспаз","Дәрігер","Күзетші"]}
+  ],
+  zhau_blitz: [
+    {q:"«Жау тылындағы бала» авторы?", a:"Қасым Қайсенов", o:["Қасым Қайсенов","Мұхтар Әуезов","Абай","Жамбыл"]},
+    {q:"Серіктің партизандардағы лақап аты?", a:"Сережа", o:["Сережа","Вася","Коля","Петя"]},
+    {q:"Серіктің қызметі отрядта?", a:"Барлаушы", o:["Барлаушы","Аспаз","Дәрігер","Хатшы"]},
+    {q:"Отряд командирі?", a:"Спижевский", o:["Спижевский","Иванов","Петров","Сидоров"]},
+    {q:"Ауыл мұғалімі кім?", a:"Анна Ивановна", o:["Анна Ивановна","Мария","Нина","Ольга"]},
+    {q:"Оқиға қай елде өтеді?", a:"Украина", o:["Украина","Ресей","Беларусь","Қазақстан"]},
+    {q:"Шығарма жанры?", a:"Повесть", o:["Повесть","Роман","Поэма","Әңгіме"]},
+    {q:"«Халық Қаһарманы» — қай жыл?", a:"1995", o:["1995","1944","1990","2000"]},
+    {q:"Серік жау тылына қалай тап болды?", a:"Анасынан айырылып қалды", o:["Анасынан айырылып қалды","Өз еркімен кетті","Тұтқынға түсті","Адасып қалды"]},
+    {q:"Шығарманың негізгі идеясы?", a:"Жастардың ерлігі", o:["Жастардың ерлігі","Соғыс трагедиясы","Дос-жаран достығы","Табиғат сұлулығы"]},
+    {q:"Серік отрядқа кіру үшін не жасады?", a:"Немістерден қашып жүріп, орманда кездесті", o:["Немістерден қашып жүріп, орманда кездесті","Өз еркімен келді","Радиомен хабарласты","Партизандарды тапты"]},
+    {q:"Қайсенов соғыс кезінде кім болды?", a:"Партизан-барлаушы", o:["Партизан-барлаушы","Ұшқыш","Танкист","Мерген"]}
+  ],
+  zhau_quote: [
+    {q:"«Ерлік жас талғамайды» — кімнің сөзі?", a:"Қасым Қайсенов", o:["Қасым Қайсенов","Бауыржан Момышұлы","Мұхтар Әуезов","Абай"]},
+    {q:"«Отанға деген сүйіспеншілік — ең асыл қасиет» — кімнің сөзі?", a:"Қасым Қайсенов", o:["Қасым Қайсенов","Жамбыл","Мағжан","Сәбит Мұқанов"]},
+    {q:"«Серік, сен батыр баласысың!» — кім айтты?", a:"Спижевский", o:["Спижевский","Анна Ивановна","Автор","Серіктің анасы"]},
+    {q:"«Жас ұрпақтың бойындағы асқақ отансүйгіштік» — повестің не туралы?", a:"Негізгі идея", o:["Негізгі идея","Кейіпкер сипаты","Автор өмірбаяны","Тарихи фон"]},
+    {q:"«Партизандар оны Сережа деп атайды» — бұл кім туралы?", a:"Серік туралы", o:["Серік туралы","Командир туралы","Мұғалім туралы","Автор туралы"]},
+    {q:"«Украина партизан қозғалысының батыры» — бұл кім?", a:"Қасым Қайсенов", o:["Қасым Қайсенов","Бауыржан Момышұлы","Мұхтар Әуезов","Жамбыл"]},
+    {q:"«Жас барлаушы, отансүйгіш қазақ баласы» — бұл повестің қай кейіпкері?", a:"Серік", o:["Серік","Спижевский","Анна Ивановна","Вася"]}
   ]
 };
 
@@ -1251,6 +1356,26 @@ function showLeaderboard() { buildLeaderboard(); showScreen('leaderScreen'); }
 function showProfile()     { buildProfile();    showScreen('profileScreen'); }
 function goHome()          { stopTimers(); showHome(); }
 
+function showZhauScreen() {
+  stopTimers();
+  // Stats жаңарту
+  document.getElementById('zhauLevel').textContent  = document.getElementById('homeLevel').textContent;
+  document.getElementById('zhauPoints').textContent = document.getElementById('homePoints').textContent;
+  document.getElementById('zhauStreak').textContent = document.getElementById('homeStreak').textContent;
+  document.getElementById('zhauGames').textContent  = document.getElementById('homeGames').textContent;
+  showScreen('zhauScreen');
+}
+
+function startZhauBlitz() {
+  S.pool = shuffle([...DATA.zhau_blitz]).slice(0, 12);
+  S.qi = 0; S.score = 0; S.correct = 0; S.totalTime = 0;
+  S.answered = false;
+  S.lastGame = 'zhau_blitz';
+  document.getElementById('blitzTitle') && (document.getElementById('blitzTitle').textContent = '⚡ Жау тылы — Блиц');
+  showScreen('blitzScreen');
+  renderBlitz();
+}
+
 function setNav(id) {
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById(id)?.classList.add('active');
@@ -1278,6 +1403,7 @@ function startGame(mode) {
   if (mode === 'memory')   { startMemory();   return; }
   if (mode === 'timeline') { startTimeline(); return; }
   if (mode === 'blitz')    { startBlitz();    return; }
+  if (mode === 'zhau_blitz') { startZhauBlitz(); return; }
 
   const src = DATA[mode];
   if (!src) { console.error('Unknown mode:', mode); return; }
@@ -1299,10 +1425,12 @@ function startGame(mode) {
     quiz:'🎯 Викторина', 
     whowrote:'✍️ Кім жазды?', 
     quote:'💬 Цитата',
-    special_zhau:'👦 Жау тылындағы бала'
+    special_zhau:'👦 Жау тылындағы бала — Викторина',
+    zhau_whowrote:'✍️ Жау тылындағы бала — Кім жазды?',
+    zhau_quote:'💬 Жау тылындағы бала — Цитата'
   };
   document.getElementById('quizTitle').textContent    = titles[mode] || '🎯 Викторина';
-  document.getElementById('quizSubtitle').textContent = mode === 'special_zhau' ? 'Арнайы тақырыптық ойын' : 'Білімді сынаймыз!';
+  document.getElementById('quizSubtitle').textContent = (mode === 'special_zhau' || mode === 'zhau_whowrote' || mode === 'zhau_quote') ? 'Арнайы тақырыптық ойын' : 'Білімді сынаймыз!';
 
   showScreen('quizScreen');
   renderQuestion();
