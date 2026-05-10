@@ -1,7 +1,7 @@
 """
 handlers/encyclopedia.py
-Визуалды энциклопедия handler — 7-9 сынып
-PTB v13 (синхронды) нұсқасы — FIXED
+Визуалды энциклопедия handler — 1-11 сынып
+PTB v13 (синхронды) нұсқасы
 """
 
 import random
@@ -10,17 +10,17 @@ from telegram.ext import CallbackContext
 
 try:
     from content.encyclopedia import ENCYCLOPEDIA
-except Exception:
+except ImportError:
     ENCYCLOPEDIA = {}
 
 try:
     from content.quiz_bank import QUIZ_BANK
-except Exception:
+except ImportError:
     QUIZ_BANK = {}
 
 try:
     from content.themes_extended import EXTENDED_THEMES
-except Exception:
+except ImportError:
     EXTENDED_THEMES = {}
 
 
@@ -39,9 +39,11 @@ def _characters(g):
     return _grade(g).get("characters", {})
 
 def _themes(g):
+    # Алдымен кеңейтілген тізімді пайдалан (100 тақырып)
     extended = EXTENDED_THEMES.get(g, [])
     if extended:
         return extended
+    # Запасной нұсқа — encyclopedia.py-дағы деректер
     return _grade(g).get("themes", [])
 
 def _facts(g):
@@ -51,35 +53,37 @@ def _terms(g):
     return _grade(g).get("terms", {})
 
 def _quiz(g):
-    # QUIZ_BANK кілттері string ("7") немесе int (7) болуы мүмкін
-    result = QUIZ_BANK.get(g, None)
-    if result is None:
-        result = QUIZ_BANK.get(str(g), [])
-    return result
+    return QUIZ_BANK.get(g, [])
 
 
 # ─── Бас мәзір ─────────────────────────────────────────────────────────────
 
 def show_encyclopedia_menu(update: Update, context: CallbackContext):
-    """Энциклопедия — 7-9 сыныптар тізімі"""
+    """Энциклопедия — сыныптар тізімі"""
     query = update.callback_query
+    query.answer()
 
-    emojis = {7: "💎", 8: "🦅", 9: "✍️"}
+    emojis = {5:"🌟",6:"⚔️",7:"💎",8:"🦅",9:"✍️",10:"🔥",11:"🏆"}
+    grade_titles = {
+        5:"5-сынып", 6:"6-сынып", 7:"7-сынып", 8:"8-сынып",
+        9:"9-сынып", 10:"10-сынып", 11:"11-сынып"
+    }
 
     keyboard = []
+    row = []
     for g in range(7, 10):
         em = emojis.get(g, "📖")
-        title = _grade(g).get("title") or f"{g}-сынып"
+        title = _grade(g).get("title") or grade_titles.get(g, f"{g}-сынып")
         short = title.split("—")[0].strip() if "—" in title else title
-        keyboard.append([InlineKeyboardButton(f"{em} {short}", callback_data=f"enc_grade_{g}")])
+        row.append(InlineKeyboardButton(f"{em} {short}", callback_data=f"enc_grade_{g}"))
+        if len(row) == 3:
+            keyboard.append(row)
+            row = []
+    if row:
+        keyboard.append(row)
     keyboard.append([InlineKeyboardButton("🏠 Бас мәзір", callback_data="menu_main")])
 
-    # FIXED: string keys үшін дұрыс есептеу
-    try:
-        quiz_total = sum(len(v) for v in QUIZ_BANK.values())
-    except Exception:
-        quiz_total = 0
-
+    quiz_total = sum(len(v) for k, v in QUIZ_BANK.items() if k >= 7)
     text = (
         "<b>📖 ҚАЗАҚ ӘДЕБИЕТІ — ВИЗУАЛДЫ ЭНЦИКЛОПЕДИЯ</b>\n\n"
         "🎓 7–9 сынып бойынша толық контент:\n"
@@ -103,9 +107,10 @@ def show_encyclopedia_menu(update: Update, context: CallbackContext):
 def show_grade_menu(update: Update, context: CallbackContext, grade_num: int):
     """Сынып ішіндегі бөлімдер"""
     query = update.callback_query
+    query.answer()
 
     grade = _grade(grade_num)
-    emojis = {7: "💎", 8: "🦅", 9: "✍️"}
+    emojis = {1:"🌱",2:"🌿",3:"📗",4:"🌺",5:"🌟",6:"⚔️",7:"💎",8:"🦅",9:"✍️",10:"🔥",11:"🏆"}
     em = emojis.get(grade_num, "📖")
 
     a_count = len(_authors(grade_num))
@@ -116,11 +121,8 @@ def show_grade_menu(update: Update, context: CallbackContext, grade_num: int):
     tr_count = len(_terms(grade_num))
     q_count = len(_quiz(grade_num))
 
-    try:
-        from content.topics import count_topics
-        tc_count = count_topics(grade_num)
-    except Exception:
-        tc_count = 0
+    from content.topics import count_topics
+    tc_count = count_topics(grade_num)
 
     keyboard = [
         [InlineKeyboardButton(f"👨‍🏫 Авторлар ({a_count})", callback_data=f"enc_authors_{grade_num}")],
@@ -155,6 +157,7 @@ def show_grade_menu(update: Update, context: CallbackContext, grade_num: int):
 
 def show_authors_list(update: Update, context: CallbackContext, grade_num: int):
     query = update.callback_query
+    query.answer()
 
     authors = _authors(grade_num)
     keyboard = []
@@ -169,7 +172,7 @@ def show_authors_list(update: Update, context: CallbackContext, grade_num: int):
     keyboard.append([InlineKeyboardButton(f"◀️ {grade_num}-сынып", callback_data=f"enc_grade_{grade_num}")])
 
     grade = _grade(grade_num)
-    em = {7: "💎", 8: "🦅", 9: "✍️"}.get(grade_num, "📖")
+    em = {1:"🌱",2:"🌿",3:"📗",4:"🌺",5:"🌟",6:"⚔️",7:"💎",8:"🦅",9:"✍️",10:"🔥",11:"🏆"}.get(grade_num,"📖")
     title = grade.get("title", f"{grade_num}-сынып")
 
     query.edit_message_text(
@@ -183,13 +186,11 @@ def show_authors_list(update: Update, context: CallbackContext, grade_num: int):
 
 def show_author_detail(update: Update, context: CallbackContext, grade_num: int, author_key: str):
     query = update.callback_query
+    query.answer()
 
     author = _authors(grade_num).get(author_key)
     if not author:
-        query.edit_message_text("❌ Автор табылмады",
-                                reply_markup=InlineKeyboardMarkup([[
-                                    InlineKeyboardButton("◀️ Артқа", callback_data=f"enc_authors_{grade_num}")
-                                ]]))
+        query.edit_message_text("❌ Автор табылмады")
         return
 
     name = author.get("name", "")
@@ -233,6 +234,7 @@ def show_author_detail(update: Update, context: CallbackContext, grade_num: int,
 
 def show_works_list(update: Update, context: CallbackContext, grade_num: int):
     query = update.callback_query
+    query.answer()
 
     works = _works(grade_num)
     keyboard = []
@@ -246,7 +248,7 @@ def show_works_list(update: Update, context: CallbackContext, grade_num: int):
     keyboard.append([InlineKeyboardButton(f"◀️ {grade_num}-сынып", callback_data=f"enc_grade_{grade_num}")])
 
     grade = _grade(grade_num)
-    em = {7: "💎", 8: "🦅", 9: "✍️"}.get(grade_num, "📖")
+    em = {1:"🌱",2:"🌿",3:"📗",4:"🌺",5:"🌟",6:"⚔️",7:"💎",8:"🦅",9:"✍️",10:"🔥",11:"🏆"}.get(grade_num,"📖")
     title = grade.get("title", f"{grade_num}-сынып")
 
     query.edit_message_text(
@@ -260,13 +262,11 @@ def show_works_list(update: Update, context: CallbackContext, grade_num: int):
 
 def show_work_detail(update: Update, context: CallbackContext, grade_num: int, work_key: str):
     query = update.callback_query
+    query.answer()
 
     work = _works(grade_num).get(work_key)
     if not work:
-        query.edit_message_text("❌ Шығарма табылмады",
-                                reply_markup=InlineKeyboardMarkup([[
-                                    InlineKeyboardButton("◀️ Артқа", callback_data=f"enc_works_{grade_num}")
-                                ]]))
+        query.edit_message_text("❌ Шығарма табылмады")
         return
 
     name = work.get("name", "")
@@ -304,10 +304,11 @@ def show_work_detail(update: Update, context: CallbackContext, grade_num: int, w
 
 def show_characters(update: Update, context: CallbackContext, grade_num: int):
     query = update.callback_query
+    query.answer()
 
     chars = _characters(grade_num)
     grade = _grade(grade_num)
-    em = {7: "💎", 8: "🦅", 9: "✍️"}.get(grade_num, "📖")
+    em = {1:"🌱",2:"🌿",3:"📗",4:"🌺",5:"🌟",6:"⚔️",7:"💎",8:"🦅",9:"✍️",10:"🔥",11:"🏆"}.get(grade_num,"📖")
     title = grade.get("title", f"{grade_num}-сынып")
 
     text = f"{em} <b>{title} — Кейіпкерлер</b>\n\n"
@@ -332,10 +333,11 @@ def show_characters(update: Update, context: CallbackContext, grade_num: int):
 
 def show_themes(update: Update, context: CallbackContext, grade_num: int):
     query = update.callback_query
+    query.answer()
 
     themes = _themes(grade_num)
     grade = _grade(grade_num)
-    em = {7: "💎", 8: "🦅", 9: "✍️"}.get(grade_num, "📖")
+    em = {1:"🌱",2:"🌿",3:"📗",4:"🌺",5:"🌟",6:"⚔️",7:"💎",8:"🦅",9:"✍️",10:"🔥",11:"🏆"}.get(grade_num,"📖")
     title = grade.get("title", f"{grade_num}-сынып")
 
     text = f"{em} <b>{title} — Тақырыптар</b>\n\n"
@@ -343,7 +345,7 @@ def show_themes(update: Update, context: CallbackContext, grade_num: int):
         text += f"{i}. {theme}\n"
 
     keyboard = [[InlineKeyboardButton(f"◀️ {grade_num}-сынып", callback_data=f"enc_grade_{grade_num}")]]
-    query.edit_message_text(text[:4000], parse_mode="HTML",
+    query.edit_message_text(text, parse_mode="HTML",
                              reply_markup=InlineKeyboardMarkup(keyboard))
 
 
@@ -351,10 +353,11 @@ def show_themes(update: Update, context: CallbackContext, grade_num: int):
 
 def show_facts(update: Update, context: CallbackContext, grade_num: int):
     query = update.callback_query
+    query.answer()
 
     facts = _facts(grade_num)
     grade = _grade(grade_num)
-    em = {7: "💎", 8: "🦅", 9: "✍️"}.get(grade_num, "📖")
+    em = {1:"🌱",2:"🌿",3:"📗",4:"🌺",5:"🌟",6:"⚔️",7:"💎",8:"🦅",9:"✍️",10:"🔥",11:"🏆"}.get(grade_num,"📖")
     title = grade.get("title", f"{grade_num}-сынып")
 
     text = f"{em} <b>{title} — Қызықты деректер</b>\n\n"
@@ -370,10 +373,11 @@ def show_facts(update: Update, context: CallbackContext, grade_num: int):
 
 def show_terms(update: Update, context: CallbackContext, grade_num: int):
     query = update.callback_query
+    query.answer()
 
     terms = _terms(grade_num)
     grade = _grade(grade_num)
-    em = {7: "💎", 8: "🦅", 9: "✍️"}.get(grade_num, "📖")
+    em = {1:"🌱",2:"🌿",3:"📗",4:"🌺",5:"🌟",6:"⚔️",7:"💎",8:"🦅",9:"✍️",10:"🔥",11:"🏆"}.get(grade_num,"📖")
     title = grade.get("title", f"{grade_num}-сынып")
 
     text = f"{em} <b>{title} — Терминдер сөздігі</b>\n\n"
@@ -393,6 +397,7 @@ def show_terms(update: Update, context: CallbackContext, grade_num: int):
 
 def show_quiz_question(update: Update, context: CallbackContext, grade_num: int, q_index: int):
     query = update.callback_query
+    query.answer()
 
     quiz = _quiz(grade_num)
     if not quiz:
@@ -445,6 +450,7 @@ def show_quiz_question(update: Update, context: CallbackContext, grade_num: int,
 
 def show_quiz_answer(update: Update, context: CallbackContext, grade_num: int, q_index: int, chosen_idx: int):
     query = update.callback_query
+    query.answer()
 
     quiz = _quiz(grade_num)
     if not quiz or q_index >= len(quiz):
@@ -459,7 +465,11 @@ def show_quiz_answer(update: Update, context: CallbackContext, grade_num: int, q
     correct_ans = options[correct_idx] if correct_idx < len(options) else ""
 
     is_correct = (chosen_idx == correct_idx)
-    result = "✅ <b>Дұрыс! Керемет!</b>" if is_correct else f"❌ Дұрыс жауап: <b>{correct_ans}</b>"
+
+    if is_correct:
+        result = "✅ <b>Дұрыс! Керемет!</b>"
+    else:
+        result = f"❌ Дұрыс жауап: <b>{correct_ans}</b>"
 
     text = (
         f"🎯 <b>{grade_num}-сынып тесті</b> | {q_index + 1}/{total}\n"
@@ -490,10 +500,10 @@ def show_quiz_answer(update: Update, context: CallbackContext, grade_num: int, q
                              reply_markup=InlineKeyboardMarkup(keyboard))
 
 
-# ─── Маршруттаушы ───────────────────────────────────────────────────────────
+# ─── Маршруттаушы (синхронды) ───────────────────────────────────────────────
 
 def encyclopedia_callback_handler(update: Update, context: CallbackContext):
-    """Барлық enc_ callback'тарды маршруттайды"""
+    """Барлық enc_ callback'тарды маршруттайды — синхронды PTB v13 нұсқасы"""
     query = update.callback_query
     data = query.data
 
@@ -559,10 +569,9 @@ def encyclopedia_callback_handler(update: Update, context: CallbackContext):
         logging.getLogger(__name__).error(f"Encyclopedia error [{data}]: {e}")
         try:
             query.edit_message_text(
-                "❌ Қате орын алды. Артқа оралып, қайталаңыз.",
-                reply_markup=InlineKeyboardMarkup([[
-                    InlineKeyboardButton("🏠 Бас мәзір", callback_data="menu_main")
-                ]])
+                f"❌ Қате орын алды. Артқа оралып, қайталаңыз.\n<code>{str(e)[:80]}</code>",
+                parse_mode="HTML"
             )
         except Exception:
             pass
+
